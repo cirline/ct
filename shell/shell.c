@@ -5,6 +5,12 @@
 #include "debug.h"
 #include "shell.h"
 #include "const.h"
+#include "field.h"
+
+void do_help(void)
+{
+	printf("this is help.\n");
+}
 
 /**
  * init the shell input buffer
@@ -68,7 +74,7 @@ int shell_split_cmdline(shell_t *sh, char *s)
 	{
 		int i;
 		for(i = 0; i < sh->argc; i++){
-			printf("cmd[%d]: %s\n", i, sh->argv[i]);
+			lp(DLI, "cmd[%d]: %s\n", i, sh->argv[i]);
 		}
 	}
 #endif
@@ -82,20 +88,43 @@ int shell_split_cmdline(shell_t *sh, char *s)
  */
 shcode_t shell_router(shell_t *sh)
 {
-	int ret;
+	//int ret;
 	int index;
-	struct option options[] = {
-		/* 0 */
-		{"quit", required_argument, 0, 0},
-		{"help", optional_argument, 0, 0},
-		{"fl", no_argument, 0, 0},
-		{"fc", no_argument, 0, 0},
-		{"fu", no_argument, 0, 0},
-		{"fg", no_argument, 0, 0},
-		{"fd", no_argument, 0, 0},
-		{0,0,0,0}
+	//const char *opstring = "";
+	struct option commands[] = {
+		[CMD_QUIT]			= {"quit", required_argument, 0, 0},
+		[CMD_HELP]			= {"help", optional_argument, 0, 0},
+		[CMD_FIELD_LIST]	= {"fl", no_argument, 0, 0},
+		[CMD_FIELD_CREATE]	= {"fc", no_argument, 0, 0},
+		[CMD_FIELD_UPDATE]	= {"fu", no_argument, 0, 0},
+		[CMD_FIELD_GEN]		= {"fg", no_argument, 0, 0},
+		[CMD_FIELD_DELETE]	= {"fd", no_argument, 0, 0},
+		{NULL, 0, NULL, 0}
 	};
-	while(-1 != (ret = getopt_long_only(sh->argc, sh->argv, NULL, options, &index))){
+	for(index = 0; index < END_CMDLIST; index++){
+		if(strcmp(commands[index].name, sh->argv[0]) == 0)
+			break;
+	}
+	switch(index){
+		case CMD_QUIT:
+			return SHELL_QUIT;
+			break;
+		case CMD_HELP:
+			do_help();
+			break;
+		case CMD_FIELD_LIST:
+		case CMD_FIELD_CREATE:
+		case CMD_FIELD_UPDATE:
+		case CMD_FIELD_GEN:
+		case CMD_FIELD_DELETE:
+			do_feild(index);
+			break;
+		default:
+			err_command(sh->argv[0]);
+			break;
+	}
+	/*
+	while(-1 != (ret = getopt_long_only(sh->argc, sh->argv, opstring, options, &index))){
 		dp("index = %d\n", index);
 		switch(index){
 			case 0:
@@ -107,8 +136,13 @@ shcode_t shell_router(shell_t *sh)
 				break;
 		}
 	}
+	*/
+	lp(DLI, "command is %s\n", sh->argv[0]);
 
 	return SHELL_OK;
 }
 
-
+void err_command(const char *cmd)
+{
+	printf("unknown command %s\n", cmd);
+}

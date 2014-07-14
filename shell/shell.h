@@ -20,5 +20,7 @@ typedef struct u_shell {
 extern int shell_init_arg_array(shell_t *sh);
 extern int shell_split_cmdline(shell_t *sh, char *s);
 extern shcode_t shell_router(shell_t *sh);
+extern void do_help(void);
+extern void err_command(const char *cmd);
 
 #endif

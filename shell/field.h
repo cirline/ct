@@ -14,4 +14,6 @@ struct u_field{
 	struct list_head list;
 };
 
+extern int do_feild(cmd_t cmd);
+
 #endif
