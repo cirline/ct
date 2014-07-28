@@ -1,31 +1,28 @@
 #include <stdio.h>
 #include <string.h>
-#include "debug.h"
 #include "sqlite3.h"
-#include "field.h"
-#include "shell.h"
+
+int exec_cb(void *params, int ncol, char **col_val, char **col_name)
+{
+	int i;
+
+	printf("call back:\n");
+
+	for(i=0; i<ncol; i++){
+		printf("\t%s", col_val[i]);
+	}
+	printf("\n");
+	return 0;
+}
 
 int main(void)
 {
-	const char *sql = "create table mytable (id int primary key, user text)";
+	const char *sql = "create table mytable (id integer primary key, user integer)";
+	const char *sql2 = "insert into mytable (id, user) values (NULL, 99)";
+	const char *sql3 = "select * from mytable";
 	char *errmsg = NULL;
 	int ret;
 	sqlite3 *db;
-	char cmdin[128] = "c -";
-	unsigned int cmd_prefix_len;
-	char *pcmd;
-	shell_t sh;
-
-	shell_init_buf(&sh);
-	cmd_prefix_len = strlen(cmdin);
-	do{
-		printf("> ");
-		pcmd = cmdin + cmd_prefix_len;
-		while((*pcmd++ = getc(stdin)) != '\n');
-		*(--pcmd) = '\0';
-		dp("cmdin: %s\n", cmdin);
-		shell_split_str(&sh, cmdin);
-	}while(SHELL_QUIT != shell_router(&sh));
 
 	ret = sqlite3_open("sqlite3-demo.db", &db);
 	if(ret != SQLITE_OK){
@@ -35,7 +32,16 @@ int main(void)
 	printf("opened. \n");
 	ret = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
 	if(ret != SQLITE_OK){
-		printf("cannot exec: %s\n", errmsg);
+		printf("1. cannot exec: %s\n", errmsg);
+	}
+
+	ret = sqlite3_exec(db, sql2, NULL, NULL, &errmsg);
+	if(ret != SQLITE_OK){
+		printf("2. cannot exec: %s\n", errmsg);
+	}
+	ret = sqlite3_exec(db, sql3, exec_cb, NULL, &errmsg);
+	if(ret != SQLITE_OK){
+		printf("3. cannot exec: %s\n", errmsg);
 	}
 
 	sqlite3_free(errmsg);
