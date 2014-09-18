@@ -25,3 +25,10 @@
 
 # i define
 tags
+
+# kernel
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+.tmp_versions
