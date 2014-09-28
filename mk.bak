@@ -1,0 +1,9 @@
+led.bin: start.S led.c
+	arm-none-linux-gnueabi-gcc -c -o start.o start.S
+	arm-none-linux-gnueabi-gcc -c -o led.o led.c
+	arm-none-linux-gnueabi-ld  -Ttext 0x40008000 start.o  led.o -o led.elf
+	arm-none-linux-gnueabi-objcopy -O binary -S led.elf led.bin
+	arm-none-linux-gnueabi-objdump -D -m arm led.elf > led.dis
+clean:
+	rm -rf *.o *.elf *.bin *.dis
+
