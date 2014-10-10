@@ -1,5 +1,5 @@
-#include <config/autoconf.h>
-#include <mach/gpio.h>
+//#include <config/autoconf.h>
+//#include <mach/gpio.h>
 
 #define	GPC0CON	(*(volatile unsigned long *)0xE0200060)
 #define	GPC0DAT	(*(volatile unsigned long *)0xE0200064)
