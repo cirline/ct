@@ -17,3 +17,6 @@ test: test.o
 clean:
 	rm -rf *.o *.elf *.bin *.dis test
 
+install:
+	cp $(bin_file) $(tftp_root)
+

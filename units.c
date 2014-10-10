@@ -33,12 +33,13 @@ static inline void led4if(int val)
 static inline void sleep(void)
 {
 	int i;
-	for(i=0;i<1000000;i++);
+	//for(i=0;i<1000000;i++);
+	for(i=0;i<10000;i++);
 }
 
 int main(void)
 {
-	unsigned long i, n;
+	unsigned long n;
 	int val;
 
 	led_init();
@@ -47,10 +48,10 @@ int main(void)
 		n = 0x8;
 		while(n--)
 		{
-			for(i=0;i<1000000;i++);
+			sleep();
 			led3if(1);
 			led4if(1);
-			for(i=0;i<1000000;i++);
+			sleep();
 			led3if(0);
 			led4if(0);
 		}

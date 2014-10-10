@@ -6,6 +6,11 @@ _start:
 	ldr r1, =0x0
 	str r1, [r0]
 
+# clock management unit
+	ldr r0, =0xE0100200
+	and r1, r1, #0xfffffffe
+#str r1, [r0]
+
 #2. setup stack space
 	ldr sp, =0x40008000
 
