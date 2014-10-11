@@ -8,7 +8,7 @@ objs	:= start.o
 objs	+= units.o
 
 $(bin_file): $(objs)
-	$(LD) -Ttext 0x40008000 $(objs) -o $(elf_file)
+	$(LD) -Ttext 0x0 $(objs) -o $(elf_file)
 	$(OBJCOPY) -O binary -S $(elf_file) $@
 	$(OBJDUMP) -D -m $(arch) $(elf_file) > $(dis_file)
 
