@@ -30,11 +30,29 @@ static inline void led4if(int val)
 	GPC0DAT |= ((val & 0x1)<<4);
 }
 
-static inline void sleep(void)
+#define DEF_DELAY 1000000
+#define DELAY ((DEF_DELAY / 1024 ) << 5)
+
+static inline void sleep(int n)
 {
-	int i;
-	//for(i=0;i<1000000;i++);
-	for(i=0;i<10000;i++);
+	if(n <= 0)
+		n = DEF_DELAY;
+	while(n--);
+}
+
+/* mode=1: 同步闪烁 */
+static void flash(int n, int delay, int mode)
+{
+	if(n <=0)
+		n = 8;
+	while(n--) {
+		sleep(delay);
+		led3if(1);
+		led4if(mode);
+		sleep(delay);
+		led3if(0);
+		led4if(!mode);
+	}
 }
 
 int main(void)
@@ -45,24 +63,17 @@ int main(void)
 	led_init();
 
 	while(1) {
-		n = 0x8;
-		while(n--)
-		{
-			sleep();
-			led3if(1);
-			led4if(1);
-			sleep();
-			led3if(0);
-			led4if(0);
-		}
+		flash(8, DELAY, 0);
+		flash(8, DEF_DELAY, 1);
+		continue;
 
 		val = *(volatile unsigned long *)0xE0000000;
 		n = 32;
 		while(n--) {
-			sleep();
+			sleep(0);
 			led3if(1);
 			led4if(val & 0x1);
-			sleep();
+			sleep(0);
 			led3if(0);
 			val >>= 1;
 		}
