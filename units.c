@@ -1,9 +1,8 @@
 //#include <config/autoconf.h>
 //#include <mach/gpio.h>
-
-#define	GPC0CON	(*(volatile unsigned long *)0xE0200060)
-#define	GPC0DAT	(*(volatile unsigned long *)0xE0200064)
-
+#include "s5p_regs.h"
+#include "uart.h"
+#include "common.h"
 
 #define	GPH0CON	(*(volatile unsigned long *)0xE0200C00)
 #define	GPH0DAT	(*(volatile unsigned long *)0xE0200C04)
@@ -14,20 +13,23 @@
 static inline void led_init(void)
 {
 	//1. 设置GPC0_3,4引脚功能:	输出功能
-	GPC0CON &= ~((0xf<<12)|(0xf<<16));
-	GPC0CON |= (0x1<<12)|(0x1<<16);
+	int val;
+	val = __s5p_read(RGPIO_BASE + GPC0CON) & ~((0xf<<12)|(0xf<<16));
+	__s5p_wirte(RGPIO_BASE + GPC0CON, val | (0x1<<12)|(0x1<<16));
 }
 
 static inline void led3if(int val)
 {
-	GPC0DAT &= ~(0x1<<3);
-	GPC0DAT |= ((val & 0x1)<<3);
+	int regval;
+	regval = __s5p_read(RGPIO_BASE + GPC0DAT) & ~(0x1<<3);
+	__s5p_wirte(RGPIO_BASE + GPC0DAT, (regval | ((val & 0x1)<<3)));
 }
 
 static inline void led4if(int val)
 {
-	GPC0DAT &= ~(0x1<<4);
-	GPC0DAT |= ((val & 0x1)<<4);
+	int regval;
+	regval = __s5p_read(RGPIO_BASE + GPC0DAT) & ~(0x1<<4);
+	__s5p_wirte(RGPIO_BASE + GPC0DAT, (regval | ((val & 0x1)<<4)));
 }
 
 #define DEF_DELAY 1000000
@@ -57,26 +59,15 @@ static void flash(int n, int delay, int mode)
 
 int main(void)
 {
-	unsigned long n;
-	int val;
+	int val=0;
 
 	led_init();
+	uart_init();
 
 	while(1) {
-		flash(8, DELAY, 0);
-		flash(8, DEF_DELAY, 1);
-		continue;
-
-		val = *(volatile unsigned long *)0xE0000000;
-		n = 32;
-		while(n--) {
-			sleep(0);
-			led3if(1);
-			led4if(val & 0x1);
-			sleep(0);
-			led3if(0);
-			val >>= 1;
-		}
+		cprint("flash loop! --- 0x%p\r\n", val++);
+		flash(2, DELAY, 0);
+		flash(2, DEF_DELAY, 1);
 	}
 
 	return 0;
