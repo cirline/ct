@@ -1,6 +1,19 @@
 #include <stdarg.h>
 #include "common.h"
 
+void inline region_write(addr_t addr, int mask, int index, int val)
+{
+	int reg;
+
+	reg = (~(mask << index)) & __raw_read(addr);
+	__raw_write(addr, (reg | ((val & mask) << index)));
+}
+
+void inline set2clear(addr_t addr, int mask, int index)
+{
+	__raw_write(addr, (mask << index));
+}
+
 char *i2hs(int n, char *ds)
 {
 	char *tb = "0123456789ABCDEF";
@@ -18,7 +31,7 @@ char *i2hs(int n, char *ds)
 	return ds;
 }
 
-int cprint(char *s, ...)
+int __s5p_printf(char *s, ...)
 {
 	va_list vl;
 	int flag = 0;
@@ -33,16 +46,19 @@ int cprint(char *s, ...)
 					low_putchar(*s);
 					break;
 				case 'p':
-					cprint(i2hs(va_arg(vl, int), st));
+					printf(i2hs(va_arg(vl, int), st));
 					break;
 				case 's':
-					cprint(va_arg(vl, char *));
+					printf(va_arg(vl, char *));
 					break;
 				default:
 					low_putchar('?');
 			}
 		} else if(*s == '%') {
 			flag = 1;
+		} else if(*s == '\n'){
+			low_putchar('\r');
+			low_putchar('\n');
 		} else {
 			low_putchar(*s);
 		}

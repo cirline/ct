@@ -2,34 +2,39 @@
 #include "s5p_regs.h"
 #include "irq.h"
 
-void key0_func(void)
-{
-	static int n = 0;
-	cprint("key0 func --- 0x%p\r\n", n++);
-
-	__s5p_wirte(VICxADDRESS(0), 0);
-	__s5p_wirte(EXT_INT_x_PEND(0), 0x1);
-}
-
 int irq_init(int channel, irq_func_t func)
 {
-	__s5p_wirte(GPHxCON(0), (0xf<<0));
-	__s5p_wirte(EXT_INT_x_CON(0), 0x2);
-	__s5p_wirte(EXT_INT_x_MASK(0), 0x0);
-	__s5p_wirte(VICxINTENABLE(0), 0x1);
-	__s5p_wirte(VICxVECTADDRx(0, 0), (__s5p_addr_type)key0_func);
-	/* set gpio function */
-
-	/* set gpio toggle */
-
-	/* set intrrupt context */
+	switch(channel & INTCLASSMASK) {
+		case int_ext:
+			channel &= (~INTCLASSMASK);
+			debug("external interrupt channel ... %p \n", channel);
+			if(channel < 8) {
+				region_write(GPHxCON(0), 0xf, channel<<2, 0xf);
+				region_write(EXT_INT_x_CON(0), 0x7, channel<<2, 0x2);
+				region_write(EXT_INT_x_MASK(0), 0x1, channel, 0x0);
+				region_write(VICxINTENABLE(0), 0x1, channel, 0x1);
+				__raw_write(VICxVECTADDRx(0, channel), (addr_t)func);
+			} else {
+				printf("unknown irq channel!\n");
+			}
+		default:
+			printf("unknown irq channel!\n");
+	}
 
 	return 0;
 }
 
+void inline eint_pending(int n, int index)
+{
+	set2clear(EXT_INT_x_PEND(n), 0x1, index);
+}
+
 void irq_handler(void)
 {
-	cprint("irq_handler request ... \r\n");
-	((void(*)(void))__s5p_read(VICxADDRESS(0)))();
+	int n;
+
+	printf("irq_handler request ... \r\n");
+	n = ((irq_func_t)__s5p_read(VICxADDRESS(0)))();
+	__s5p_wirte(VICxADDRESS(0), 0);
 }
 

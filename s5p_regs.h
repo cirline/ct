@@ -2,9 +2,9 @@
 #define __S5P_REGS_H__
 
 /**    **/
-#define __s5p_addr_type				unsigned long
-#define __s5p_wirte(addr, val)		(*(volatile __s5p_addr_type *)(addr)) = (val)
-#define __s5p_read(addr)			(*(volatile __s5p_addr_type *)(addr))
+typedef unsigned long				__s5p_addr_t;
+#define __s5p_wirte(addr, val)		(*(volatile __s5p_addr_t *)(addr)) = (val)
+#define __s5p_read(addr)			(*(volatile __s5p_addr_t *)(addr))
 
 /**  GPIO  **/
 #define RGPIO_BASE		0xE0200000

@@ -55,16 +55,27 @@ static void flash(int n, int delay, int mode)
 	}
 }
 
+int key0_func(void)
+{
+	static int n = 0;
+	printf("key0 func --- 0x%p\r\n", n++);
+
+	eint_pending(0, 0);
+
+	return 0;
+}
+
+
 int main(void)
 {
 	int val=0;
 
-	irq_init(0,0);
+	irq_init(EINT(0), key0_func);
 	led_init();
 	uart_init();
 
 	while(1) {
-		cprint("flash loop! --- 0x%p\r\n", val++);
+		printf("flash loop! --- 0x%p\n", val++);
 		flash(2, DELAY, 0);
 		flash(2, DEF_DELAY, 1);
 	}
