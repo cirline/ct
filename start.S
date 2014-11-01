@@ -1,32 +1,49 @@
 # s5pv210 file header, total 16 bytes
 # iROM jump to iRAM(0xD002_0010) but iRAM is begin 0xD002_0000
-.word 0x2000
-.word 0x0
-.word 0x0
-.word 0x0
+#.word 0x2000
+#.word 0x0
+#.word 0x0
+#.word 0x0
 
 .text
 .global _start
 _start:
+# reset
 	b	reset
+# undefined
+	b	reset
+# soft interrupt
+	b	reset
+# pre fetch instruction stop
+	b	reset
+# data stop
+	b	reset
+# remain
+	b	reset
+# IRQ interrupt
+	b	irq_request
+# FIQ interrupt
+	b	reset
+
 reset:
-# SVC mode
-	mrs r0, cpsr
-	bic r0, #0x1f
-	orr r0, #0xd3
-	msr cpsr, r0
+# svc mode
+	msr cpsr_c, #0xd3
 
 # disable watchdog
 	ldr r0, =0xE2700000
 	mov r1, #0x0
 	str r1, [r0]
 
+# relocate interrupt vendor
+	ldr r0, =0x40008000
+	mcr p15, 0, r0, c12, c0, 0
+
 # led test
-	ldr r0, =0xE0200060
-	ldr r1, =(0x11<<12)
-	str r1, [r0]
-	mov r0, #1
-	bl led_debug
+#	ldr r0, =0xE0200060
+#	ldr r1, =(0x11<<12)
+#	str r1, [r0]
+#	mov r0, #1
+#	bl led_debug
 
 # close mmu and data cache
 #	L1 I/D
@@ -46,11 +63,35 @@ reset:
 
 # setup stack space
 set_stack:
-	sub r0, pc, #8
-	ldr r1, =set_stack
-	ldr r2, =end_stack
-	sub r1, r2, r1
-	add sp, r0, r1
+#	mov r0, pc
+#	sub r0, r0, #8			@# r0 = set_stack = currect address
+#	ldr r1, =set_stack		@# r1 = relative set_stack
+#	ldr r2, =stack_top		@# r2 = relative stack_top
+#	sub r1, r2, r1			@# r1 = address gap
+#	add r0, r0, r1			@# r0 = absolute stack_top
+	ldr r0, =(__data_end + 0x3000)
+# svc mode
+	msr cpsr_c, #0xd3
+	mov sp, r0
+	sub r0, r0, #0x1000
+# irq mode
+	msr cpsr_c, #0xd2
+	mov sp, r0
+	sub r0, r0, #0x1000
+# sys mode, and enable irq
+	msr cpsr_c, #0xdf
+	mov sp, r0
+	msr cpsr_c, #0x5f
+
+# clean bss section
+	ldr r0, =__bss_start
+	ldr r1, =__bss_end
+	mov r2, #0
+bss_clean:
+	cmp r0, r1
+	strne r2, [r0]
+	addne r0, r0, #4
+	bne bss_clean
 
 # jump to main
 	bl main
@@ -125,12 +166,10 @@ wait_lock:
 
 	mov pc, lr
 
-
-
-fstack:	.space 128, 0
-end_stack:
-
-
-
+irq_request:
+	stmfd sp!, {r0-r12, lr}
+	bl	irq_handler
+	ldmfd sp!, {r0-r12, pc}^
+	subs pc, lr, #4
 
 

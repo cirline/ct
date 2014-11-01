@@ -3,9 +3,7 @@
 #include "s5p_regs.h"
 #include "uart.h"
 #include "common.h"
-
-#define	GPH0CON	(*(volatile unsigned long *)0xE0200C00)
-#define	GPH0DAT	(*(volatile unsigned long *)0xE0200C04)
+#include "irq.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -61,6 +59,7 @@ int main(void)
 {
 	int val=0;
 
+	irq_init();
 	led_init();
 	uart_init();
 

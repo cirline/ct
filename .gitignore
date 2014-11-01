@@ -3,3 +3,6 @@
 *.elf
 *.dis
 *.out
+
+*.swp
+*.asm
