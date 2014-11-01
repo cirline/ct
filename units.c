@@ -59,7 +59,7 @@ int main(void)
 {
 	int val=0;
 
-	irq_init();
+	irq_init(0,0);
 	led_init();
 	uart_init();
 

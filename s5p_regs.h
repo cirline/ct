@@ -12,12 +12,14 @@
 #define GPA0CON			0x00000000
 #define GPC0CON			0x00000060
 #define GPC0DAT			0x00000064
-#define GPH0CON			0x00000C00
-#define GPH0DAT			0x00000C04
 
-#define EXT_INT_0_CON	0x00000E00
-#define EXT_INT_0_MASK	0x00000F00
-#define EXT_INT_0_PEND	0x00000F40
+#define GPH_BASE		(RGPIO_BASE + 0xC00)
+#define GPHxCON(x)		(GPH_BASE + ((x)<<5) + (0<<2))
+#define GPHxDAT(x)		(GPHxCON(x) + 0x4)
+
+#define EXT_INT_x_CON(x)	(RGPIO_BASE + 0xE00 + ((x)<<2))
+#define EXT_INT_x_MASK(x)	(RGPIO_BASE + 0xF00 + ((x)<<2))
+#define EXT_INT_x_PEND(x)	(RGPIO_BASE + 0xF40 + ((x)<<2))
 
 /**  CMU  **/
 #define RCMU_BASE		0xE0100000
@@ -40,10 +42,6 @@
 
 /**  INT  **/
 #define RINT_BASE		0xF2000000
-#define VIC0INTENABLE	0x00000010
-#define VIC0VECTADDR0	0x00000100
-#define VIC0ADDRESS		0x00000F00
-
 #define VICx_BASE(x)	(RINT_BASE + ((x)<<20))
 
 #define VICxINTENABLE(x)	(VICx_BASE(x) + 0x0010)
