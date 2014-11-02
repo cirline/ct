@@ -105,8 +105,10 @@ int keyback(void)
 int key_mux(void)
 {
 	int val = KEYMUXMASK & __raw_read(GPHxDAT(2));
-	printf("%p --- %s --- key value is 0x%p\n", __LINE__, __func__, val);
+	int pend = KEYMUXMASK & __raw_read(EXT_INT_x_PEND(2));
 
+	printf("%p --- %s --- key value is 0x%p\n", __LINE__, __func__, val);
+	printf("%p --- %s --- pend value is 0x%p\n", __LINE__, __func__, pend);
 	switch(val) {
 		case KEYMUXMASK ^ (1<<6):
 			printf("keyhome pressed! \n");
@@ -121,6 +123,9 @@ int key_mux(void)
 			set2clear(EXT_INT_x_PEND(2), 0xff, 0);
 			break;
 	}
+
+	pend = KEYMUXMASK & __raw_read(EXT_INT_x_PEND(2));
+	printf("%p --- %s --- clear pend value is 0x%p\n", __LINE__, __func__, pend);
 
 	//eint_pending(2, ~val);
 	return 0;
