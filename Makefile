@@ -17,6 +17,7 @@ objs	+= units.o
 objs	+= uart.o
 objs	+= common.o
 objs	+= irq.o
+objs	+= nf.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

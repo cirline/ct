@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "common.h"
 #include "irq.h"
+#include "nf.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -134,6 +135,7 @@ int key_mux(void)
 int main(void)
 {
 	int val=0;
+	unsigned char buf[2048];
 
 	irq_init(EINT(0), key0_func);
 	irq_init(EINT(1), keydown);
@@ -145,6 +147,26 @@ int main(void)
 	irq_init(EINT(23), key_mux);
 	led_init();
 	uart_init();
+	nf_init();
+
+
+	nf_erase(0);
+	nf_read(0, buf);
+	for(val=0; val<32; val++) {
+		printf("[%p]\t= %p\n", val, buf[val]);
+	}
+	for(val=0; val<32; val++) {
+		buf[val] = val << 1;
+	}
+	nf_write(0, buf);
+	for(val=0; val<32; val++) {
+		buf[val] = 0;
+	}
+	sleep(0);
+	nf_read(0, buf);
+	for(val=0; val<32; val++) {
+		printf("[%p]\t= %p\n", val, buf[val]);
+	}
 
 	while(1) {
 		printf("main --- loop! ... 0x%p\n", val++);

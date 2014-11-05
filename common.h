@@ -15,8 +15,12 @@ typedef __s5p_addr_t				addr_t;
 
 #ifdef DEBUG
 #define debug(format, arg...)		printf(format, ##arg)
+#define fstart()					printf("%s start ... \n", __func__)
+#define fend()						printf("%s end ... \n", __func__)
 #else
 #define debug(format, arg...)
+#define fstart()
+#define fend()
 #endif
 
 extern void inline region_write(addr_t addr, int mask, int index, int val);

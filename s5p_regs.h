@@ -17,6 +17,10 @@ typedef unsigned long				__s5p_addr_t;
 #define GPHxCON(x)		(GPH_BASE + ((x)<<5) + (0<<2))
 #define GPHxDAT(x)		(GPHxCON(x) + 0x4)
 
+#define MP0_BASE		(RGPIO_BASE + 0x2E0)
+#define MP0_xCON(x)		(MP0_BASE + (((x)-1)<<5))
+#define MP0_xDAT(x)		(MP0_xCON(x) + 0x04)
+
 #define EXT_INT_x_CON(x)	(RGPIO_BASE + 0xE00 + ((x)<<2))
 #define EXT_INT_x_MASK(x)	(RGPIO_BASE + 0xF00 + ((x)<<2))
 #define EXT_INT_x_PEND(x)	(RGPIO_BASE + 0xF40 + ((x)<<2))
@@ -47,6 +51,15 @@ typedef unsigned long				__s5p_addr_t;
 #define VICxINTENABLE(x)	(VICx_BASE(x) + 0x0010)
 #define VICxVECTADDRx(x, y)	(VICx_BASE(x) + 0x100 + ((y)<<2))
 #define VICxADDRESS(x)		(VICx_BASE(x) + 0x0F00)
+
+/**  NAND FLASH  **/
+#define NF_BASE			0xB0E00000
+#define NFCONF			(NF_BASE + 0x0)
+#define NFCONT			(NF_BASE + 0x4)
+#define NFCMMD			(NF_BASE + 0x8)
+#define NFADDR			(NF_BASE + 0xC)
+#define NFDATA			(NF_BASE + 0x10)
+#define NFSTAT			(NF_BASE + 0x28)
 
 #endif
 
