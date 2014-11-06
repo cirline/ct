@@ -25,6 +25,17 @@ int irq_init(int channel, irq_func_t func)
 				printf("error irq channel 0x%p\n", channel);
 			}
 			break;
+		case int_timer:
+			channel &= INTMINORMASK;
+			debug("timer interrupt channal ... 0x%p\n", channel);
+			if(0 <= channel && channel <=4) {
+				region_write(TINT_CSTAT, 0x1, channel, 0x1);
+				region_write(VICxINTENABLE(0), 0x1, 21 + channel, 0x1);
+				__raw_write(VICxVECTADDRx(0, 21 + channel), (addr_t)func);
+			} else {
+				printf("error irq channel 0x%p\n", channel);
+			}
+			break;
 		default:
 			printf("unknown irq channel class! 0x%p\n", channel);
 			break;
@@ -36,6 +47,12 @@ int irq_init(int channel, irq_func_t func)
 void inline eint_pending(int n, int index)
 {
 	set2clear(EXT_INT_x_PEND(n), 0x1, index);
+}
+
+void inline tint_pending(int n)
+{
+	set2clear(TINT_CSTAT, 0x1, 5 + n);
+	region_write(TINT_CSTAT, 0x1, n, 0x1);
 }
 
 void irq_handler(void)

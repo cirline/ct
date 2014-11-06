@@ -13,6 +13,10 @@ typedef unsigned long				__s5p_addr_t;
 #define GPC0CON			0x00000060
 #define GPC0DAT			0x00000064
 
+#define GPD_BASE		(RGPIO_BASE + 0x0A0)
+#define GPDxCON(x)		(GPD_BASE + ((x)<<5))
+#define GPDxDAT(x)		(GPDxCON(x) + 0x4)
+
 #define GPH_BASE		(RGPIO_BASE + 0xC00)
 #define GPHxCON(x)		(GPH_BASE + ((x)<<5) + (0<<2))
 #define GPHxDAT(x)		(GPHxCON(x) + 0x4)
@@ -60,6 +64,16 @@ typedef unsigned long				__s5p_addr_t;
 #define NFADDR			(NF_BASE + 0xC)
 #define NFDATA			(NF_BASE + 0x10)
 #define NFSTAT			(NF_BASE + 0x28)
+
+/**  TIMER  **/
+#define TIMER_BASE		0xE2500000
+#define TCFG0			(TIMER_BASE + 0x0)
+#define TCFG1			(TIMER_BASE + 0x4)
+#define TCON			(TIMER_BASE + 0x8)
+#define TCNTBx(x)		(TIMER_BASE + 0xC + ((x)<<4) - ((x)<<2))
+#define TCMPBx(x)		(TIMER_BASE + 0x10 + ((x)<<4) - ((x)<<2))
+#define TCNTOx(x)		(TIMER_BASE + 0x14 + ((x)<<4) - ((x)<<2))
+#define TINT_CSTAT		(TIMER_BASE + 0x44)
 
 #endif
 

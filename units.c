@@ -5,6 +5,7 @@
 #include "common.h"
 #include "irq.h"
 #include "nf.h"
+#include "timer.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -69,6 +70,8 @@ int key0_func(void)
 int keydown(void)
 {
 	printf("%p --- %s \n", __LINE__, __func__);
+	timer_init();
+	timer_toggle(1);
 	eint_pending(0, 1);
 
 	return 0;
@@ -132,6 +135,14 @@ int key_mux(void)
 	return 0;
 }
 
+int timer1_int_func(void)
+{
+	fstart();
+	tint_pending(1);
+	return 0;
+}
+
+
 int main(void)
 {
 	int val=0;
@@ -148,8 +159,10 @@ int main(void)
 	led_init();
 	uart_init();
 	nf_init();
-
-
+	timer_init();
+	irq_init(TIMERINT(1), timer1_int_func);
+	
+/*
 	nf_erase(0);
 	nf_read(0, buf);
 	for(val=0; val<32; val++) {
@@ -163,6 +176,8 @@ int main(void)
 		buf[val] = 0;
 	}
 	sleep(0);
+*/
+//	timer_toggle(1);
 	nf_read(0, buf);
 	for(val=0; val<32; val++) {
 		printf("[%p]\t= %p\n", val, buf[val]);
