@@ -32,6 +32,9 @@ int irq_init(int channel, irq_func_t func)
 				region_write(TINT_CSTAT, 0x1, channel, 0x1);
 				region_write(VICxINTENABLE(0), 0x1, 21 + channel, 0x1);
 				__raw_write(VICxVECTADDRx(0, 21 + channel), (addr_t)func);
+			} else if(channel == MINOR_RTCALM){
+				region_write(VICxINTENABLE(0), 0x1, 28, 0x1);
+				__raw_write(VICxVECTADDRx(0, 28), (addr_t)func);
 			} else {
 				printf("error irq channel 0x%p\n", channel);
 			}

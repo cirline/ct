@@ -75,5 +75,26 @@ typedef unsigned long				__s5p_addr_t;
 #define TCNTOx(x)		(TIMER_BASE + 0x14 + ((x)<<4) - ((x)<<2))
 #define TINT_CSTAT		(TIMER_BASE + 0x44)
 
+/**  RTC  **/
+#define RTC_BASE		0xE2800000
+#define INTP			(RTC_BASE + 0x30)
+#define RTCCON			(RTC_BASE + 0x40)
+#define TICCNT			(RTC_BASE + 0x44)
+#define RTCALM			(RTC_BASE + 0x50)
+#define ALMSEC			(RTC_BASE + 0x54)
+#define ALMMIN			(RTC_BASE + 0x58)
+#define ALMHOUR			(RTC_BASE + 0x5C)
+#define ALMDAY			(RTC_BASE + 0x60)
+#define ALMMON			(RTC_BASE + 0x64)
+#define ALMYEAR			(RTC_BASE + 0x68)
+#define BCDSEC			(RTC_BASE + 0x70)
+#define BCDMIN			(RTC_BASE + 0x74)
+#define BCDHOUR			(RTC_BASE + 0x78)
+#define BCDDAY			(RTC_BASE + 0x7C)
+#define BCDDAYWEEK		(RTC_BASE + 0x80)
+#define BCDMON			(RTC_BASE + 0x84)
+#define BCDYEAR			(RTC_BASE + 0x88)
+#define CURTICCNT		(RTC_BASE + 0x90)
+
 #endif
 

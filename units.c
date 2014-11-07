@@ -6,6 +6,7 @@
 #include "irq.h"
 #include "nf.h"
 #include "timer.h"
+#include "rtc.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -142,11 +143,20 @@ int timer1_int_func(void)
 	return 0;
 }
 
+int rtcalm_int_func(void)
+{
+	fstart();
+	rtc_print();
+	rtc_clear_int_pending();
+	fend();
+}
+
 
 int main(void)
 {
 	int val=0;
 	unsigned char buf[2048];
+	rtc_t rtc;
 
 	irq_init(EINT(0), key0_func);
 	irq_init(EINT(1), keydown);
@@ -156,11 +166,25 @@ int main(void)
 	irq_init(EINT(5), keyback);
 	irq_init(EINT(22), key_mux);
 	irq_init(EINT(23), key_mux);
+	irq_init(RTCALMINT(), rtcalm_int_func);
 	led_init();
 	uart_init();
 	nf_init();
 	timer_init();
+	rtc_init();
 	irq_init(TIMERINT(1), timer1_int_func);
+
+	rtc.sec = 0x14;
+	rtc.min = 0x13;
+	rtc.hour = 0x22;
+	rtc.day = 0x10;
+	rtc.mon = 0x10;
+	rtc.year = 0x989;
+
+	rtc_set(&rtc);
+
+	rtc.min = 0x15;
+	rtc_set_alarm(&rtc);
 	
 /*
 	nf_erase(0);
@@ -185,6 +209,7 @@ int main(void)
 
 	while(1) {
 		printf("main --- loop! ... 0x%p\n", val++);
+		rtc_print();
 		flash(2, DELAY, 0);
 		flash(2, DEF_DELAY, 1);
 	}

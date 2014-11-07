@@ -19,6 +19,7 @@ objs	+= common.o
 objs	+= irq.o
 objs	+= nf.o
 objs	+= timer.o
+objs	+= rtc.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)
