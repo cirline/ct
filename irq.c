@@ -1,9 +1,11 @@
 #include "common.h"
 #include "s5p_regs.h"
 #include "irq.h"
+#include "uart.h"
 
 int irq_init(int channel, irq_func_t func)
 {
+	printf("IRF address 0x%p\n", func);
 	switch(channel & INTCLASSMASK) {
 		case int_ext:
 			channel &= INTMINORMASK;
@@ -39,6 +41,15 @@ int irq_init(int channel, irq_func_t func)
 				printf("error irq channel 0x%p\n", channel);
 			}
 			break;
+		case int_uart:
+			channel &= INTMINORMASK;
+			debug("uart interrupt channel ... 0x%p\n", channel);
+			if(0 <= channel && channel < 4) {
+				uart_irq_init(func);
+			} else {
+				printf("error irq channel 0x%p\n", channel);
+			}
+			break;
 		default:
 			printf("unknown irq channel class! 0x%p\n", channel);
 			break;
@@ -58,12 +69,25 @@ void inline tint_pending(int n)
 	region_write(TINT_CSTAT, 0x1, n, 0x1);
 }
 
+void inline uint_pending(int n)
+{
+	uart_clear_int_pend(n);
+}
+
 void irq_handler(void)
 {
 	int n;
 
-	printf("irq_handler request ... \r\n");
-	n = ((irq_func_t)__s5p_read(VICxADDRESS(0)))();
-	__s5p_wirte(VICxADDRESS(0), 0);
+//	fstart();
+//	printf("vic0 address 0x%p\n", __raw_read(VICxADDRESS(0)));
+//	printf("vic1 address 0x%p\n", __raw_read(VICxADDRESS(1)));
+	if(__raw_read(VICxADDRESS(0))) {
+		n = ((irq_func_t)__raw_read(VICxADDRESS(0)))();
+	} else {
+		n = ((irq_func_t)__raw_read(VICxADDRESS(1)))();
+	}
+	__raw_write(VICxADDRESS(0), 0);
+	__raw_write(VICxADDRESS(1), 0);
+//	fend();
 }
 

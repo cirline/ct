@@ -48,6 +48,22 @@ typedef unsigned long				__s5p_addr_t;
 #define UBRDIV0			0x00000028
 #define UDIVSLOT0		0x0000002C
 
+#define ULCONx(x)		(RUART_BASE + (x<<10))
+#define UCONx(x)		(ULCONx(x) + 0x4)
+#define UFCONx(x)		(ULCONx(x) + 0x8)
+#define UMCONx(x)		(ULCONx(x) + 0xC)
+#define UTRSTATx(x)		(ULCONx(x) + 0x10)
+#define UERSTATx(x)		(ULCONx(x) + 0x14)
+#define UFSTATx(x)		(ULCONx(x) + 0x18)
+#define UMSTATx(x)		(ULCONx(x) + 0x1C)
+#define UTXHx(x)		(ULCONx(x) + 0x20)
+#define URXHx(x)		(ULCONx(x) + 0x24)
+#define UBRDIVx(x)		(ULCONx(x) + 0x28)
+#define UDIVSLOTx(x)	(ULCONx(x) + 0x2C)
+#define UINTPx(x)		(ULCONx(x) + 0x30)
+#define UINTSPx(x)		(ULCONx(x) + 0x34)
+#define UINTMx(x)		(ULCONx(x) + 0x38)
+
 /**  INT  **/
 #define RINT_BASE		0xF2000000
 #define VICx_BASE(x)	(RINT_BASE + ((x)<<20))

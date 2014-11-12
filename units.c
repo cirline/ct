@@ -149,6 +149,24 @@ int rtcalm_int_func(void)
 	rtc_print();
 	rtc_clear_int_pending();
 	fend();
+	return 0;
+}
+
+int uart0_int_func(void)
+{
+	int n;
+	n = __raw_read(URXHx(0)) & 0xff;
+	printf("%s n = 0x%p\n", __func__, n);
+	printf("uintm 1= 0x%p\n", __raw_read(UINTMx(0)));
+	printf("uintsp 1= 0x%p\n", __raw_read(UINTSPx(0)));
+	printf("uintp 1= 0x%p\n", __raw_read(UINTPx(0)));
+	uint_pending(0);
+	printf("uintm 2= 0x%p\n", __raw_read(UINTMx(0)));
+	printf("uintsp 2= 0x%p\n", __raw_read(UINTSPx(0)));
+	printf("uintp 2= 0x%p\n", __raw_read(UINTPx(0)));
+	fend();
+
+	return 0;
 }
 
 
@@ -158,6 +176,9 @@ int main(void)
 	unsigned char buf[2048];
 	rtc_t rtc;
 
+	uart_init();
+	__raw_write(VICxADDRESS(0), 0);
+	__raw_write(VICxADDRESS(1), 0);
 	irq_init(EINT(0), key0_func);
 	irq_init(EINT(1), keydown);
 	irq_init(EINT(2), keyleft);
@@ -168,11 +189,11 @@ int main(void)
 	irq_init(EINT(23), key_mux);
 	irq_init(RTCALMINT(), rtcalm_int_func);
 	led_init();
-	uart_init();
 	nf_init();
 	timer_init();
 	rtc_init();
 	irq_init(TIMERINT(1), timer1_int_func);
+	irq_init(UARTINT(0), uart0_int_func);
 
 	rtc.sec = 0x14;
 	rtc.min = 0x13;
@@ -208,10 +229,15 @@ int main(void)
 	}
 
 	while(1) {
-		printf("main --- loop! ... 0x%p\n", val++);
+//		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
-		flash(2, DELAY, 0);
-		flash(2, DEF_DELAY, 1);
+		*buf = getchar();
+		buf[1] = '\0';
+		printf("char = %s\n", buf);
+
+
+//		flash(2, DELAY, 0);
+//		flash(2, DEF_DELAY, 1);
 	}
 
 	return 0;
