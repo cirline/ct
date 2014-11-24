@@ -83,7 +83,13 @@ static int inline i2c_receive_data(int ack, char *ch)
 
 int i2c_read_byte(unsigned char addr, char *ch)
 {
+	return i2c_read_array(addr, ch, 1);
+}
+
+int i2c_read_array(unsigned char addr, char *buf, int len)
+{
 	int ret;
+	int i;
 
 	ret = i2c_select_device(0x50, I2C_WRITE);
 	if(ret) {
@@ -93,17 +99,23 @@ int i2c_read_byte(unsigned char addr, char *ch)
 	ret = i2c_send_addr(addr);
 	if(ret) {
 		printf("i2c send address fail.\n");
-		goto i2c_send_addr_fail;
+		goto i2c_fail;
 	}
 	ret = i2c_restart(0x50, I2C_READ);
 	if(ret) {
 		printf("i2c restart fail.\n");
-		goto i2c_restart_fail;
+		goto i2c_fail;
 	}
-	i2c_receive_data(I2C_SET_NACK, ch);
-	ret = 0;
-i2c_restart_fail:
-i2c_send_addr_fail:
+	for(i = 0; i < len-1; i++) {
+		ret = i2c_receive_data(I2C_SET_ACK, buf + i);
+		if(ret) {
+			printf("i2c receive data fail, 0x%p bytes success\n", i);
+			goto i2c_fail;
+		}
+	}
+	i2c_receive_data(I2C_SET_NACK, buf + i);
+	ret = len;
+i2c_fail:
 	i2c_stop();
 	i2c_trx_resume();
 i2c_select_device_fail:

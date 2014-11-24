@@ -237,10 +237,17 @@ int main(void)
 //		*buf = getchar();
 		buf[1] = '\0';
 //		printf("char = %s\n", buf);
+#if 0
 		for(val=1; val<8; ) {
 			i2c_read_byte(val++, buf);
 			printf("after i2c read byte = 0x%p\n", (int)buf[0]);
 		}
+#endif
+		i2c_read_array(0, buf, 8);
+		for(val=0; val<8; val++) {
+			printf("after i2c read byte = 0x%p\n", (int)buf[val]);
+		}
+
 
 
 //		flash(2, DELAY, 0);
