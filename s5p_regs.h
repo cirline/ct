@@ -69,6 +69,7 @@ typedef unsigned long				__s5p_addr_t;
 #define VICx_BASE(x)	(RINT_BASE + ((x)<<20))
 
 #define VICxINTENABLE(x)	(VICx_BASE(x) + 0x0010)
+#define VICxINTENCLEAR(x)	(VICx_BASE(x) + 0x0014)
 #define VICxVECTADDRx(x, y)	(VICx_BASE(x) + 0x100 + ((y)<<2))
 #define VICxADDRESS(x)		(VICx_BASE(x) + 0x0F00)
 
@@ -111,6 +112,14 @@ typedef unsigned long				__s5p_addr_t;
 #define BCDMON			(RTC_BASE + 0x84)
 #define BCDYEAR			(RTC_BASE + 0x88)
 #define CURTICCNT		(RTC_BASE + 0x90)
+
+/**  I2C  **/
+#define I2C_BASE		0xE1800000
+#define I2CCONx(x)		(I2C_BASE)
+#define I2CSTATx(x)		(I2CCONx(x)		+ 4)
+#define I2CADDx(x)		(I2CSTATx(x)	+ 4)
+#define I2CDSx(x)		(I2CADDx(x)		+ 4)
+#define I2CLCx(x)		(I2CDSx(x)		+ 4)
 
 #endif
 

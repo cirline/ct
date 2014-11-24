@@ -20,6 +20,7 @@ objs	+= irq.o
 objs	+= nf.o
 objs	+= timer.o
 objs	+= rtc.o
+objs	+= i2c.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

@@ -7,6 +7,7 @@
 #include "nf.h"
 #include "timer.h"
 #include "rtc.h"
+#include "i2c.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -156,14 +157,14 @@ int uart0_int_func(void)
 {
 	int n;
 	n = __raw_read(URXHx(0)) & 0xff;
-	printf("%s n = 0x%p\n", __func__, n);
-	printf("uintm 1= 0x%p\n", __raw_read(UINTMx(0)));
-	printf("uintsp 1= 0x%p\n", __raw_read(UINTSPx(0)));
-	printf("uintp 1= 0x%p\n", __raw_read(UINTPx(0)));
+//	printf("%s n = 0x%p\n", __func__, n);
+//	printf("uintm 1= 0x%p\n", __raw_read(UINTMx(0)));
+//	printf("uintsp 1= 0x%p\n", __raw_read(UINTSPx(0)));
+//	printf("uintp 1= 0x%p\n", __raw_read(UINTPx(0)));
 	uint_pending(0);
-	printf("uintm 2= 0x%p\n", __raw_read(UINTMx(0)));
-	printf("uintsp 2= 0x%p\n", __raw_read(UINTSPx(0)));
-	printf("uintp 2= 0x%p\n", __raw_read(UINTPx(0)));
+//	printf("uintm 2= 0x%p\n", __raw_read(UINTMx(0)));
+//	printf("uintsp 2= 0x%p\n", __raw_read(UINTSPx(0)));
+//	printf("uintp 2= 0x%p\n", __raw_read(UINTPx(0)));
 	fend();
 
 	return 0;
@@ -192,6 +193,7 @@ int main(void)
 	nf_init();
 	timer_init();
 	rtc_init();
+	i2c_init();
 	irq_init(TIMERINT(1), timer1_int_func);
 	irq_init(UARTINT(0), uart0_int_func);
 
@@ -227,17 +229,22 @@ int main(void)
 	for(val=0; val<32; val++) {
 		printf("[%p]\t= %p\n", val, buf[val]);
 	}
-
+	
+	val = 0;
 	while(1) {
 //		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
-		*buf = getchar();
+//		*buf = getchar();
 		buf[1] = '\0';
-		printf("char = %s\n", buf);
+//		printf("char = %s\n", buf);
+		for(val=1; val<8; ) {
+			i2c_read_byte(val++, buf);
+			printf("after i2c read byte = 0x%p\n", (int)buf[0]);
+		}
 
 
 //		flash(2, DELAY, 0);
-//		flash(2, DEF_DELAY, 1);
+		flash(2, DEF_DELAY, 1);
 	}
 
 	return 0;
