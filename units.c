@@ -176,6 +176,7 @@ int main(void)
 	int val=0;
 	unsigned char buf[2048];
 	rtc_t rtc;
+	int i;
 
 	uart_init();
 	__raw_write(VICxADDRESS(0), 0);
@@ -243,9 +244,18 @@ int main(void)
 			printf("after i2c read byte = 0x%p\n", (int)buf[0]);
 		}
 #endif
+		for(i = 0; i < 8; i++) {
+			val += i;
+			buf[32+i] = val;
+			printf("write i2c read byte 0x%p = 0x%p\n", i, buf[32+i]);
+			i2c_write_byte(i, val);
+		}
+		buf[32+i] = '\0';
+		printf("buf string %s\n", buf + 32);
+//		i2c_write_array(0, buf + 32, 8);
 		i2c_read_array(0, buf, 8);
-		for(val=0; val<8; val++) {
-			printf("after i2c read byte = 0x%p\n", (int)buf[val]);
+		for(i = 0; i < 8; i++) {
+			printf("after i2c read byte = 0x%p\n", (int)buf[i]);
 		}
 
 

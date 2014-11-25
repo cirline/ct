@@ -81,6 +81,15 @@ static int inline i2c_receive_data(int ack, char *ch)
 	return i2c_not_rcv_ack();
 }
 
+static int inline i2c_send_data(char ch)
+{
+	i2c_data_write(ch);
+	i2c_trx_resume();
+	while(!i2c_trx_pend());
+	return i2c_not_rcv_ack();
+//	return i2c_send_addr(ch);
+}
+
 int i2c_read_byte(unsigned char addr, char *ch)
 {
 	return i2c_read_array(addr, ch, 1);
@@ -96,6 +105,7 @@ int i2c_read_array(unsigned char addr, char *buf, int len)
 		printf("i2c devices no response.\n");
 		goto i2c_select_device_fail;
 	}
+	printf("%p - addr is 0x%p\n", __func__, addr);
 	ret = i2c_send_addr(addr);
 	if(ret) {
 		printf("i2c send address fail.\n");
@@ -114,6 +124,43 @@ int i2c_read_array(unsigned char addr, char *buf, int len)
 		}
 	}
 	i2c_receive_data(I2C_SET_NACK, buf + i);
+	ret = len;
+i2c_fail:
+	i2c_stop();
+	i2c_trx_resume();
+i2c_select_device_fail:
+	return ret;
+}
+
+int i2c_write_byte(unsigned char addr, char ch)
+{
+	return i2c_write_array(addr, &ch, 1);
+}
+
+int i2c_write_array(unsigned char addr, char *buf, int len)
+{
+	int i;
+	int ret;
+
+	ret = i2c_select_device(0x50, I2C_WRITE);
+	if(ret) {
+		printf("i2c devices no response.\n");
+		goto i2c_select_device_fail;
+	}
+	printf("%p - addr is 0x%p\n", __func__, addr);
+	ret = i2c_send_addr(addr);
+	if(ret) {
+		printf("i2c send address fail.\n");
+		goto i2c_fail;
+	}
+	for(i = 0; i < len; i++) {
+		printf("send data is 0x%p\n", buf[i]);
+		ret = i2c_send_data(buf[i]);
+		if(ret) {
+			printf("i2c send data fail, 0x%p bytes success.\n", i);
+			goto i2c_fail;
+		}
+	}
 	ret = len;
 i2c_fail:
 	i2c_stop();

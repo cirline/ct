@@ -19,6 +19,8 @@ typedef enum i2c_mode {
 extern int i2c_init(void);
 extern int i2c_read_byte(unsigned char addr, char *ch);
 extern int i2c_read_array(unsigned char addr, char *buf, int len);
+extern int i2c_write_byte(unsigned char addr, char ch);
+extern int i2c_write_array(unsigned char addr, char *buf, int len);
 
 
 #endif
