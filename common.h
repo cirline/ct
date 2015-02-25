@@ -16,8 +16,8 @@ typedef __s5p_addr_t				addr_t;
 
 #ifdef DEBUG
 #define debug(format, arg...)		printf(format, ##arg)
-#define fstart()					printf("%s start ... \n", __func__)
-#define fend()						printf("%s end ... \n", __func__)
+#define fstart()					printf("function [%s] , line [%d] start ... \n", __func__, __LINE__)
+#define fend()						printf("function [%s] , line [%d] end ... \n", __func__, __LINE__)
 #else
 #define debug(format, arg...)
 #define fstart()
