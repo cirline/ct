@@ -8,6 +8,8 @@
 #include "timer.h"
 #include "rtc.h"
 #include "i2c.h"
+#include "lcd.h"
+#include "keyboard.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -65,16 +67,6 @@ int key0_func(void)
 	printf("key0 func --- 0x%p\r\n", n++);
 
 	eint_pending(0, 0);
-
-	return 0;
-}
-
-int keydown(void)
-{
-	printf("%p --- %s \n", __LINE__, __func__);
-	timer_init();
-	timer_toggle(1);
-	eint_pending(0, 1);
 
 	return 0;
 }
@@ -170,6 +162,7 @@ int uart0_int_func(void)
 	return 0;
 }
 
+void task_loop(void);
 
 int main(void)
 {
@@ -192,11 +185,13 @@ int main(void)
 	irq_init(RTCALMINT(), rtcalm_int_func);
 	led_init();
 	nf_init();
-	timer_init();
+	timer_init(TIMER0, 16110, 8550);
 	rtc_init();
 	i2c_init();
 	irq_init(TIMERINT(1), timer1_int_func);
 	irq_init(UARTINT(0), uart0_int_func);
+
+//	lcd_init();
 
 	rtc.sec = 0x14;
 	rtc.min = 0x13;
@@ -232,6 +227,7 @@ int main(void)
 	}
 	
 	val = 0;
+
 	while(1) {
 //		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
@@ -262,9 +258,49 @@ int main(void)
 
 //		flash(2, DELAY, 0);
 		flash(2, DEF_DELAY, 1);
+
+		task_loop();
 	}
 
 	return 0;
 }
+
+/* task_loop */
+#define TASK_GETCHAR	1<<0
+#define TASK_BACKLIGHT	1<<1
+
+void task_list(int *task)
+{
+	*task = 0;
+//	*task |= TASK_GETCHAR;
+	*task |= TASK_BACKLIGHT;
+}
+
+
+void task_loop(void)
+{
+	int task[1];
+
+	task_list(task);
+	/* test getchar */
+	if(*task & TASK_GETCHAR) {
+		char c;
+		printf("test getchar------------->\n");
+		c = getchar();
+		printf("input char is -----------> [%c]\n", c);
+	}
+	/* test backlight */
+	if(*task & TASK_BACKLIGHT) {
+		int i;
+		printf("test backlight----------->\n");
+		backlight_init(BL_LEV_MIN);
+		for(i = BL_LEV_MIN; i < BL_LEV_MAX; i++) {
+			printf("backlight level is 0x%p\n", i);
+			backlight_set_level(i);
+			getchar();
+		}
+	}
+}
+/* task_loop end */
 
 
