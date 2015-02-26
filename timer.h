@@ -2,7 +2,7 @@
 #define __TIMER_H__
 
 /* timer serial number */
-enum timer_sn { TIMER0 = 0, TIMER1, TIMER2, TIMER3 };
+enum timer_sn { TIMER0 = 0, TIMER1, TIMER2, TIMER3, TIMER_NONE};
 
 /* prescaler: 0 ~ 0xFF */
 #define TIMER_PRESCALER		((0xff<<8) | 0xff)
@@ -27,7 +27,8 @@ enum timer_tcon {
 
 extern void inline timer_update(enum timer_sn t_sn);
 extern void timer_toggle(enum timer_sn t_sn, int x);
-extern int timer_init(enum timer_sn t_sn, int cnt, int lev);
+extern void timer_set_period(enum timer_sn t_sn, int cnt, int high_ratio);
+extern int timer_init(enum timer_sn t_sn, int cnt, int high_ratio);
 
 #endif
 

@@ -25,6 +25,9 @@ typedef __s5p_addr_t				addr_t;
 #endif
 
 enum mask_defined {
+	MASK_BITS_1 = 0x1,
+	MASK_BITS_2 = 0x3,
+	MASK_BITS_3 = 0x7,
 	MASK_BITS_4 = 0xf,
 	MASK_BITS_8 = 0xff,
 	MASK_BITS_16 = 0xffff,
