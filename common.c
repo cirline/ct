@@ -31,6 +31,13 @@ char *i2hs(int n, char *ds)
 	return ds;
 }
 
+/**
+ * valid variable:
+ * x: hexadecimal number
+ * p: hexadecimal number
+ * s: string
+ * c: character
+ */
 int __s5p_printf(char *s, ...)
 {
 	va_list vl;
@@ -46,10 +53,14 @@ int __s5p_printf(char *s, ...)
 					low_putchar(*s);
 					break;
 				case 'p':
+				case 'x':
 					printf(i2hs(va_arg(vl, int), st));
 					break;
 				case 's':
 					printf(va_arg(vl, char *));
+					break;
+				case 'c':
+					low_putchar(va_arg(vl, int));
 					break;
 				default:
 					low_putchar('?');
