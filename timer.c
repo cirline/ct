@@ -7,7 +7,7 @@ void inline timer_update(enum timer_sn t_sn)
 	region_write(TCON, 0x1, (t_sn == TIMER0) ? 1 : ((t_sn<<2) + 5), 1);
 }
 
-void timer_toggle(enum timer_sn tn, int x)
+void timer_toggle(enum timer_sn t_sn, int x)
 {
 	region_write(TCON, 0x1, (t_sn ==  TIMER0) ? 1 : ((t_sn<<2) + 5), 0);
 	region_write(TCON, 0x1, (t_sn ==  TIMER0) ? 0 : ((t_sn<<2) + 4), (x & 1));
