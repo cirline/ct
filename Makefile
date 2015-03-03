@@ -33,7 +33,7 @@ $(bin_file): $(objs)
 test: test.o
 
 clean:
-	rm -rf *.o *.elf *.bin *.asm *.out test
+	rm -rf *.o *.elf *.bin *.asm *.out *.i test
 
 install:
 	cp $(bin_file) $(tftp_root)

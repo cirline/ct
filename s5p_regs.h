@@ -6,6 +6,10 @@ typedef unsigned long				__s5p_addr_t;
 #define __s5p_wirte(addr, val)		(*(volatile __s5p_addr_t *)(addr)) = (val)
 #define __s5p_read(addr)			(*(volatile __s5p_addr_t *)(addr))
 
+/** common define **/
+#define OFFSET4B(x)     ((x)<<2)
+#define OFFSET8B(x)     ((x)<<3)
+
 /**  GPIO  **/
 #define RGPIO_BASE		0xE0200000
 
@@ -120,6 +124,86 @@ typedef unsigned long				__s5p_addr_t;
 #define I2CADDx(x)		(I2CSTATx(x)	+ 4)
 #define I2CDSx(x)		(I2CADDx(x)		+ 4)
 #define I2CLCx(x)		(I2CDSx(x)		+ 4)
+
+/**  DISPLAY **/
+#define VID_BASE        0xF8000000
+#define VIDCONx(x)      (VID_BASE + OFFSET4B(x))
+#define VIDTCONx(x)     (VID_BASE + OFFSET4B(x) + 0x10)
+#define WINCONx(x)      (VID_BASE + (4<<(x)) + 0x20)
+#define SHADOWCON       (VID_BASE + 0x34)
+/* OSD sfr x1~3, xA~D */
+#define VIDOSDxx(x, y)  (VID_BASE + ((4+x)<<4)+ OFFSET4B(y - 'A'))
+/* x1~4, y0~1, z0~2 */
+#define VIDW0xADDxBx(x, y, z)   (&((vidw_add_b##z##_t *)(VID_BASE + 0xA0))->VIDW0##x##ADD##y##B##z)
+struct vidw_add_b_ {
+    int VIDW00ADD0B0;
+    int VIDW00ADD0B1;
+    int VIDW01ADD0B0;
+    int VIDW01ADD0B1;
+    int VIDW02ADD0B0;
+    int VIDW02ADD0B1;
+    int VIDW03ADD0B0;
+    int VIDW03ADD0B1;
+    int VIDW04ADD0B0;
+    int VIDW04ADD0B1;
+    int NA1, NA2;
+    int VIDW00ADD1B0;
+    int VIDW00ADD1B1;
+    int VIDW01ADD1B0;
+    int VIDW01ADD1B1;
+    int VIDW02ADD1B0;
+    int VIDW02ADD1B1;
+    int VIDW03ADD1B0;
+    int VIDW03ADD1B1;
+    int VIDW04ADD1B0;
+    int VIDW04ADD1B1;
+};
+
+struct vidw_add_b2 {
+    char NA1[0x2000];
+    long VIDW00ADD0B2;
+    long VIDW01ADD0B2;
+    long VIDW02ADD0B2;
+    long VIDW03ADD0B2;
+    long VIDW04ADD0B2;
+    long NA2;
+    long VIDW00ADD1B2;
+    long VIDW01ADD1B2;
+    long VIDW02ADD1B2;
+    long VIDW03ADD1B2;
+    long VIDW04ADD1B2;
+};
+
+typedef struct vidw_add_b_ vidw_add_b0_t;
+typedef struct vidw_add_b_ vidw_add_b1_t;
+typedef struct vidw_add_b2 vidw_add_b2_t;
+/* x0~4 */
+#define VIDW0xADD2(x)       (VID_BASE + 0x100 + OFFSET4B(x))
+#define VIDINTCON(x)        (VID_BASE + 0x130 + OFFSET4B(x))
+#define WxKEYCONx(x, y)     (VID_BASE + 0x140 + OFFSET8B(x-1) + OFFSET4B(y))
+#define WxKEYALPHA(x)       (VID_BASE + 0x160 + OFFSET4B(x-1))
+#define DITHMODE            (VID_BASE + 0x170)
+#define WINxMAP(x)          (VID_BASE + 0x180 + OFFSET4B(x))
+#define WPALCON_H           (VID_BASE + 0x19C)
+#define WPALCON_L           (VID_BASE + 0x1A0)
+#define TRIGCON             (VID_BASE + 0x1A4)
+#define I80IFCONAx(x)       (VID_BASE + 0x1B0 + OFFSET4B(x))
+#define I80IFCONBx(x)       (VID_BASE + 0x1B8 + OFFSET4B(x))
+#define COLORGAINCON        (VID_BASE + 0x1C0)
+#define LDI_CMDCONx(x)      (VID_BASE + 0x1D0 + OFFSET4B(x))
+#define SIFCCONx(x)         (VID_BASE + 0x1E0 + OFFSET4B(x))
+#define HUECOEFxx(x, y)     (VID_BASE + 0x1EC + OFFSET8B(x) + OFFSET4B(y))
+#define HUEOFFSET           (VID_BASE + 0x1FC)
+#define VIDWxALPHAx(x, y)   (VID_BASE + 0x200 + OFFSET8B(x) + OFFSET4B(y))
+#define BLENDEQx(x)         (VID_BASE + 0x240 + OFFSET4B(x))
+#define BLENDCON            (VID_BASE + 0x260)
+#define WxRTQOSCON(x)       (VID_BASE + 0x264 + OFFSET4B(x))
+#define LDI_CMDx(x)         (VID_BASE + 0x280 + OFFSET4B(x))
+#define GAMMALUT_N_x(y)     (VID_BASE + 0x37C + OFFSET4B(y>>1))
+#define SHD_VIDW0xADD0(x)   (VID_BASE + 0x40A0 + OFFSET8B(x))
+#define SHD_VIDW0xADD1(x)   (VID_BASE + 0x40D0 + OFFSET8B(x))
+#define SHD_VIDW0xADD2(x)   (VID_BASE + 0x4100 + OFFSET4B(x))
+/** DISPLAY end **/
 
 #endif
 
