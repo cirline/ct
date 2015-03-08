@@ -127,13 +127,26 @@ typedef unsigned long				__s5p_addr_t;
 
 /**  DISPLAY **/
 #define VID_BASE        0xF8000000
+/**
+ * output format, display enable/disable
+ * RGB i/f control signal
+ * output format control
+ * image enhancement control
+ */
 #define VIDCONx(x)      (VID_BASE + OFFSET4B(x))
+/* output timing and display size */
 #define VIDTCONx(x)     (VID_BASE + OFFSET4B(x) + 0x10)
+/* window feature setting */
 #define WINCONx(x)      (VID_BASE + (4<<(x)) + 0x20)
+/* window shadow control */
 #define SHADOWCON       (VID_BASE + 0x34)
-/* OSD sfr x1~3, xA~D */
+/** OSD sfr x1~3, xA~D
+ * window position setting, OSD size setting
+ */
 #define VIDOSDxx(x, y)  (VID_BASE + ((4+x)<<4)+ OFFSET4B(y - 'A'))
-/* x1~4, y0~1, z0~2 */
+/** x1~4, y0~1, z0~2
+ * source image address setting
+ */
 #define VIDW0xADDxBx(x, y, z)   (&((vidw_add_b##z##_t *)(VID_BASE + 0xA0))->VIDW0##x##ADD##y##B##z)
 struct vidw_add_b_ {
     int VIDW00ADD0B0;
@@ -179,27 +192,47 @@ typedef struct vidw_add_b_ vidw_add_b1_t;
 typedef struct vidw_add_b2 vidw_add_b2_t;
 /* x0~4 */
 #define VIDW0xADD2(x)       (VID_BASE + 0x100 + OFFSET4B(x))
+/* interrupt contro/pending */
 #define VIDINTCON(x)        (VID_BASE + 0x130 + OFFSET4B(x))
+/* color key setting */
 #define WxKEYCONx(x, y)     (VID_BASE + 0x140 + OFFSET8B(x-1) + OFFSET4B(y))
+/* color key alpha value */
 #define WxKEYALPHA(x)       (VID_BASE + 0x160 + OFFSET4B(x-1))
+/* dithering mode */
 #define DITHMODE            (VID_BASE + 0x170)
+/* window color control */
 #define WINxMAP(x)          (VID_BASE + 0x180 + OFFSET4B(x))
+/* palette control */
 #define WPALCON_H           (VID_BASE + 0x19C)
 #define WPALCON_L           (VID_BASE + 0x1A0)
+/* trigger control */
 #define TRIGCON             (VID_BASE + 0x1A4)
+/* i80 i/f control main/sub LDI */
 #define I80IFCONAx(x)       (VID_BASE + 0x1B0 + OFFSET4B(x))
 #define I80IFCONBx(x)       (VID_BASE + 0x1B8 + OFFSET4B(x))
+/* color gain color */
 #define COLORGAINCON        (VID_BASE + 0x1C0)
+/* i80 i/f LDI command control */
 #define LDI_CMDCONx(x)      (VID_BASE + 0x1D0 + OFFSET4B(x))
+/* LCD i80 system i/f commond control */
 #define SIFCCONx(x)         (VID_BASE + 0x1E0 + OFFSET4B(x))
+/* hue coefficient control */
 #define HUECOEFxx(x, y)     (VID_BASE + 0x1EC + OFFSET8B(x) + OFFSET4B(y))
+/* hue offset control */
 #define HUEOFFSET           (VID_BASE + 0x1FC)
+/* window's alpha value */
 #define VIDWxALPHAx(x, y)   (VID_BASE + 0x200 + OFFSET8B(x) + OFFSET4B(y))
+/* bending equation control */
 #define BLENDEQx(x)         (VID_BASE + 0x240 + OFFSET4B(x))
+/* bending control */
 #define BLENDCON            (VID_BASE + 0x260)
+/* window's RTQOS control */
 #define WxRTQOSCON(x)       (VID_BASE + 0x264 + OFFSET4B(x))
+/* i80 i/f LDI command */
 #define LDI_CMDx(x)         (VID_BASE + 0x280 + OFFSET4B(x))
+/* gamma LUT data */
 #define GAMMALUT_N_x(y)     (VID_BASE + 0x37C + OFFSET4B(y>>1))
+/* window's buffer start/end address, buffer size */
 #define SHD_VIDW0xADD0(x)   (VID_BASE + 0x40A0 + OFFSET8B(x))
 #define SHD_VIDW0xADD1(x)   (VID_BASE + 0x40D0 + OFFSET8B(x))
 #define SHD_VIDW0xADD2(x)   (VID_BASE + 0x4100 + OFFSET4B(x))
