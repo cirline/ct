@@ -38,21 +38,45 @@ void timer_set_period(enum timer_sn t_sn, int cnt, int high_ratio)
  * f(timer input clock) = PCLK / (prescaler+1) / divider
  * f = 66MHz / 256 / 16 = 16113 Hz
  */
-int timer_init(enum timer_sn t_sn, int cnt, int high_ratio)
+int timer_init(struct timer *pt)
 {
 	/* set tout */
-	region_write(GPDxCON(0), MASK_BITS_4, (t_sn<<2), 0x2);
+	region_write(GPDxCON(0), MASK_BITS_4, (pt->sn<<2), 0x2);
 	/* set prescaler */
-	region_write(TCFG0, MASK_BITS_16, 0, TIMER_PRESCALER);
+	region_write(TCFG0, MASK_BITS_8, 0, pt->prescaler<<((pt->sn > TIMER1) ? 8 : 0));
 	/* set divider */
-	region_write(TCFG1, MASK_BITS_4, (t_sn<<2), TIMER_DIVIDER16);
+	region_write(TCFG1, MASK_BITS_4, (pt->sn<<2), pt->divider);
 	/* set timer */
-#define SET_TIMER_TCON	(TIMER_AUTO_RELOAD_ON)
-	region_write(TCON, MASK_BITS_4, (t_sn == TIMER0) ? 0 : ((t_sn<<2) + 4), SET_TIMER_TCON);
+	region_write(TCON, MASK_BITS_4, (pt->sn == TIMER0) ? 0 : ((pt->sn<<2) + 4), \
+            pt->auto_reload<<TIMER_AUTO_RELOAD | \
+            pt->out_invert<<TIMER_TOUT_INVERTER );
 	/* set period */
-	timer_set_period(t_sn, cnt, high_ratio);
-	timer_update(t_sn);
+	timer_set_period(pt->sn, pt->count_buffer, pt->high_ratio);
+	timer_update(pt->sn);
 
 	return 0;
+}
+
+void timer_default_cfg(struct timer *pt)
+{
+    pt->sn = TIMER0;
+    pt->count_buffer = TIMER_DEF_CNTB;
+    pt->high_ratio = TIMER_DEF_CNTB / 2;
+    pt->prescaler = 0xFF;
+    pt->divider = TIMER_DIVIDER16;
+    pt->auto_reload = TIMER_ONESHOT;
+    pt->out_invert = TIMER_INVERT_OFF;
+}
+
+int timer_spin_lock(enum timer_sn t_sn, int ms)
+{
+    struct timer timer;
+
+    timer_default_cfg(&timer);
+    timer.sn = TIMER1;
+    timer.count_buffer = ms<<4;
+    timer.high_ratio = ms<<3;
+    timer_init(&timer);
+    timer_toggle(timer.sn, 1);
 }
 
