@@ -9,6 +9,11 @@ void inline region_write(addr_t addr, int mask, int index, int val)
 	__raw_write(addr, (reg | ((val & mask) << index)));
 }
 
+int inline region_read(addr_t addr, int mask, int index)
+{
+	return (__raw_read(addr) >> index) & mask;
+}
+
 void inline set2clear(addr_t addr, int mask, int index)
 {
 	__raw_write(addr, (mask << index));

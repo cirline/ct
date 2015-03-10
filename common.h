@@ -34,6 +34,7 @@ enum mask_defined {
 };
 
 extern void inline region_write(addr_t addr, int mask, int index, int val);
+extern int inline region_read(addr_t addr, int mask, int index);
 extern void inline set2clear(addr_t addr, int mask, int index);
 extern char *i2hs(int n, char *ds);
 extern int __s5p_printf(char *s, ...);
