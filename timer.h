@@ -5,7 +5,7 @@
 #define TIMER_DEF_CMPB	8055
 
 /* timer serial number */
-enum timer_sn { TIMER0 = 0, TIMER1, TIMER2, TIMER3, TIMER_NONE};
+enum timer_sn { TIMER0 = 0, TIMER1, TIMER2, TIMER3, TIMER4, TIMER_NONE};
 
 /* divider */
 enum timer_divider {

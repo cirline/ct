@@ -12,6 +12,7 @@
 #define getchar()					uart_get_char()
 #define __raw_write(addr, val)		__s5p_wirte(addr, val)
 #define __raw_read(addr)			__s5p_read(addr)
+#define sleep(time)					__s5p_sleep(time)
 typedef __s5p_addr_t				addr_t;
 
 #ifdef DEBUG

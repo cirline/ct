@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include "common.h"
+#include "timer.h"
 
 void inline region_write(addr_t addr, int mask, int index, int val)
 {
@@ -82,3 +83,9 @@ int __s5p_printf(char *s, ...)
 
 	return 0;
 }
+
+int inline __s5p_sleep(int ms)
+{
+	return timer_spin_lock(TIMER4, ms);
+}
+
