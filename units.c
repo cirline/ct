@@ -36,26 +36,16 @@ static inline void led4if(int val)
 	__s5p_wirte(RGPIO_BASE + GPC0DAT, (regval | ((val & 0x1)<<4)));
 }
 
-#define DEF_DELAY 1000000
-#define DELAY ((DEF_DELAY / 1024 ) << 5)
-
-static inline void sleep(int n)
-{
-	if(n <= 0)
-		n = DEF_DELAY;
-	while(n--);
-}
-
 /* mode=1: 同步闪烁 */
-static void flash(int n, int delay, int mode)
+static void flash(int n, int ms, int mode)
 {
 	if(n <=0)
 		n = 8;
 	while(n--) {
-		sleep(delay);
+		sleep(ms);
 		led3if(1);
 		led4if(mode);
-		sleep(delay);
+		sleep(ms);
 		led3if(0);
 		led4if(!mode);
 	}
@@ -162,7 +152,7 @@ int uart0_int_func(void)
 	return 0;
 }
 
-void task_loop(void);
+void task_loop(int count);
 
 int main(void)
 {
@@ -170,6 +160,7 @@ int main(void)
 	unsigned char buf[2048];
 	rtc_t rtc;
 	int i;
+	int task_loop_run = 0;
 
 	uart_init();
 	__raw_write(VICxADDRESS(0), 0);
@@ -185,7 +176,6 @@ int main(void)
 	irq_init(RTCALMINT(), rtcalm_int_func);
 	led_init();
 	nf_init();
-	timer_init(TIMER0, 16110, 8550);
 	rtc_init();
 	i2c_init();
 	irq_init(TIMERINT(1), timer1_int_func);
@@ -254,12 +244,9 @@ int main(void)
 			printf("after i2c read byte = 0x%p\n", (int)buf[i]);
 		}
 
+		flash(2, 500, 1);
 
-
-//		flash(2, DELAY, 0);
-		flash(2, DEF_DELAY, 1);
-
-		task_loop();
+		task_loop(task_loop_run++);
 	}
 
 	return 0;
@@ -268,16 +255,22 @@ int main(void)
 /* task_loop */
 #define TASK_GETCHAR	1<<0
 #define TASK_BACKLIGHT	1<<1
+#define TASK_LCD        1<<2
+#define TASK_BUZZ		1<<3
+#define TASK_SLEEP		1<<4
 
 void task_list(int *task)
 {
 	*task = 0;
 //	*task |= TASK_GETCHAR;
-	*task |= TASK_BACKLIGHT;
+//	*task |= TASK_BACKLIGHT;
+//	*task |= TASK_LCD;
+//	*task |= TASK_BUZZ;
+//	*task |= TASK_SLEEP;
 }
 
 
-void task_loop(void)
+void task_loop(int count)
 {
 	int task[1];
 
@@ -298,6 +291,30 @@ void task_loop(void)
 			printf("backlight level is 0x%p\n", i);
 			backlight_set_level(i);
 			getchar();
+		}
+	}
+	/* test LCD */
+    if(*task & TASK_LCD) {
+        printf("test lcd------------------>\n");
+        lcd_init();
+    }
+	/* test buzz */
+	if(!count && (*task & TASK_BUZZ)) {
+        printf("test buzz------------------>\n");
+		struct timer timer;
+		timer_default_cfg(&timer);
+		timer.sn = TIMER1;
+		timer.auto_reload = TIMER_INTERVAL;
+		timer_init(&timer);
+		timer_toggle(timer.sn, 1);
+	}
+	/* test timer sleep */
+	if(*task & TASK_SLEEP) {
+		int i;
+		printf("test sleep-------------------->\n");
+		for(i=0; i<9; i++) {
+			printf("test sleep count %x-------------------->\n", i);
+			timer_spin_lock(TIMER4, 1000);
 		}
 	}
 }
