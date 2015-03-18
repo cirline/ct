@@ -20,7 +20,7 @@ void inline set2clear(addr_t addr, int mask, int index)
 	__raw_write(addr, (mask << index));
 }
 
-char *i2hs(int n, char *ds)
+char *i2hs(unsigned int n, char *ds)
 {
 	char *tb = "0123456789ABCDEF";
 	char ts[32];
@@ -60,7 +60,7 @@ int __s5p_printf(char *s, ...)
 					break;
 				case 'p':
 				case 'x':
-					printf(i2hs(va_arg(vl, int), st));
+					printf(i2hs(va_arg(vl, unsigned int), st));
 					break;
 				case 's':
 					printf(va_arg(vl, char *));

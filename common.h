@@ -31,12 +31,15 @@ enum mask_defined {
 	MASK_BITS_3 = 0x7,
 	MASK_BITS_4 = 0xf,
 	MASK_BITS_8 = 0xff,
+    MASK_BITS_11 = 0x7FF,
 	MASK_BITS_16 = 0xffff,
+	MASK_BITS_24 = 0xffffff,
 };
 
 extern void inline region_write(addr_t addr, int mask, int index, int val);
 extern int inline region_read(addr_t addr, int mask, int index);
 extern void inline set2clear(addr_t addr, int mask, int index);
-extern char *i2hs(int n, char *ds);
+extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
+extern int inline __s5p_sleep(int ms);
 #endif
