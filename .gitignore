@@ -25,6 +25,7 @@
 
 # i define
 tags
+*.dis
 
 # kernel
 *.mod.c
