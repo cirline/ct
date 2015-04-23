@@ -4,7 +4,7 @@ MODULE_LICENSE("GPL");
 
 static int __init mdl_init(void)
 {
-	printk(KERN_INFO"hello pc module\n");
+	printk(KERN_INFO"hello ---------add 0934------------------pc module\n");
 	return 0;
 }
 
