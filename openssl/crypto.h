@@ -120,7 +120,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <openssl/e_os2.h>
+//#include <openssl/e_os2.h>
 
 #ifndef OPENSSL_NO_FP_API
 #include <stdio.h>
@@ -131,10 +131,10 @@
 #include <openssl/fips.h>
 #endif
 
-#include <openssl/stack.h>
-#include <openssl/safestack.h>
-#include <openssl/opensslv.h>
-#include <openssl/ossl_typ.h>
+//#include <openssl/stack.h>
+//#include <openssl/safestack.h>
+//#include <openssl/opensslv.h>
+//#include <openssl/ossl_typ.h>
 
 #ifdef CHARSET_EBCDIC
 #include <openssl/ebcdic.h>
@@ -142,7 +142,7 @@
 
 /* Resolve problems on some operating systems with symbol names that clash
    one way or another */
-#include <openssl/symhacks.h>
+//#include <openssl/symhacks.h>
 
 /* For FIPS mode rename all OpenSSL symbols to avoid clashes with a
  * non-FIPS OpenSSL.
@@ -297,7 +297,7 @@ typedef struct
 
 /* predec of the BIO type */
 typedef struct bio_st BIO_dummy;
-
+#if 0
 struct crypto_ex_data_st
 	{
 	STACK_OF(void) *sk;
@@ -318,7 +318,7 @@ typedef struct crypto_ex_data_func_st
 	} CRYPTO_EX_DATA_FUNCS;
 
 DECLARE_STACK_OF(CRYPTO_EX_DATA_FUNCS)
-
+#endif
 /* Per class, we have a STACK of CRYPTO_EX_DATA_FUNCS for each CRYPTO_EX_DATA
  * entry.
  */
@@ -411,6 +411,7 @@ int CRYPTO_set_ex_data_implementation(const CRYPTO_EX_DATA_IMPL *i);
 /* Get a new "ex_data" class, and return the corresponding "class_index" */
 int CRYPTO_ex_data_new_class(void);
 /* Within a given class, get/register a new index */
+#if 0
 int CRYPTO_get_ex_new_index(int class_index, long argl, void *argp,
 		CRYPTO_EX_new *new_func, CRYPTO_EX_dup *dup_func,
 		CRYPTO_EX_free *free_func);
@@ -424,6 +425,7 @@ void CRYPTO_free_ex_data(int class_index, void *obj, CRYPTO_EX_DATA *ad);
  * (relative to the class type involved) */
 int CRYPTO_set_ex_data(CRYPTO_EX_DATA *ad, int idx, void *val);
 void *CRYPTO_get_ex_data(const CRYPTO_EX_DATA *ad,int idx);
+#endif
 /* This function cleans up all "ex_data" state. It mustn't be called under
  * potential race-conditions. */
 void CRYPTO_cleanup_all_ex_data(void);
