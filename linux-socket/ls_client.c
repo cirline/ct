@@ -9,7 +9,7 @@
  * 3. read & write -- read(), write()
  */
 
-#define NET_IPADDR  "192.168.0.187"
+#define NET_IPADDR  "192.168.7.100"
 #define NET_PORT    8099
 
 int main(void)
