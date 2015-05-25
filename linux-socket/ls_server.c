@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <inttypes.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
     }
     client_fd = accept(server_fd, (struct sockaddr *)&saddr, sizeof(saddr));
     if(client_fd < 0) {
-        printf("accept error: client_fd = %d\n", client_fd);
+        printf("accept error: client_fd = %d: %s\n", client_fd, strerror(errno));
         return 0;
     }
     ret = write(client_fd, "hello client!", 1024);
