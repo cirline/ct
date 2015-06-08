@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mntdir=gm450
+username=chenqiwei
+hostname=codesvr
+remotepath=/home/user/chenqiwei/work1/z15_sdk_v2.0/4.5inch
+
+if [ ! -d $mntdir ]; then
+    mkdir $mntdir
+fi
+
+#sshfs chenqiwei@codesvr:/home/user/chenqiwei/work1/z15_sdk_v2.0/4.5inch $mntdir
+sshfs $username@$hostname:$remotepath $mntdir
+
+cd $mntdir
+
+

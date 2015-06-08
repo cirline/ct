@@ -1,0 +1,6 @@
+#!/bin/bash
+
+s=`find . -name "*" -type d`
+
+echo $s
+
