@@ -1,0 +1,13 @@
+#!/bin/bash
+
+bin_path=$0
+
+#echo "bin path is: $bin_path"
+
+dir_path=`echo $bin_path | sed "s/\/[^\/]*$//g"`
+
+echo "dir path ($dir_path) included: "
+
+ls --color=auto $dir_path
+
+
