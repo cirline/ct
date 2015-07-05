@@ -34,3 +34,7 @@ Module.symvers
 modules.order
 .tmp_versions
 *.tmp
+
+
+# ignore folder
+code_trash

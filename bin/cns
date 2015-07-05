@@ -1,0 +1,7 @@
+#!/bin/bash
+
+username=$1
+hostname=codesvr
+
+ssh $username@$hostname 
+

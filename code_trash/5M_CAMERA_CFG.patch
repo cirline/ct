@@ -1,0 +1,33 @@
+diff --git a/configs/camera.cfg b/configs/camera.cfg
+index 1d169fd..870da3d 100644
+--- a/configs/camera.cfg
++++ b/configs/camera.cfg
+@@ -55,14 +55,14 @@ camera_device = /dev/video0
+ device_id = 0
+ 
+ used_preview_size = 1
+-key_support_preview_size = 640x480
+-key_default_preview_size = 640x480
++key_support_preview_size = 1280x960, 640x480
++key_default_preview_size = 1280x960
+ 
+ used_picture_size = 1
+-key_support_picture_size = 1600x1200,800x600
+-key_default_picture_size = 1600x1200
++key_support_picture_size = 2592x1936,1600x1200,640x480
++key_default_picture_size = 2592x1936
+ 
+-used_flash_mode = 1
++used_flash_mode = 0
+ key_support_flash_mode = on,off,auto
+ key_default_flash_mode = on
+ 
+@@ -74,7 +74,7 @@ used_frame_rate = 1
+ key_support_frame_rate = 25
+ key_default_frame_rate = 25
+ 
+-used_focus_mode = 0
++used_focus_mode = 1
+ key_support_focus_mode = auto,infinity,macro,fixed,continuous-video,continuous-picture
+ key_default_focus_mode = auto
+ 

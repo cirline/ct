@@ -1,0 +1,66 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]; then
+    echo "error, need 2 arguments"
+fi
+
+relative_path=$2
+absolute_path=$1$2
+
+echo "push file $absolute_path to $relative_path"
+
+if [ ! -f $absolute_path ]; then
+    echo "error, file not exist ($absolute_path)"
+    exit
+fi
+
+adb remount
+echo "pushing ..."
+adb push $absolute_path $relative_path
+echo "chmoding ..."
+adb shell chmod 644 $relative_path
+echo "rebooting ..."
+adb reboot
+
+
+exit
+
+echo "i already exit"
+
+dest=/vendor/modules
+bin_dest=/system/bin
+
+if [ $# -gt 0 ]; then
+	echo "push file: $1"
+
+	if [ -f $1 ]; then
+		echo "pushing \"$1\" to $dest"
+		adb remount
+		adb push $1 $dest
+		adb shell chmod 644 $dest/$1
+		adb shell sync
+		if [ $2 = "r" ]; then
+			echo "android rebooting ..."
+			adb reboot
+		fi
+	elif [ $1 = "b" ]; then
+		if [ -f $2 ]; then
+			echo "pushing \"$2\" to $bin_dest"
+			adb remount
+			adb push $2 $bin_dest
+			adb shell chmod 755 $bin_dest/$2
+			adb shell sync
+			if [ $3 = "r" ]; then
+				echo "android rebooting ..."
+				adb reboot
+			fi
+		else
+			echo "\"$2\" is not a file"
+		fi
+	else
+		echo "\"$1\" is not a file"
+	fi
+else
+	echo "usage: apush [b] <filename> [r]"
+fi
+
