@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [ $# -ne 1 ]; then
-    echo "error, need 1 arguments"
+    echo "adb push a module to /system/vendor/modules/, need 1 arguments"
+    exit 1;
 fi
 
 relative_path=$1

@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [ $# -ne 2 ]; then
-    echo "error, need 2 arguments"
+    echo "adb push a file, 2nd arguments is dest path"
+    exit 1
 fi
 
 relative_path=$2
