@@ -1,3 +1,5 @@
+srfi := mdl
+
 ifeq ($(KERNELRELEASE),)
 
 KERN_PATH := /lib/modules/$(shell uname -r)/build
@@ -10,13 +12,13 @@ modules_install:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules_install
 
 clean:
-	rm -rf *.o *.ko *.mod.o *.mod.c
+	rm -rf *.o *.ko *.mod.o *.mod.c *.order *.symvers
 
 .PHONY: modules modules_install clean
 
 else
 
-obj-m := mdl.o
+obj-m := $(srfi).o
 
 endif
 

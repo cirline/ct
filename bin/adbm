@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+    echo "adb push a module to /system/vendor/modules/, need 1 arguments"
+    exit 1;
+fi
+
+relative_path=$1
+absolute_path=/system/vendor/modules/$1
+
+echo "push file $relative_path to $absolute_path"
+
+if [ ! -f $relative_path ]; then
+    echo "error, file not exist ($relative_path)"
+    exit
+fi
+
+adb remount
+echo "pushing ..."
+adb push $relative_path $absolute_path
+echo "chmoding ..."
+adb shell chmod 644 $absolute_path
+#echo "rebooting ..."
+#adb reboot
+
+
+exit
+
