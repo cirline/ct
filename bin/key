@@ -1,0 +1,56 @@
+#!/bin/bash
+
+cmd=`echo $0 | awk -F '/' '{print $NF}'`
+option=h
+
+case $cmd in
+    "key" )
+        if [ $# -gt 0 ]; then
+            option=$1
+        else
+            option=h
+        fi
+        ;;
+    "kh" )
+        option=h;;
+    "kb" )
+        option=b;;
+    "kp" )
+        option=p;;
+    "ku" )
+        option=+;;
+    "kd" )
+        option=-;;
+    * )
+        echo "unknown key, exit"
+        exit -1
+        ;;
+    esac
+
+case $option in
+    "P" | "p" )
+        key=POWER
+        ;;
+    "H" | "h" )
+        key=HOME
+        ;;
+    "B" | "b" )
+        key=BACK
+        ;;
+    "+" )
+        key=VOLUME_UP
+        ;;
+    "-" )
+        key=VOLUME_DOWN
+        ;;
+    * )
+        echo "unknown key, exit"
+        exit -1
+        ;;
+esac
+
+echo "send key $key"
+
+adb shell input keyevent $key
+
+
