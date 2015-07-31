@@ -3,7 +3,7 @@
 mntdir=ka751
 username=chenqiwei
 hostname=codesvr
-remotepath=/home/user/chenqiwei/work1/a33-ka751
+remotepath=/home/user/chenqiwei/1work/a33-ka751
 
 if [ ! -d $mntdir ]; then
     mkdir $mntdir
