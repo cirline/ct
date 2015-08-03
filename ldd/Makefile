@@ -1,4 +1,4 @@
-sf := sem
+sf := spinlock
 
 ifeq ($(KERNELRELEASE),)
 
@@ -12,7 +12,7 @@ modules_install:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules_install
 
 clean:
-	rm -rf *.o *.ko *.mod.o *.mod.c *.order *.symvers
+	rm -rf *.o *.ko *.mod.o *.mod.c *.order *.symvers *.orig
 
 install:
 	cp $(sf).ko ~/
