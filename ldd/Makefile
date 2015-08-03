@@ -1,4 +1,4 @@
-srcfile := proc_file
+sf := sem
 
 ifeq ($(KERNELRELEASE),)
 
@@ -14,11 +14,14 @@ modules_install:
 clean:
 	rm -rf *.o *.ko *.mod.o *.mod.c *.order *.symvers
 
+install:
+	cp $(sf).ko ~/
+
 .PHONY: modules modules_install clean
 
 else
 
-obj-m := $(srcfile).o
+obj-m := $(sf).o
 
 endif
 
