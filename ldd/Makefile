@@ -1,4 +1,4 @@
-sf := atomic
+sf := bitops
 
 ifeq ($(KERNELRELEASE),)
 
