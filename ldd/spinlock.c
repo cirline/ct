@@ -1,3 +1,8 @@
+/**
+ * NOTE !!!
+ * spin_lock & spin_unlock must be used by pair
+ */
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/workqueue.h>
@@ -43,8 +48,6 @@ static int __init module_init_func(void)
     spin_lock_init(&lock1);
     spin_lock_init(&lock2);
     printk("init lock end.\n");
-    spin_lock(&lock2);
-    printk("locked lock2 .\n");
 
     module_works_queue = create_singlethread_workqueue("module_works_queue");
     if(!module_works_queue) {
@@ -60,6 +63,12 @@ static int __init module_init_func(void)
 
     INIT_WORK(&module_work1, module_work1_func);
     INIT_WORK(&module_work2, module_work2_func);
+
+    printk("__init try lock.\n");
+    spin_lock(&lock1);
+    printk("__init locked!\n");
+    spin_unlock(&lock1);
+    printk("__init release lock.\n");
 
 	printk("start work1.\n");
     queue_work(module_works_queue, &module_work1);

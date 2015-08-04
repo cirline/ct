@@ -7,6 +7,7 @@ LOCAL_PATH := $(shell pwd)
 
 modules:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules
+	cp $(sf).ko ~/
 
 modules_install:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules_install
