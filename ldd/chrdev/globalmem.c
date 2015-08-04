@@ -4,9 +4,13 @@
 #include <linux/cdev.h>
 #include <linux/slab.h>
 #include <linux/poll.h>
+#include <linux/ioctl.h>
 
 #define MEMSIZE     16
 #define DEVNAME     "globalmem"
+
+#define GMEM_IOC_MAGIC  'k'
+#define GMEM_IOC_GET_MEMSIZE    _IOWR(GMEM_IOC_MAGIC, 0, int)
 
 struct globalmem {
     struct cdev dev;
@@ -45,9 +49,39 @@ static loff_t gm_llseek(struct file * filp, loff_t offset, int cur)
     return filp->f_pos;
 }
 
-static long gm_ioctl(struct file *filp, unsigned int code, unsigned long val)
+static long gm_ioctl(struct file *filp, unsigned int cmd, unsigned long val)
 {
-    return 0;
+    struct globalmem *dev = flip->private_data;
+    int ret;
+    int control_val;
+
+    if(_IOC_TYPE(cmd) != GMEM_IOC_MAGIC) {
+        printk("command error!\n");
+        return -ENOTTY;
+    }
+    if(_IOC_DIR(cmd) & _IOC_READ)
+        ret = ! access_ok(VERIFY_WRITE, (void __user *)val, _IOC_SIZE(cmd));
+    else if(_IOC_DIR(cmd) & _IOC_WRITE)
+        ret = ! access_ok(VERIFY_READ, (void __user *)val, _IOC_SIZE(cmd));
+    if(ret) {
+        printk("access verify failed!\n");
+        return -EFAULT;
+    }
+
+    switch(cmd) {
+        case GMEM_IOC_GET_MEMSIZE:
+            if(!capable(CAP_SYS_ADMIN)) {
+                printk("no permitted!\n");
+                return -EPERM;
+            }
+            __get_user(control_val, (int __user *)val);
+            printk("control val = %d\n", control_val);
+            control_val += MEMSIZE;
+            break;
+        default:
+            printk("unknown command!\n");
+            return -ENOTTY;
+    }
 }
 
 static ssize_t gm_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos)

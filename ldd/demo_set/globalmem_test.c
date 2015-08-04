@@ -1,3 +1,8 @@
+/**
+ * list the device number: cat /proc/devices
+ * create device note: mknod /dev/deviceN c major minor
+ */
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -11,7 +16,7 @@ int main(void)
     *buf2 = 1;
 
     while(1) {
-        int fd = open("/dev/globalmem", O_RDWR);
+        int fd = open("/dev/gmem0", O_RDWR);
         if(fd < 0) {
             printf("open failure.\n");
             return -1;
@@ -36,8 +41,8 @@ int main(void)
             printf("write err.\n");
             return -1;
         }
-        getchar();
-        buf2[0] = j;
+        buf2[0] = getchar();
+        while(getchar() != '\n');
     }
 
     return 0;

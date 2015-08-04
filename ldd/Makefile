@@ -20,8 +20,8 @@ install:
 
 else
 
-obj-m := bitops/
-obj-m := chrdev/
+# obj-m += bitops/
+obj-m += chrdev/
 
 endif
 
