@@ -51,8 +51,8 @@ static loff_t gm_llseek(struct file * filp, loff_t offset, int cur)
 
 static long gm_ioctl(struct file *filp, unsigned int cmd, unsigned long val)
 {
-    struct globalmem *dev = flip->private_data;
-    int ret;
+    //struct globalmem *dev = filp->private_data;
+    int ret = 0;
     int control_val;
 
     if(_IOC_TYPE(cmd) != GMEM_IOC_MAGIC) {
@@ -74,14 +74,16 @@ static long gm_ioctl(struct file *filp, unsigned int cmd, unsigned long val)
                 printk("no permitted!\n");
                 return -EPERM;
             }
-            __get_user(control_val, (int __user *)val);
+            ret = __get_user(control_val, (int __user *)val);
             printk("control val = %d\n", control_val);
             control_val += MEMSIZE;
+            ret = __put_user(control_val, (int __user *)val);
             break;
         default:
             printk("unknown command!\n");
             return -ENOTTY;
     }
+    return ret;
 }
 
 static ssize_t gm_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos)

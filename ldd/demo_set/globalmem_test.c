@@ -6,14 +6,35 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <linux/ioctl.h>
+#include <errno.h>
+#include <string.h>
+
+#define GMEM_IOC_MAGIC  'k'
+#define GMEM_IOC_GET_MEMSIZE    _IOWR(GMEM_IOC_MAGIC, 0, int)
 
 int main(void)
 {
     char buf[16], buf2[16];
     int ret;
     int i, j = 0;
+    int fd;
+    int ctl_val;
 
     *buf2 = 1;
+
+    fd = open("/dev/gmem0", O_RDWR);
+    if(fd < 0) {
+        printf("open gmem0 failed !!! \n");
+        return -1;
+    }
+
+    ctl_val = 22;
+    ret = ioctl(fd, GMEM_IOC_GET_MEMSIZE, &ctl_val);
+    if(ret < 0) {
+        printf("ioctl failed(%s)\n", strerror(errno));
+    }
+    printf("ioctl: ret =%d, ctl_val = %d\n", ret, ctl_val);
 
     while(1) {
         int fd = open("/dev/gmem0", O_RDWR);
