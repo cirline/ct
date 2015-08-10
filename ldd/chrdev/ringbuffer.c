@@ -9,7 +9,7 @@
 #include <linux/wait.h>
 #include <linux/sched.h>
 
-#define MEMSIZE     128
+#define MEMSIZE     16
 #define DEVNAME     "ringbuffer"
 
 #define RB_IOC_MAGIC  'k'
@@ -36,9 +36,17 @@ static void rb_init(rb_t *rbptr)
     init_waitqueue_head(&rbptr->wq);
 }
 
-static int idle_buffer(rb_t *rbptr)
+static inline size_t buffer_used(rb_t * rbptr)
 {
-    return rbptr->size - (rbptr->write_pos - rbptr->read_pos);
+    if(rbptr->write_pos > rbptr->read_pos)
+        return rbptr->write_pos - rbptr->read_pos - 1;
+    else
+        return rbptr->write_pos - rbptr->read_pos - 1 + rbptr->size;
+}
+
+static inline size_t idle_buffer(rb_t *rbptr)
+{
+    return rbptr->size - buffer_used(rbptr) - 1;
 }
 
 static inline int next_read_pos(rb_t *rbptr)
@@ -104,23 +112,51 @@ static long rb_ioctl(struct file *filp, unsigned int cmd, unsigned long val)
     return ret;
 }
 
+//#define DEBUG_READ
+#ifdef DEBUG_READ
+#define debug_read(fmt, args...)   printk("ringbuffer: "fmt, ##args)
+#else
+#define debug_read(fmt, args...)
+#endif
 static ssize_t rb_read(struct file *filp, char __user *buf, size_t size, loff_t *ppos)
 {
     struct ringbuffer *dev = filp->private_data;
-    loff_t tmp = MEMSIZE - *ppos;
-    printk("read- f_pos = %d, offset = %d\n", (int)filp->f_pos, (int)*ppos);
-    if(tmp <= 0)
-        return -1;
-    if(size > tmp)
-        size = tmp;
-    if(copy_to_user(buf, dev->mem + *ppos, size))
-        return -1;
-    *ppos += size;
-    printk("read+ f_pos = %d, offset = %d\n", (int)filp->f_pos, (int)*ppos);
-    return size;
+    char * buffer;
+    size_t buffer_pos;
+    size_t buffer_size;
+    size_t read_size;
+
+    debug_read("read data size = %lu\n", size);
+    if(size <= 0)
+        return - EINVAL;
+    buffer = kmalloc(size, GFP_KERNEL);
+    if(!buffer)
+        return - ENOMEM;
+
+    buffer_pos = 0;
+    while(buffer_pos < size) {
+        if(down_interruptible(&dev->sem))
+            return - ERESTARTSYS;
+        if(is_empty(dev)) {
+            up(&dev->sem);
+            break;
+        }
+        buffer_size = size - buffer_pos;
+        read_size = (buffer_size < buffer_used(dev)) ? buffer_size : buffer_used(dev);
+        while(read_size-- > 0) {
+            dev->read_pos = next_read_pos(dev);
+            buffer[buffer_pos++] = dev->mem[dev->read_pos];
+        }
+        up(&dev->sem);
+        wake_up_interruptible(&dev->wq);
+    }
+    if(copy_to_user(buf, buffer, buffer_pos))
+        return - ERESTARTSYS;
+
+    return buffer_pos;
 }
 
-#define DEBUG_WRITE
+//#define DEBUG_WRITE
 #ifdef DEBUG_WRITE
 #define debug_write(fmt, args...)   printk("ringbuffer: "fmt, ##args)
 #else
@@ -148,10 +184,12 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
 
     buffer_pos = 0;
     while(buffer_pos < size) {
+        debug_write("buffer_pos = %d, size = %lu\n", buffer_pos, size);
         if(down_interruptible(&dev->sem))
             return -ERESTARTSYS; /* acquired semaphore failed */
         if(is_filled(dev)) {
             up(&dev->sem);   /* buffer is filled, free sem and hang */
+            //wake_up_interruptible(&dev->wq);
             if(wait_event_interruptible(dev->wq, !is_filled(dev)))
                 return -ERESTARTSYS;
             if(down_interruptible(&dev->sem))
@@ -165,6 +203,7 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
             dev->write_pos = next_write_pos(dev);               /* move the write_pos */
         }
         up(&dev->sem); /* a loop is finish */
+        wake_up_interruptible(&dev->wq);
     }
     return size;
 }
