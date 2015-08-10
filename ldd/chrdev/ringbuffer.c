@@ -5,6 +5,9 @@
 #include <linux/slab.h>
 #include <linux/poll.h>
 #include <linux/ioctl.h>
+#include <linux/semaphore.h>
+#include <linux/wait.h>
+#include <linux/sched.h>
 
 #define MEMSIZE     128
 #define DEVNAME     "ringbuffer"
@@ -29,12 +32,13 @@ static void rb_init(rb_t *rbptr)
     rbptr->size = MEMSIZE;
     rbptr->read_pos = rbptr->size - 1;
     rbptr->write_pos = 0;
+    sema_init(&rbptr->sem, 1);
     init_waitqueue_head(&rbptr->wq);
 }
 
 static int idle_buffer(rb_t *rbptr)
 {
-    return rbptr-size - (rbptr->write_pos - rbptr->read_pos);
+    return rbptr->size - (rbptr->write_pos - rbptr->read_pos);
 }
 
 static inline int next_read_pos(rb_t *rbptr)
@@ -47,9 +51,9 @@ static inline int next_write_pos(rb_t *rbptr)
     return (rbptr->write_pos + 1) % rbptr->size;
 }
 
-static int rb_is_empty(rb_t *rbptr)
+static int is_empty(rb_t *rbptr)
 {
-    return (rbptr->read_pos + 1) % rbptr->size == rbptr->wirte_pos;
+    return (rbptr->read_pos + 1) % rbptr->size == rbptr->write_pos;
 }
 
 static inline int is_filled(rb_t *rbptr)
@@ -116,13 +120,21 @@ static ssize_t rb_read(struct file *filp, char __user *buf, size_t size, loff_t 
     return size;
 }
 
+#define DEBUG_WRITE
+#ifdef DEBUG_WRITE
+#define debug_write(fmt, args...)   printk("ringbuffer: "fmt, ##args)
+#else
+#define debug_write(fmt, args...)
+#endif
 static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, loff_t *ppos)
 {
     struct ringbuffer *dev = filp->private_data;
     char *buffer;
     int buffer_pos;
-    int write_size, buffer_size;
+    int write_size;
+    int buffer_size;
 
+    debug_write("write data size: %lu\n", size);
     if(size <= 0)
         return -EINVAL;
 
@@ -130,26 +142,29 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
     if(!buffer)
         return -ENOMEM;
 
-    size = copy_from_user(buffer, buf, size);
-    printk("size of data from user (%d)\n", size);
+    if(copy_from_user(buffer, buf, size))
+        return - ERESTARTSYS;
+    debug_write("copy from use: %s\n", buffer);
 
     buffer_pos = 0;
     while(buffer_pos < size) {
-        if(down_interruptible(&dev.sem))
+        if(down_interruptible(&dev->sem))
             return -ERESTARTSYS; /* acquired semaphore failed */
         if(is_filled(dev)) {
-            up(&dev.sem);   /* buffer is filled */
-            if(wait_event_interruptible(dev.wq, !is_filled(dev)))
+            up(&dev->sem);   /* buffer is filled, free sem and hang */
+            if(wait_event_interruptible(dev->wq, !is_filled(dev)))
                 return -ERESTARTSYS;
-            if(down_interruptible(&dev.sem))
+            if(down_interruptible(&dev->sem))
                 return -ERESTARTSYS;
         }
-        buffer_size = size - buffer_pos;
-        write_size = (buffer_size < idle_buffer(dev)) ? buffer_size : idle_buffer(dev);
+        buffer_size = size - buffer_pos; /* buffer to be writen size */
+        write_size = (buffer_size < idle_buffer(dev)) ? buffer_size : idle_buffer(dev); /* size to be writen this loop */
         while(write_size-- > 0) {
-            dev->mem[next_write_pos(dev)] = buffer[buffer_pos++];
+            dev->mem[dev->write_pos] = buffer[buffer_pos++];    /* write data to current write_pos */
+            debug_write("mem[%d] = %c\n", dev->write_pos, dev->mem[dev->write_pos]);
+            dev->write_pos = next_write_pos(dev);               /* move the write_pos */
         }
-        up(&dev.sem);
+        up(&dev->sem); /* a loop is finish */
     }
     return size;
 }
@@ -173,7 +188,7 @@ static int __init ringbuffer_init(void)
         printk("kmalloc failure.\n");
         goto out;
     }
-    rb_init();
+    rb_init(rb);
     ret = alloc_chrdev_region(&devno, 0, 1, DEVNAME);
     if(ret < 0) {
         printk("alloc_chrdev_region failure.\n");
