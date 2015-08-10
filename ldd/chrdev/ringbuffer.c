@@ -125,6 +125,7 @@ static ssize_t rb_read(struct file *filp, char __user *buf, size_t size, loff_t 
     size_t buffer_pos;
     size_t buffer_size;
     size_t read_size;
+    int ret;
 
     debug_read("read data size = %lu\n", size);
     if(size <= 0)
@@ -135,8 +136,10 @@ static ssize_t rb_read(struct file *filp, char __user *buf, size_t size, loff_t 
 
     buffer_pos = 0;
     while(buffer_pos < size) {
-        if(down_interruptible(&dev->sem))
-            return - ERESTARTSYS;
+        if(down_interruptible(&dev->sem)) {
+            ret = - ERESTARTSYS;
+            goto out;
+        }
         if(is_empty(dev)) {
             up(&dev->sem);
             break;
@@ -151,9 +154,12 @@ static ssize_t rb_read(struct file *filp, char __user *buf, size_t size, loff_t 
         wake_up_interruptible(&dev->wq);
     }
     if(copy_to_user(buf, buffer, buffer_pos))
-        return - ERESTARTSYS;
-
-    return buffer_pos;
+        ret = - ERESTARTSYS;
+    else
+        ret = buffer_pos;
+out:
+    kfree(buffer);
+    return ret;
 }
 
 //#define DEBUG_WRITE
@@ -169,6 +175,7 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
     int buffer_pos;
     int write_size;
     int buffer_size;
+    int ret;
 
     debug_write("write data size: %lu\n", size);
     if(size <= 0)
@@ -178,22 +185,28 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
     if(!buffer)
         return -ENOMEM;
 
-    if(copy_from_user(buffer, buf, size))
-        return - ERESTARTSYS;
+    if(copy_from_user(buffer, buf, size)) {
+        ret = - ERESTARTSYS;
+        goto out;
+    }
     debug_write("copy from use: %s\n", buffer);
 
     buffer_pos = 0;
     while(buffer_pos < size) {
         debug_write("buffer_pos = %d, size = %lu\n", buffer_pos, size);
-        if(down_interruptible(&dev->sem))
-            return -ERESTARTSYS; /* acquired semaphore failed */
+        if(down_interruptible(&dev->sem)) {
+            ret = -ERESTARTSYS; /* acquired semaphore failed */
+            goto out;
+        }
         if(is_filled(dev)) {
             up(&dev->sem);   /* buffer is filled, free sem and hang */
             //wake_up_interruptible(&dev->wq);
-            if(wait_event_interruptible(dev->wq, !is_filled(dev)))
-                return -ERESTARTSYS;
+            if(wait_event_interruptible(dev->wq, !is_filled(dev))) {
+                ret = - ERESTARTSYS;
+                goto out;
+            }
             if(down_interruptible(&dev->sem))
-                return -ERESTARTSYS;
+                continue;
         }
         buffer_size = size - buffer_pos; /* buffer to be writen size */
         write_size = (buffer_size < idle_buffer(dev)) ? buffer_size : idle_buffer(dev); /* size to be writen this loop */
@@ -205,7 +218,10 @@ static ssize_t rb_write(struct file *filp, const char __user *buf, size_t size, 
         up(&dev->sem); /* a loop is finish */
         wake_up_interruptible(&dev->wq);
     }
-    return size;
+    ret = size;
+out:
+    kfree(buffer);
+    return ret;
 }
 
 struct file_operations rbfops = {
