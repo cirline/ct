@@ -23,6 +23,7 @@ else
 # obj-m += bitops/
 obj-m += chrdev/
 obj-m += timer/
+obj-m += tasklet/
 
 endif
 
