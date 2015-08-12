@@ -24,6 +24,7 @@ else
 obj-m += chrdev/
 obj-m += timer/
 obj-m += tasklet/
+obj-m += workqueue/
 
 endif
 
