@@ -14,7 +14,7 @@ static __exit void sm_exit(void)
 
 module_init(sm_init);
 module_exit(sm_exit);
-
+MODULE_LICENSE("GPL");
 
 
 
