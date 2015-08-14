@@ -26,6 +26,7 @@ obj-m += timer/
 obj-m += tasklet/
 obj-m += workqueue/
 obj-m += memory/
+obj-m += devmod/
 
 endif
 
