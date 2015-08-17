@@ -3,12 +3,15 @@
 #include <linux/device.h>
 #include <linux/stat.h>
 
+#define debug(format, args...) printk("%d: "format, __LINE__, ##args)
+
 int kernsm_match(struct device *dev, struct device_driver *drv)
 {
-    printk("run kernsm bus match ...\n");
-    printk("device name %s, driver name %s\n", dev->init_name, drv->name);
-    return 1;
-//    return ! strcmp(dev->init_name, drv->name);
+    printk("bus match .. device name %s, driver name %s\n", dev->kobj.name, drv->name);
+    if(dev->kobj.name && drv->name)
+        return ! strcmp(dev->init_name, drv->name);
+    else
+        return 0;
 }
 
 ssize_t kernsm_bus_show(struct bus_type *bus, char *buf)
@@ -49,7 +52,7 @@ struct device kernsm_bus = {
 
 int kernsm_driver_probe(struct device *dev)
 {
-    printk("kernsm name : %s, driver probe ... \n", dev->init_name);
+    printk("kernsm name : %s, driver probe ... \n", dev->kobj.name);
     return 0;
 }
 
@@ -93,12 +96,13 @@ struct _kernsm_device kernsm_device = {
     .version = "kernsm device v1",
     .name = "kernsm_driver",
     .device = {
-        .init_name = "kernsm_device_init_name",
         .bus = &kernsm_bus_type,
         .parent = &kernsm_bus,
         .release = kernsm_device_release,
     },
 };
+
+/**/
 
 static __init int sm_init(void)
 {
@@ -143,8 +147,7 @@ static __init int sm_init(void)
     }
 
     /* device */
-//    kernsm_device.device.init_name = kernsm_device.name;
-    printk("__init device name2: %s\n", kernsm_device.device.init_name);
+    kernsm_device.device.init_name = kernsm_device.name;
     ret = device_register(&kernsm_device.device);
     if(ret) {
         printk("register kernsm device failed !!! \n");
