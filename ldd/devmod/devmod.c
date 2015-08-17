@@ -2,6 +2,8 @@
 #include <linux/module.h>
 #include <linux/device.h>
 #include <linux/stat.h>
+//#include <linux/cdev.h>
+#include <linux/fs.h>
 
 #define debug(format, args...) printk("%d: "format, __LINE__, ##args)
 
@@ -9,7 +11,7 @@ int kernsm_match(struct device *dev, struct device_driver *drv)
 {
     printk("bus match .. device name %s, driver name %s\n", dev->kobj.name, drv->name);
     if(dev->kobj.name && drv->name)
-        return ! strcmp(dev->init_name, drv->name);
+        return ! strcmp(dev->kobj.name, drv->name);
     else
         return 0;
 }
@@ -50,10 +52,60 @@ struct device kernsm_bus = {
     .release = kernsm_bus_release,
 };
 
+
+/* class */
+#define DEVNAME     "kernsm_device_name"
+void class_device_release(struct device *dev) {
+    debug("class_device_release in .\n");
+}
+
+void kernsm_class_release(struct class *class) {
+    debug("kernsm_class_release in .\n");
+}
+
+struct class kernsm_class = {
+    .name = "kernsm_class",
+    .dev_release = class_device_release,
+    .class_release = kernsm_class_release,
+};
+
+dev_t devno;
+struct device *kdev;
 int kernsm_driver_probe(struct device *dev)
 {
+    int ret;
+
     printk("kernsm name : %s, driver probe ... \n", dev->kobj.name);
+
+    /* device id */
+    ret = alloc_chrdev_region(&devno, 0, 1, DEVNAME);
+    if(ret < 0) {
+        printk("alloc devno failed !!!\n");
+        goto alloc_devno_failed;
+    }
+    debug("devno: %u\n", devno);
+
+    /* class */
+    ret = class_register(&kernsm_class);
+    if(ret) {
+        printk("register class failed !!! \n");
+        goto register_class_failed;
+    }
+
+    kdev = device_create(&kernsm_class, NULL, devno, NULL, "kernsm_dev0");
+    if(!kdev) {
+        printk("device create failed !!!\n");
+        goto device_create_failed;
+    }
+
     return 0;
+
+device_create_failed:
+    class_unregister(&kernsm_class);
+register_class_failed:
+    unregister_chrdev_region(devno, 1);
+alloc_devno_failed:
+    return ret;
 }
 
 struct _kernsm_driver {
@@ -101,8 +153,6 @@ struct _kernsm_device kernsm_device = {
         .release = kernsm_device_release,
     },
 };
-
-/**/
 
 static __init int sm_init(void)
 {
@@ -154,6 +204,7 @@ static __init int sm_init(void)
         goto register_device_failed;
     }
 
+
 	return ret;
 
 register_device_failed:
@@ -172,6 +223,8 @@ create_attr_failed:
 static __exit void sm_exit(void)
 {
 	printk("bye, exit\n");
+    unregister_chrdev_region(devno, 1);
+    class_unregister(&kernsm_class);
     device_unregister(&kernsm_device.device);
     driver_remove_file(&kernsm_driver.driver, &kernsm_driver.drv_attr);
     driver_unregister(&kernsm_driver.driver);
