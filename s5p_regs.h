@@ -9,10 +9,16 @@ typedef unsigned long				__s5p_addr_t;
 /** common define **/
 #define OFFSET4B(x)     ((x)<<2)
 #define OFFSET8B(x)     ((x)<<3)
+#define GAP32B(x)        ((x)<<4)
 
 /**  GPIO  **/
 #define RGPIO_BASE		0xE0200000
-
+#define IOCON           0
+#define IODAT           4
+#define IOPUD           8
+#define IODRV           12
+#define IOCONPDN        16
+#define IOPUDPDN        20
 #define GPA0CON			0x00000000
 #define GPC0CON			0x00000060
 #define GPC0DAT			0x00000064
@@ -20,6 +26,11 @@ typedef unsigned long				__s5p_addr_t;
 #define GPD_BASE		(RGPIO_BASE + 0x0A0)
 #define GPDxCON(x)		(GPD_BASE + ((x)<<5))
 #define GPDxDAT(x)		(GPDxCON(x) + 0x4)
+
+#define GPF_BASE        (RGPIO_BASE + 0x120)
+#define GPFxCON(x)      (GPF_BASE + GAP32B(x))
+#define GPFxDAT(x)      (GPFxCON(x) + IODAT)
+#define GPFxPUD(x)      (GPFxCON(x) + IOPUD)
 
 #define GPH_BASE		(RGPIO_BASE + 0xC00)
 #define GPHxCON(x)		(GPH_BASE + ((x)<<5) + (0<<2))
@@ -137,9 +148,9 @@ typedef unsigned long				__s5p_addr_t;
 /* output timing and display size */
 #define VIDTCONx(x)     (VID_BASE + OFFSET4B(x) + 0x10)
 /* window feature setting */
-#define WINCONx(x)      (VID_BASE + (4<<(x)) + 0x20)
+#define WINCONx(x)      (VID_BASE + ((x)<<2) + 0x20)
 /* window shadow control */
-#define SHADOWCON       (VID_BASE + 0x34)
+#define SHODOWCON       (VID_BASE + 0x34)
 /** OSD sfr x1~3, xA~D
  * window position setting, OSD size setting
  */
@@ -174,17 +185,17 @@ struct vidw_add_b_ {
 
 struct vidw_add_b2 {
     char NA1[0x2000];
-    long VIDW00ADD0B2;
-    long VIDW01ADD0B2;
-    long VIDW02ADD0B2;
-    long VIDW03ADD0B2;
-    long VIDW04ADD0B2;
-    long NA2;
-    long VIDW00ADD1B2;
-    long VIDW01ADD1B2;
-    long VIDW02ADD1B2;
-    long VIDW03ADD1B2;
-    long VIDW04ADD1B2;
+    long long VIDW00ADD0B2;
+    long long VIDW01ADD0B2;
+    long long VIDW02ADD0B2;
+    long long VIDW03ADD0B2;
+    long long VIDW04ADD0B2;
+    long long NA2;
+    long long VIDW00ADD1B2;
+    long long VIDW01ADD1B2;
+    long long VIDW02ADD1B2;
+    long long VIDW03ADD1B2;
+    long long VIDW04ADD1B2;
 };
 
 typedef struct vidw_add_b_ vidw_add_b0_t;

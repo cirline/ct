@@ -163,6 +163,7 @@ int main(void)
 	int task_loop_run = 0;
 
 	uart_init();
+#if 0
 	__raw_write(VICxADDRESS(0), 0);
 	__raw_write(VICxADDRESS(1), 0);
 	irq_init(EINT(0), key0_func);
@@ -215,10 +216,11 @@ int main(void)
 	for(val=0; val<32; val++) {
 		printf("[%p]\t= %p\n", val, buf[val]);
 	}
-	
-	val = 0;
 
+	val = 0;
+#endif
 	while(1) {
+#if 0
 //		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
 //		*buf = getchar();
@@ -243,10 +245,12 @@ int main(void)
 		for(i = 0; i < 8; i++) {
 			printf("after i2c read byte = 0x%p\n", (int)buf[i]);
 		}
-
 		flash(2, 500, 1);
-
 		task_loop(task_loop_run++);
+#endif
+        i = 0xffff;
+        while(i--);
+        printf("loop count = 0x%x\n", task_loop_run++);
 	}
 
 	return 0;
@@ -258,17 +262,7 @@ int main(void)
 #define TASK_LCD        1<<2
 #define TASK_BUZZ		1<<3
 #define TASK_SLEEP		1<<4
-
-void task_list(int *task)
-{
-	*task = 0;
-//	*task |= TASK_GETCHAR;
-//	*task |= TASK_BACKLIGHT;
-//	*task |= TASK_LCD;
-//	*task |= TASK_BUZZ;
-//	*task |= TASK_SLEEP;
-}
-
+void task_list(int *task);
 
 void task_loop(int count)
 {
@@ -295,8 +289,15 @@ void task_loop(int count)
 	}
 	/* test LCD */
     if(*task & TASK_LCD) {
+        int i;
         printf("test lcd------------------>\n");
         lcd_init();
+        vid_toggle(1);
+        for(i=0; i<800; i++) {
+            printf("<><><><><><><><><><><><>\n");
+            sleep(1000);
+            printf("test lcd----- fb[i] = %x------------->\n", fb[i]);
+        }
     }
 	/* test buzz */
 	if(!count && (*task & TASK_BUZZ)) {
@@ -318,6 +319,17 @@ void task_loop(int count)
 		}
 	}
 }
+
+void task_list(int *task)
+{
+	*task = 0;
+//	*task |= TASK_GETCHAR;
+//	*task |= TASK_BACKLIGHT;
+	*task |= TASK_LCD;
+//	*task |= TASK_BUZZ;
+//	*task |= TASK_SLEEP;
+}
+
 /* task_loop end */
 
 
