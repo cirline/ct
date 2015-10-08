@@ -8,12 +8,12 @@ else
 link_base	:= map.lds
 endif
 
-elf_file	:= units.elf
-bin_file	:= units.bin
-dis_file	:= units.asm
+elf_file	:= main.elf
+bin_file	:= main.bin
+dis_file	:= main.asm
 
 objs	:= start.o
-objs	+= units.o
+objs	+= main.o
 objs	+= uart.o
 objs	+= common.o
 objs	+= irq.o
@@ -33,7 +33,7 @@ $(bin_file): $(objs)
 test: test.o
 
 clean:
-	rm -rf *.o *.elf *.bin *.asm *.out *.i test
+	rm -rf *.o *.elf *.bin *.asm *.out *.i test *.dis
 
 install:
 	cp $(bin_file) $(tftp_root)
