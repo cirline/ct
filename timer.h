@@ -29,9 +29,12 @@ enum { TIMER_INVERT_OFF = 0, TIMER_INVERT_ON };
 enum { TIMER_ONESHOT = 0, TIMER_INTERVAL };
 
 struct timer {
+    /* timer serial number */
     enum timer_sn sn;
+    /* down-counter count buffer, timer will intrrupt when zero */
     int count_buffer;
-    int high_ratio;
+    /* compare register, TOUT will invert when cntb == cmpb */
+    int cmp_buffer;     // high_ratio;
     /* prescaler: 0 ~ 0xFF */
     int prescaler;
     enum timer_divider divider;
@@ -43,7 +46,7 @@ struct timer {
 
 extern void inline timer_update(enum timer_sn t_sn);
 extern void timer_toggle(enum timer_sn t_sn, int x);
-extern void timer_set_period(enum timer_sn t_sn, int cnt, int high_ratio);
+extern void timer_set_period(enum timer_sn t_sn, int cnt, int cmp);
 extern void timer_default_cfg(struct timer *pt);
 extern int timer_init(struct timer *pt);
 extern void inline timer_irq_toggle(enum timer_sn t_sn, int enable);
