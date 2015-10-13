@@ -14,7 +14,7 @@ int backlight_init(enum backlight_level bl_lev)
 	timer_default_cfg(&timer);
 	timer.sn = TIMER0;
 	timer.count_buffer = BL_LEV_MAX;
-	timer.high_ratio = bl_lev;
+	timer.cmp_buffer = bl_lev;
     timer.auto_reload = TIMER_INTERVAL;
 	timer_init(&timer);
 	timer_toggle(timer.sn, 1);
