@@ -1,8 +1,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#define TIMER_DEF_CNTB	16110
-#define TIMER_DEF_CMPB	8055
+#define TIMER_DEF_CNTB	16112
 
 /* timer serial number */
 enum timer_sn { TIMER0 = 0, TIMER1, TIMER2, TIMER3, TIMER4, TIMER_NONE};
