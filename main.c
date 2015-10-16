@@ -10,6 +10,7 @@
 #include "i2c.h"
 #include "lcd.h"
 #include "keyboard.h"
+#include "task.h"
 
 #define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
 #define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
@@ -152,8 +153,6 @@ int uart0_int_func(void)
 	return 0;
 }
 
-void task_loop(int count);
-
 int main(void)
 {
 	int val=0;
@@ -161,9 +160,10 @@ int main(void)
 	rtc_t rtc;
 	int i;
 	int task_loop_run = 0;
+    unsigned long taskset;
 
-	uart_init();
 #if 0
+	uart_init();
 	__raw_write(VICxADDRESS(0), 0);
 	__raw_write(VICxADDRESS(1), 0);
 	irq_init(EINT(0), key0_func);
@@ -219,7 +219,9 @@ int main(void)
 
 	val = 0;
 #endif
+    task_init(&taskset);
 	while(1) {
+        task_loop(&taskset);
 #if 0
 //		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
@@ -246,11 +248,10 @@ int main(void)
 			printf("after i2c read byte = 0x%p\n", (int)buf[i]);
 		}
 		flash(2, 500, 1);
-		task_loop(task_loop_run++);
-#endif
         i = 0xffff;
         while(i--);
         printf("loop count = 0x%x\n", task_loop_run++);
+#endif
 	}
 
 	return 0;
@@ -262,13 +263,32 @@ int main(void)
 #define TASK_LCD        1<<2
 #define TASK_BUZZ		1<<3
 #define TASK_SLEEP		1<<4
-void task_list(int *task);
 
-void task_loop(int count)
+void inline set_task(unsigned long *taskset, int task)
 {
-	int task[1];
+    *taskset |= 1<<task;
+}
 
-	task_list(task);
+void inline clr_task(unsigned long *taskset, int task)
+{
+    *taskset &= ~(1<<task);
+}
+
+int inline test_task(unsigned long taskset, int task)
+{
+    return taskset & (1<<task);
+}
+
+void task_init(unsigned long *taskset)
+{
+    *taskset = 0;
+    set_task(taskset, TASK_TIMER);
+}
+
+void task_loop(unsigned long *taskset)
+{
+    int task[1] = {0};
+
 	/* test getchar */
 	if(*task & TASK_GETCHAR) {
 		char c;
@@ -300,7 +320,7 @@ void task_loop(int count)
         }
     }
 	/* test buzz */
-	if(!count && (*task & TASK_BUZZ)) {
+	if(*task & TASK_BUZZ) {
         printf("test buzz------------------>\n");
 		struct timer timer;
 		timer_default_cfg(&timer);
@@ -318,16 +338,17 @@ void task_loop(int count)
 			timer_spin_lock(TIMER4, 1000);
 		}
 	}
-}
 
-void task_list(int *task)
-{
-	*task = 0;
-//	*task |= TASK_GETCHAR;
-//	*task |= TASK_BACKLIGHT;
-	*task |= TASK_LCD;
-//	*task |= TASK_BUZZ;
-//	*task |= TASK_SLEEP;
+    /* test the timer by 1Hz buzz */
+    if(test_task(*taskset, TASK_TIMER)) {
+        struct timer timer;
+        timer_default_cfg(&timer);
+        timer.sn = TIMER1;
+        timer.auto_reload = TIMER_INTERVAL;
+        timer_init(&timer);
+        timer_toggle(timer.sn, 1);
+        clr_task(taskset, TASK_TIMER);
+    }
 }
 
 /* task_loop end */
