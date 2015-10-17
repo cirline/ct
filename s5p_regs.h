@@ -9,7 +9,7 @@ typedef unsigned long				__s5p_addr_t;
 /** common define **/
 #define OFFSET4B(x)     ((x)<<2)
 #define OFFSET8B(x)     ((x)<<3)
-#define GAP32B(x)        ((x)<<4)
+#define GAP32B(x)        ((x)<<5)
 
 /**  GPIO  **/
 #define RGPIO_BASE		0xE0200000
@@ -22,6 +22,10 @@ typedef unsigned long				__s5p_addr_t;
 #define GPA0CON			0x00000000
 #define GPC0CON			0x00000060
 #define GPC0DAT			0x00000064
+
+#define GPA_BASE        (RGPIO_BASE)
+#define GPAxCON(x)      (GPA_BASE + GAP32B(x))
+#define GPAxDAT(x)      (GPAxCON(x) + IODAT)
 
 #define GPD_BASE		(RGPIO_BASE + 0x0A0)
 #define GPDxCON(x)		(GPD_BASE + ((x)<<5))

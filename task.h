@@ -1,6 +1,7 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+#define TASK_UART       0  /* uart support */
 #define TASK_TIMER      5  /* test the timer by 1 Hz buzz */
 
 

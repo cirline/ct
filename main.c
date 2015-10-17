@@ -163,7 +163,6 @@ int main(void)
     unsigned long taskset;
 
 #if 0
-	uart_init();
 	__raw_write(VICxADDRESS(0), 0);
 	__raw_write(VICxADDRESS(1), 0);
 	irq_init(EINT(0), key0_func);
@@ -282,12 +281,22 @@ int inline test_task(unsigned long taskset, int task)
 void task_init(unsigned long *taskset)
 {
     *taskset = 0;
+    set_task(taskset, TASK_UART);
     set_task(taskset, TASK_TIMER);
 }
 
 void task_loop(unsigned long *taskset)
 {
     int task[1] = {0};
+
+    /* uart support */
+    if(test_task(*taskset, TASK_UART)) {
+        int i = 0xff;
+        uart_init();
+        while(i--);
+        uart_send_string("====== uart support ! ======\n");
+        clr_task(taskset, TASK_UART);
+    }
 
 	/* test getchar */
 	if(*task & TASK_GETCHAR) {

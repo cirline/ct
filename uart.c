@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015 Qiwei Chen
+ */
+
 #include "s5p_regs.h"
 #include "irq.h"
 #include "common.h"
