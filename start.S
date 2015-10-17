@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) 2015 Qiwei Chen
+ *
+ ************************
+ * !!! Some WARNING !!! *
+ ************************
+ * 1. if use IRQ, don't forget relocate IRQ vendor. see WARNING1
+ * 2. select correct DRAM link address for different boot mode, according to warning1
+ * 3. if use nand boot, start.S must set the 16 Bytes file header, see WARNING2 
+ */
+
+/* !!! WARNING2 !!! */
 # s5pv210 file header, total 16 bytes
 # iROM jump to iRAM(0xD002_0010) but iRAM is begin 0xD002_0000
 #.word 0x2000
@@ -34,16 +46,19 @@ reset:
 	mov r1, #0x0
 	str r1, [r0]
 
-# relocate interrupt vendor
+/** !!! WARNING1 !!!
+ * relocate interrupt vendor
+ * mode:
+ tftp:  0 -> 40008000
+ usb:   0 -> 23e00000
+ nand:  0 -> d0020000
+ */
 	ldr r0, =0x40008000
 	mcr p15, 0, r0, c12, c0, 0
 
-# led test
-#	ldr r0, =0xE0200060
-#	ldr r1, =(0x11<<12)
-#	str r1, [r0]
-#	mov r0, #1
-#	bl led_debug
+led_test:
+    mov r0, #0
+    bl led_debug
 
 # close mmu and data cache
 #	L1 I/D
@@ -99,23 +114,31 @@ bss_clean:
 stop:
     b stop
 
+/**
+ * if r0 == 0, light on the led
+ * else, program will stay here to flash the led
+ */
 led_debug:
-	ldr r1, =0xE0200064
-ld_loop1:
-	cmp r0, #0
-	beq ld_end
-
-	mov r2, #0x10
+# set GPA0CON output
+	ldr r1, =0xE0200060
+	ldr r2, =(0x11<<12)
 	str r2, [r1]
-
+# GPA0DAT register
+	ldr r1, =0xE0200064
+led_death_loop:
+# delay
 	ldr r2, =0x8fffff
 ld_loop2:
 	sub r2, r2, #1
 	cmp r2, #0
 	bgt ld_loop2
-
+# light on
 	mov r2, #0x8
 	str r2, [r1]
+
+// if r0 == 0, return
+    cmp r0, #0
+    moveq pc, lr
 
 	ldr r2, =0x8fffff
 ld_loop3:
@@ -123,10 +146,10 @@ ld_loop3:
 	cmp r2, #0
 	bgt ld_loop3
 
-	sub r0, r0, #0x1
-	b ld_loop1
-ld_end:
-	mov pc, lr
+# light off
+	mov r2, #0
+	str r2, [r1]
+	b led_death_loop
 
 clock_init:
 #	reset clock src mux	

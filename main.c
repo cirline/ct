@@ -294,7 +294,7 @@ void task_loop(unsigned long *taskset)
         int i = 0xff;
         uart_init();
         while(i--);
-        uart_send_string("====== uart support ! ======\n");
+        uart_send_string("====== uart support ! ======\r\n");
         clr_task(taskset, TASK_UART);
     }
 

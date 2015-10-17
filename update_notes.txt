@@ -1,0 +1,6 @@
+TBM: tftp boot mode
+UBM: usb boot mode
+NBM: nand boot mode
+
+uart_send_yes__TBM:
+ * uart send string success at tftp boot mode
