@@ -28,15 +28,15 @@ void uart_clear_int_pend(int n)
 
 int uart_init(void)
 {
-	__s5p_wirte(RGPIO_BASE + GPA0CON, 0x22);
-	__s5p_wirte(RUART_BASE + ULCON0, 0x3);
-	__s5p_wirte(RUART_BASE + UCON0, (1<<2));
-	__s5p_wirte(RUART_BASE + UFCON0, 0);
-	__s5p_wirte(RUART_BASE + UMCON0, 0);
+    region_write(GPAxCON(0), MASK_BITS_8, 0, 0x22); // pin config
+    iowrite32(3, ULCONx(0));          // line control
+    iowrite32((1<<2) | 1, UCONx(0));  // rx & tx control
+    iowrite32(0, UFCONx(0));          // fifo control
+    iowrite32(0, UMCONx(0));            // rts & cts (modem) control
 //	__s5p_wirte(RCMU_BASE + CLK_SRC4, 0x7 << 16);
 //	__s5p_wirte(RCMU_BASE + CLK_DIV4, 0x5 << 16);
-	__s5p_wirte(RUART_BASE + UBRDIV0, 0x22);
-	__s5p_wirte(RUART_BASE + UDIVSLOT0, 0xDFDD);
+    iowrite32(0x22, UBRDIVx(0));        // baud rate division
+    iowrite32(0xdfdd, UDIVSLOTx(0));    // dividing slot (baud rate fine tune)
 	return 0;
 }
 
@@ -61,15 +61,17 @@ int uart_send_string(char *s)
 	return 0;
 }
 
-void inline uart_rx_wait(void)
+int inline uart_rx_ready(void)
 {
-	while(! (__raw_read(UTRSTATx(0)) & (1<<0)));
+	return ioread32(UTRSTATx(0)) & (1<<0);
 }
 
 unsigned char uart_get_char(void)
 {
+    int ret = 0;
 	fstart();
-	uart_rx_wait();
+    while(!uart_rx_ready());
+
 	return __raw_read(URXHx(0)) & 0xff;
 }
 

@@ -12,46 +12,6 @@
 #include "keyboard.h"
 #include "task.h"
 
-#define	GPD0CON	(*(volatile unsigned long *)0xE02000A0)
-#define	GPD0DAT	(*(volatile unsigned long *)0xE02000A4)
-
-static inline void led_init(void)
-{
-	//1. 设置GPC0_3,4引脚功能:	输出功能
-	int val;
-	val = __s5p_read(RGPIO_BASE + GPC0CON) & ~((0xf<<12)|(0xf<<16));
-	__s5p_wirte(RGPIO_BASE + GPC0CON, val | (0x1<<12)|(0x1<<16));
-}
-
-static inline void led3if(int val)
-{
-	int regval;
-	regval = __s5p_read(RGPIO_BASE + GPC0DAT) & ~(0x1<<3);
-	__s5p_wirte(RGPIO_BASE + GPC0DAT, (regval | ((val & 0x1)<<3)));
-}
-
-static inline void led4if(int val)
-{
-	int regval;
-	regval = __s5p_read(RGPIO_BASE + GPC0DAT) & ~(0x1<<4);
-	__s5p_wirte(RGPIO_BASE + GPC0DAT, (regval | ((val & 0x1)<<4)));
-}
-
-/* mode=1: 同步闪烁 */
-static void flash(int n, int ms, int mode)
-{
-	if(n <=0)
-		n = 8;
-	while(n--) {
-		sleep(ms);
-		led3if(1);
-		led4if(mode);
-		sleep(ms);
-		led3if(0);
-		led4if(!mode);
-	}
-}
-
 int key0_func(void)
 {
 	static int n = 0;
@@ -159,7 +119,6 @@ int main(void)
 	unsigned char buf[2048];
 	rtc_t rtc;
 	int i;
-	int task_loop_run = 0;
     unsigned long taskset;
 
 #if 0
@@ -174,7 +133,6 @@ int main(void)
 	irq_init(EINT(22), key_mux);
 	irq_init(EINT(23), key_mux);
 	irq_init(RTCALMINT(), rtcalm_int_func);
-	led_init();
 	nf_init();
 	rtc_init();
 	i2c_init();
@@ -246,10 +204,6 @@ int main(void)
 		for(i = 0; i < 8; i++) {
 			printf("after i2c read byte = 0x%p\n", (int)buf[i]);
 		}
-		flash(2, 500, 1);
-        i = 0xffff;
-        while(i--);
-        printf("loop count = 0x%x\n", task_loop_run++);
 #endif
 	}
 
@@ -257,8 +211,6 @@ int main(void)
 }
 
 /* task_loop */
-#define TASK_GETCHAR	1<<0
-#define TASK_BACKLIGHT	1<<1
 #define TASK_LCD        1<<2
 #define TASK_BUZZ		1<<3
 #define TASK_SLEEP		1<<4
@@ -282,7 +234,9 @@ void task_init(unsigned long *taskset)
 {
     *taskset = 0;
     set_task(taskset, TASK_UART);
-    set_task(taskset, TASK_TIMER);
+//    set_task(taskset, TASK_TIMER);
+    //set_task(taskset, TASK_BACKLIGHT);
+    set_task(taskset, TASK_GETCHAR);
 }
 
 void task_loop(unsigned long *taskset)
@@ -295,18 +249,19 @@ void task_loop(unsigned long *taskset)
         uart_init();
         while(i--);
         uart_send_string("====== uart support ! ======\r\n");
+        printf("hello world!\n");
         clr_task(taskset, TASK_UART);
     }
 
 	/* test getchar */
-	if(*task & TASK_GETCHAR) {
+	if(test_task(taskset, TASK_GETCHAR)) {
 		char c;
 		printf("test getchar------------->\n");
 		c = getchar();
 		printf("input char is -----------> [%c]\n", c);
 	}
 	/* test backlight */
-	if(*task & TASK_BACKLIGHT) {
+	if(test_task(*taskset, TASK_BACKLIGHT)) {
 		int i;
 		printf("test backlight----------->\n");
 		backlight_init(BL_LEV_MIN);

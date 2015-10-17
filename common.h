@@ -42,4 +42,15 @@ extern void inline set2clear(addr_t addr, int mask, int index);
 extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
 extern int inline __s5p_sleep(int ms);
+
+unsigned int inline ioread32(const volatile void *addr)
+{
+    return __s5p_read(addr);
+}
+
+void inline iowrite32(unsigned int w, const volatile void *addr)
+{
+    __s5p_wirte(addr, w);
+}
+
 #endif
