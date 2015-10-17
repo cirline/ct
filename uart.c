@@ -29,14 +29,14 @@ void uart_clear_int_pend(int n)
 int uart_init(void)
 {
     region_write(GPAxCON(0), MASK_BITS_8, 0, 0x22); // pin config
-    iowrite32(3, ULCONx(0));          // line control
-    iowrite32((1<<2) | 1, UCONx(0));  // rx & tx control
-    iowrite32(0, UFCONx(0));          // fifo control
-    iowrite32(0, UMCONx(0));            // rts & cts (modem) control
+    __raw_write(ULCONx(0), 3);          // line control
+    __raw_write(UCONx(0), (1<<2) | 1);  // rx & tx control
+    __raw_write(UFCONx(0), 0);          // fifo control
+    __raw_write(UMCONx(0), 0);            // rts & cts (modem) control
 //	__s5p_wirte(RCMU_BASE + CLK_SRC4, 0x7 << 16);
 //	__s5p_wirte(RCMU_BASE + CLK_DIV4, 0x5 << 16);
-    iowrite32(0x22, UBRDIVx(0));        // baud rate division
-    iowrite32(0xdfdd, UDIVSLOTx(0));    // dividing slot (baud rate fine tune)
+    __raw_write(UBRDIVx(0), 0x22);        // baud rate division
+    __raw_write(UDIVSLOTx(0), 0xdfdd);    // dividing slot (baud rate fine tune)
 	return 0;
 }
 
@@ -63,7 +63,7 @@ int uart_send_string(char *s)
 
 int inline uart_rx_ready(void)
 {
-	return ioread32(UTRSTATx(0)) & (1<<0);
+	return __raw_read(UTRSTATx(0)) & (1<<0);
 }
 
 unsigned char uart_get_char(void)

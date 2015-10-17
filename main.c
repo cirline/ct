@@ -235,8 +235,8 @@ void task_init(unsigned long *taskset)
     *taskset = 0;
     set_task(taskset, TASK_UART);
 //    set_task(taskset, TASK_TIMER);
-    //set_task(taskset, TASK_BACKLIGHT);
-    set_task(taskset, TASK_GETCHAR);
+    set_task(taskset, TASK_BACKLIGHT);
+//    set_task(taskset, TASK_GETCHAR);
 }
 
 void task_loop(unsigned long *taskset)

@@ -7,3 +7,6 @@ uart_send_yes__TBM:
 
 uart_getchar_yes--TBM:
 * uart get char success at tftp boot mode
+
+lcd_backlight_yes--TBM:
+* lcd backlight 3 level success at tftp boot mode
