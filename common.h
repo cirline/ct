@@ -43,5 +43,10 @@ extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
 extern int inline __s5p_sleep(int ms);
 
+void inline mdelay(int ms)
+{
+    __s5p_sleep(ms);
+}
+
 #endif
 

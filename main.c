@@ -211,9 +211,7 @@ int main(void)
 }
 
 /* task_loop */
-#define TASK_LCD        1<<2
 #define TASK_BUZZ		1<<3
-#define TASK_SLEEP		1<<4
 
 void inline set_task(unsigned long *taskset, int task)
 {
@@ -230,13 +228,41 @@ int inline test_task(unsigned long taskset, int task)
     return taskset & (1<<task);
 }
 
+int test_lcd(unsigned long *taskset)
+{
+    int i;
+    printf("--- test lcd ---\n");
+    lcd_init();
+    vid_toggle(1);
+    for(i=0; i<800; i++) {
+        printf("<><><><><><><><><><><><>\n");
+        sleep(1000);
+        printf("test lcd----- fb[i] = %x------------->\n", fb[i]);
+    }
+    return 0;
+}
+
+int test_delay(unsigned long *taskset)
+{
+    int i;
+    printf("--- test delay ---\n");
+    for(i=0; i<9; i++) {
+        printf("test sleep count %x ...\n", i);
+        mdelay(1000);
+        //timer_spin_lock(TIMER4, 1000);
+    }
+    return 0;
+}
+
 void task_init(unsigned long *taskset)
 {
     *taskset = 0;
     set_task(taskset, TASK_UART);
+    set_task(taskset, TASK_DELAY);
 //    set_task(taskset, TASK_TIMER);
-    set_task(taskset, TASK_BACKLIGHT);
+//    set_task(taskset, TASK_BACKLIGHT);
 //    set_task(taskset, TASK_GETCHAR);
+//    set_task(taskset, TASK_LCD);
 }
 
 void task_loop(unsigned long *taskset)
@@ -252,6 +278,9 @@ void task_loop(unsigned long *taskset)
         printf("hello world!\n");
         clr_task(taskset, TASK_UART);
     }
+
+    /* test timer delay */
+    test_task(*taskset, TASK_DELAY) && test_delay(taskset);
 
 	/* test getchar */
 	if(test_task(taskset, TASK_GETCHAR)) {
@@ -272,17 +301,8 @@ void task_loop(unsigned long *taskset)
 		}
 	}
 	/* test LCD */
-    if(*task & TASK_LCD) {
-        int i;
-        printf("test lcd------------------>\n");
-        lcd_init();
-        vid_toggle(1);
-        for(i=0; i<800; i++) {
-            printf("<><><><><><><><><><><><>\n");
-            sleep(1000);
-            printf("test lcd----- fb[i] = %x------------->\n", fb[i]);
-        }
-    }
+    test_task(*taskset, TASK_LCD) && test_lcd(taskset);
+
 	/* test buzz */
 	if(*task & TASK_BUZZ) {
         printf("test buzz------------------>\n");
@@ -292,15 +312,6 @@ void task_loop(unsigned long *taskset)
 		timer.auto_reload = TIMER_INTERVAL;
 		timer_init(&timer);
 		timer_toggle(timer.sn, 1);
-	}
-	/* test timer sleep */
-	if(*task & TASK_SLEEP) {
-		int i;
-		printf("test sleep-------------------->\n");
-		for(i=0; i<9; i++) {
-			printf("test sleep count %x-------------------->\n", i);
-			timer_spin_lock(TIMER4, 1000);
-		}
 	}
 
     /* test the timer by 1Hz buzz */

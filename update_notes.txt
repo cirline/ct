@@ -10,3 +10,6 @@ uart_getchar_yes--TBM:
 
 lcd_backlight_yes--TBM:
 * lcd backlight 3 level success at tftp boot mode
+
+timer_mdelay_success--TBM:
+* use timer do mdelay success at tftp boot mode
