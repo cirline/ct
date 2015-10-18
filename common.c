@@ -2,6 +2,21 @@
 #include "common.h"
 #include "timer.h"
 
+void inline mdelay(int ms)
+{
+    __s5p_sleep(ms);
+}
+
+unsigned int ioread32(const volatile addr_t addr)
+{
+    return __s5p_read(addr);
+}
+
+void iowrite32(unsigned int w, const volatile addr_t addr)
+{
+    __s5p_write(addr, w);
+}
+
 void inline region_write(addr_t addr, int mask, int index, int val)
 {
 	int reg;

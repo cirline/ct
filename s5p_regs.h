@@ -3,7 +3,7 @@
 
 /**    **/
 typedef unsigned long				__s5p_addr_t;
-#define __s5p_wirte(addr, val)		(*(volatile __s5p_addr_t *)(addr)) = (val)
+#define __s5p_write(addr, val)		(*(volatile __s5p_addr_t *)(addr)) = (val)
 #define __s5p_read(addr)			(*(volatile __s5p_addr_t *)(addr))
 
 /** common define **/
@@ -19,9 +19,6 @@ typedef unsigned long				__s5p_addr_t;
 #define IODRV           12
 #define IOCONPDN        16
 #define IOPUDPDN        20
-#define GPA0CON			0x00000000
-#define GPC0CON			0x00000060
-#define GPC0DAT			0x00000064
 
 #define GPA_BASE        (RGPIO_BASE)
 #define GPAxCON(x)      (GPA_BASE + GAP32B(x))
@@ -56,16 +53,6 @@ typedef unsigned long				__s5p_addr_t;
 
 /**  UART  **/
 #define RUART_BASE		0xE2900000
-
-#define ULCON0			0x00000000
-#define UCON0			0x00000004
-#define UFCON0			0x00000008
-#define UMCON0			0x0000000C
-#define UTRSTAT0		0x00000010
-#define UTXH0			0x00000020
-#define URXH0			0x00000024
-#define UBRDIV0			0x00000028
-#define UDIVSLOT0		0x0000002C
 
 #define ULCONx(x)		(RUART_BASE + (x<<10))
 #define UCONx(x)		(ULCONx(x) + 0x4)

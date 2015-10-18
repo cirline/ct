@@ -42,13 +42,13 @@ int uart_init(void)
 
 void uart_wait_free(void)
 {
-	while (!(__s5p_read(RUART_BASE + UTRSTAT0) & (1<<2)));
+    while(! (ioread32(UTRSTATx(0)) & (1<<2)));
 }
 
 int uart_send_char(char c)
 {
 	uart_wait_free();
-	__s5p_wirte(RUART_BASE + UTXH0, c);
+    iowrite32(c, UTXHx(0));
 	return 0;
 }
 

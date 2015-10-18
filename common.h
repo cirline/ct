@@ -10,7 +10,7 @@
 
 #define printf(format, arg...)		__s5p_printf(format, ##arg)
 #define getchar()					uart_get_char()
-#define __raw_write(addr, val)		__s5p_wirte(addr, val)
+#define __raw_write(addr, val)		__s5p_write(addr, val)
 #define __raw_read(addr)			__s5p_read(addr)
 #define sleep(time)					__s5p_sleep(time)
 typedef __s5p_addr_t				addr_t;
@@ -36,17 +36,15 @@ enum mask_defined {
 	MASK_BITS_24 = 0xffffff,
 };
 
+extern void inline mdelay(int ms);
+extern unsigned int ioread32(const volatile addr_t addr);
+extern void iowrite32(unsigned int w, const volatile addr_t addr);
 extern void inline region_write(addr_t addr, int mask, int index, int val);
 extern int inline region_read(addr_t addr, int mask, int index);
 extern void inline set2clear(addr_t addr, int mask, int index);
 extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
 extern int inline __s5p_sleep(int ms);
-
-void inline mdelay(int ms)
-{
-    __s5p_sleep(ms);
-}
 
 #endif
 
