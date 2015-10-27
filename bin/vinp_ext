@@ -30,6 +30,16 @@ echo "keyboard_event: $1"
 adb -s $mechine_id shell input keyevent $1
 }
 
+function cap() {
+adb -s $mechine_id shell screencap -p /mnt/sdcard/screencap.png
+adb -s $mechine_id pull /mnt/sdcard/screencap.png .
+shotwell screencap.png
+}
+
+function adb_sleep() {
+adb -s $mechine_id shell sleep $1
+}
+
 # command link router
 case $cmd in
     "vinp_ext" )
@@ -39,23 +49,20 @@ case $cmd in
             option=h
         fi
         ;;
-    "kh" )
-        option=h;;
-    "kb" )
-        option=b;;
+    "kc" )
+        while true; do
+            cap
+            swipe_event 600 300 -100 0
+            sleep 1
+        done
+        exit 0;;
     "ep" )
         # key_power event
         key_event POWER
         exit 0;;
-    "ku" )
-        option=+;;
-    "kd" )
-        option=-;;
-    # follow is virtual mouse action
     "pd" )
         # pagedown, swipe right -> left
         swipe_event 600 300 -100 0
-        #adb shell input swipe 600 300 400 300
         exit 0;;
     "pu" )
         # pageup, swipe left -> right
@@ -65,7 +72,7 @@ case $cmd in
         # power on  & send password to unlock
         loop=`echo $1 | rev`
         key_event POWER
-        sleep 1
+        adb_sleep 1
         while (($loop > 0)); do
             ((remainer = loop % 10))
             ((loop = loop / 10))
