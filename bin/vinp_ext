@@ -40,6 +40,15 @@ function adb_sleep() {
 adb -s $mechine_id shell sleep $1
 }
 
+function key_number() {
+loop=$1
+while ((loop > 0)); do
+    ((remainer = loop % 10))
+    ((loop = loop / 10))
+    key_event KEYCODE_$remainer
+done
+}
+
 # command link router
 case $cmd in
     "vinp_ext" )
@@ -70,14 +79,14 @@ case $cmd in
         exit 0;;
     "lock" )
         # power on  & send password to unlock
-        loop=`echo $1 | rev`
+        password=`echo $1 | rev`
         key_event POWER
-        adb_sleep 1
-        while (($loop > 0)); do
-            ((remainer = loop % 10))
-            ((loop = loop / 10))
-            key_event KEYCODE_$remainer
-        done
+        key_number $password
+        echo "Repeat input? (press 'y' to do)"
+        read repeat
+        if [ "$repeat" == "y" ]; then
+            key_number $password
+        fi
         exit 0;;
     "mcd" )
         adb shell input tap 750 250
