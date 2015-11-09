@@ -1,10 +1,11 @@
 #include <iostream>
 #include <stdexcept>
-#include "2.4.1_vendor.h"
+#include <sstream>
+#include "cpp_vector.h"
 
 using namespace std;
 
-Ventor::Ventor(int n) : elem{new double[n]}, len{n} {}
+Ventor::Ventor(unsigned long n) : elem{new double[n]}, len{n} {}
 
 double & Ventor::operator[](int i) {
     // 2.4.3, error handing
@@ -14,8 +15,25 @@ double & Ventor::operator[](int i) {
     return elem[i];
 }
 
-int Ventor::size() {
+/* container initializing */
+cpp_vector::cpp_vector(initializer_list<double> list)
+    :len{list.size()},
+    elem{new double[list.size()]}
+{
+    copy(list.begin(), list.end(), elem);
+}
+
+unsigned long cpp_vector::size() {
     return len;
+}
+
+string cpp_vector::tostring(void) {
+    ostringstream ts;
+    ts << "vector: { ";
+    for(int i = 0; i < size(); i++)
+        ts << elem[i] << ", ";
+    ts << "}";
+    return ts.str();
 }
 
 int main(void) {
@@ -24,6 +42,10 @@ int main(void) {
     for(int i = 0; i < v.size(); i++) {
         v[i] = i;
     }
+
+    /* container initializing */
+    cpp_vector v1 = {5, 8, 3, 9};
+    cout << v1.tostring() << endl;
 
     // 2.4.3, error handing
     try {

@@ -1,14 +1,26 @@
+#ifndef __CPP_VECTOR__
+#define __CPP_VECTOR__
 
-class Ventor {
+#define Ventor cpp_vector
+
+using namespace std;
+
+class cpp_vector {
     public:
-    Ventor(int n);
+    cpp_vector(unsigned long n);
+
+    /* container initializing */
+    cpp_vector(initializer_list<double> list);
 
     double & operator[](int i);
 
-    int size();
+    unsigned long size();
+    string tostring(void);
 
     private:
     double * elem;
-    int len;
+    unsigned long len;
 };
+
+#endif
 
