@@ -1,3 +1,13 @@
+/**
+ * RingBuffer
+ * address: n-1 0 1 ... n-1
+ * data:     *  * * ...  *
+ *           |  |
+ * position: rs ws          - read start & write start
+ * when: w - r = 1, mean buffer empty
+ * when: w - r = 0, mean buffer filled
+ */
+
 //#include <init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -8,25 +18,41 @@
 #include <linux/semaphore.h>
 #include <linux/wait.h>
 #include <linux/sched.h>
+#include <linux/device.h>
+
+#include "ringbuffer.h"
 
 #define MEMSIZE     16
 #define DEVNAME     "ringbuffer"
 
-#define RB_IOC_MAGIC  'k'
-#define RB_IOC_GET_MEMSIZE    _IOWR(RB_IOC_MAGIC, 0, int)
+//#define RB_IOC_MAGIC  'k'
+//#define RB_IOC_GET_MEMSIZE    _IOWR(RB_IOC_MAGIC, 0, int)
 
 typedef struct ringbuffer {
-    struct cdev dev;
+    /* char device */
+    struct cdev *cdev;
+    struct class *cls;
+    struct device *dev;
+    /**
+     * buffer & size
+     * data pointer
+     */
     char mem[MEMSIZE];
     int size;
     int read_pos;
     int write_pos;
+
+    /* control */
     struct semaphore sem;
     wait_queue_head_t wq;
 } rb_t;
 
 static rb_t * rb;
 
+/** initial:
+ * buffer size,
+ * read, write position
+ */
 static void rb_init(rb_t *rbptr)
 {
     rbptr->size = MEMSIZE;
@@ -36,6 +62,9 @@ static void rb_init(rb_t *rbptr)
     init_waitqueue_head(&rbptr->wq);
 }
 
+/**
+ * size of the buffer were used
+ */
 static inline size_t buffer_used(rb_t * rbptr)
 {
     if(rbptr->write_pos > rbptr->read_pos)
@@ -44,6 +73,9 @@ static inline size_t buffer_used(rb_t * rbptr)
         return rbptr->write_pos - rbptr->read_pos - 1 + rbptr->size;
 }
 
+/**
+ * size of the buffer not be used
+ */
 static inline size_t idle_buffer(rb_t *rbptr)
 {
     return rbptr->size - buffer_used(rbptr) - 1;
@@ -236,11 +268,15 @@ static int __init ringbuffer_init(void)
 {
     int ret;
     dev_t devno;
+    struct cdev *cdev;
+    struct device *dev;
+    struct class *cls;
 
     printk("%s\n", __func__);
     rb = kmalloc(sizeof(struct ringbuffer), GFP_KERNEL);
     if(!rb) {
         printk("kmalloc failure.\n");
+        ret = - ENOMEM;
         goto out;
     }
     rb_init(rb);
@@ -249,27 +285,58 @@ static int __init ringbuffer_init(void)
         printk("alloc_chrdev_region failure.\n");
         goto out_free;
     }
-    cdev_init(&rb->dev, &rbfops);
-    rb->dev.owner = THIS_MODULE;
-    ret = cdev_add(&rb->dev, devno, 1);
+    cdev = cdev_alloc();
+    if(!cdev) {
+        eprintk("cdev_alloc failure\n");
+        ret = - ENOMEM;
+        goto err_cdev_alloc;
+    }
+    //cdev_init(cdev, &rbfops);
+    cdev->owner = THIS_MODULE;
+    cdev->ops = &rbfops;
+    kobject_set_name(&cdev->kobj, DEVNAME);
+    ret = cdev_add(cdev, devno, 1);
     if(ret < 0) {
-        printk("cdev_add failure.\n");
-        goto out_free_devno;
+        eprintk("cdev_add failure.\n");
+        goto err_cdev_add;
+    }
+    rb->cdev = cdev;
+
+    cls = class_create(THIS_MODULE, DEVNAME"_cls");
+    if(IS_ERR(cls)) {
+        eprintk("class_create failure.\n");
+        ret = PTR_ERR(cls);
+        goto err_class_create;
+    }
+    rb->cls = cls;
+    dev = device_create(cls, NULL, devno, NULL, DEVNAME);
+    if(IS_ERR(dev)) {
+        eprintk("device_create failure.\n");
+        ret = PTR_ERR(dev);
+        goto err_device_create;
     }
     return 0;
-out_free_devno:
+err_device_create:
+    class_destroy(cls);
+err_class_create:
+    cdev_del(cdev);
+err_cdev_add:
+    kobject_put(&cdev->kobj);
+err_cdev_alloc:
     unregister_chrdev_region(devno, 1);
 out_free:
     kfree(rb);
 out:
-    return -1;
+    return ret;
 }
 
 static void __exit ringbuffer_exit(void)
 {
-    cdev_del(&rb->dev);
-    printk("devno = %d\n", rb->dev.dev);
-    unregister_chrdev_region(rb->dev.dev, 1);
+    device_destroy(rb->cls, rb->cdev->dev);
+    class_destroy(rb->cls);
+    cdev_del(rb->cdev);
+    kobject_put(&rb->cdev->kobj);
+    unregister_chrdev_region(rb->cdev->dev, 1);
     kfree(rb);
 }
 
