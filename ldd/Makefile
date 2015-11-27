@@ -2,9 +2,11 @@ ifeq ($(KERNELRELEASE),)
 
 KERN_PATH := /lib/modules/$(shell uname -r)/build
 LOCAL_PATH := $(shell pwd)
+demo_path := demo
 
 modules:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules
+	$(MAKE) -C $(demo_path)
 #	cp $(sf).ko ~/
 
 modules_install:
@@ -12,6 +14,7 @@ modules_install:
 
 clean:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) clean
+	$(MAKE) -C $(demo_path) clean
 
 install:
 	cp $(sf).ko ~/
