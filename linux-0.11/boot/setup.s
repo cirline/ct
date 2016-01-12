@@ -190,6 +190,7 @@ end_move:
 
 	mov	ax,#0x0001	! protected mode (PE) bit
 	lmsw	ax		! This is it!
+! segment selector: [ b15~3:index ][ b2:gdt or ldt selector ][ b1~0:privilege ]
 	jmpi	0,8		! jmp offset 0 of segment 8 (cs)
 
 ! This routine checks that the keyboard command queue is empty
@@ -203,8 +204,12 @@ empty_8042:
 	ret
 
 gdt:
+! globl segment descriptor table, each segment descriptor contrain 8 bytes
 	.word	0,0,0,0		! dummy
-
+! .word segment length limit
+! .word segment base address
+! .word [ P ][ DPL ][ S ][ Type ][ Base Address ]
+! .word [ Base Address ][ G ][ D/B ][ 0 ][ AVL ][ length limit ]
 	.word	0x07FF		! 8Mb - limit=2047 (2048*4096=8Mb)
 	.word	0x0000		! base address=0
 	.word	0x9A00		! code read/exec
