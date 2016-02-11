@@ -12,18 +12,34 @@
     } *curbs = 0;
 
 int newfile(char *filename);
+int popfile();
 %}
 
 %%
+^"#"[ \t]*"include"[ \t]*[\"<]      { BEGIN IFILE; }
+<IFILE>[^ \t\n\">]+                 {
+    {int c; while((c = input()) && c != '\n'); }
+    curbs->lineno++;
+    if(newfile(yytext) != 0) yyterminate();
+    BEGIN INITIAL;
+}
+<<EOF>>     {
+    if(popfile() != 0) yyterminate();
+}
+
 ^[ \t]*\n   {
-    printf("%4d:\n", curbs->lineno);
+    fprintf(yyout, "%4d:\n", curbs->lineno);
     curbs->lineno++;
 }
-.*      {
-    printf("%4d: %s", curbs->lineno, yytext);
+^.      {
+    fprintf(yyout, "%4d: ", curbs->lineno);
+    ECHO;
+}
+.       {
+    ECHO;
 }
 \n      {
-    printf("\n"); 
+    fprintf(yyout, "\n"); 
     curbs->lineno++;
 }
 %%
@@ -57,6 +73,27 @@ int newfile(char *filename)
     bs->prev = curbs;
     curbs = bs;
     yy_switch_to_buffer(curbs->bs);
+    return 0;
+}
+
+int popfile()
+{
+    struct bufstack *bs_prev;
+
+    if(!curbs)
+        return -1;
+    if(curbs->f)
+        fclose(curbs->f);
+    if(curbs->bs)
+        yy_delete_buffer(curbs->bs);
+    bs_prev = curbs->prev;
+    free(curbs);
+    if(!bs_prev)
+        return 1;
+    curbs = bs_prev;
+    if(curbs && curbs->bs)
+        yy_switch_to_buffer(curbs->bs);
+
     return 0;
 }
 
