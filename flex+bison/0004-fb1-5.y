@@ -4,6 +4,7 @@
 
 %token NUMBER
 %token ADD SUB MUL DIV
+%token LOP ROP
 %token ABS
 %token EOL
 
@@ -24,7 +25,7 @@ factor: term { $$ = $1; }
 
 term: NUMBER { $$ = $1; }
     | ABS exp ABS { $$ = $2 > 0 ? $2 : -$2; }
-    | SUB term { $$ = -$2; }
+    | LOP exp ROP { $$ = $2; }
     ;
 %%
 

@@ -8,8 +8,11 @@
 "*"     { return MUL; }
 "/"     { return DIV; }
 "|"     { return ABS; }
+"("     { return LOP; }
+")"     { return ROP; }
 [0-9]+  { yylval = atoi(yytext); return NUMBER; }
-[ \t]   { }
+[ \t]
+"//".*\n
 \n      { return EOL; }
 .       { printf("ERROR\n"); }
 %%

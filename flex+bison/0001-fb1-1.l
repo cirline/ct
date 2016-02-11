@@ -5,6 +5,8 @@
     int lines = 0;
 %}
 
+%option noyywrap
+
 %%
 [a-zA-Z]+   { words++; chars += strlen(yytext); }
 \n          { chars++; lines++; }
@@ -13,6 +15,12 @@
 
 int main(void)
 {
+
+    yyin = fopen("file.in", "r");
+    if(!yyin) {
+        perror("fopen failed.\n");
+        return -1;
+    }
     yylex();
     printf("lines: %d, words: %d, chars: %d\n", lines, words, chars);
 
