@@ -13,6 +13,7 @@ struct numval {
     double d;
 };
 
+struct ast * newast(int type, struct ast * l, struct ast * r);
 struct ast * newnum(double d);
 double calc(struct ast *tree);
 
@@ -26,7 +27,7 @@ double d;
 %token <d> NUMBER
 %token EOL
 
-%type <a> exp /*factor term*/
+%type <a> exp factor term
 
 %%
 calclist: /* nothing */
@@ -36,7 +37,17 @@ calclist: /* nothing */
         }
         | calclist EOL { printf("> "); }
         ;
-exp: NUMBER { $$ = newnum($1); }
+exp: factor
+   | exp '+' factor     { $$ = newast('+', $1, $3); }
+   | exp '-' factor     { $$ = newast('-', $1, $3); }
+   ;
+
+factor: term
+      | factor '*' term { $$ = newast('*', $1, $3); }
+      | factor '/' term { $$ = newast('/', $1, $3); }
+      ;
+
+term: NUMBER { $$ = newnum($1); }
    ;
 %%
 
@@ -51,6 +62,23 @@ yyerror(char *s)
 {
     printf("yyerror: %s", s);
     abort();
+}
+
+struct ast * newast(int type, struct ast * l, struct ast * r)
+{
+    struct ast * tp;
+
+    tp = malloc(sizeof(struct ast));
+    if(!tp) {
+        perror("malloc");
+        abort();
+    }
+
+    tp->nodetype = type;
+    tp->l = l;
+    tp->r = r;
+
+    return tp;
 }
 
 struct ast * newnum(double d)
@@ -71,15 +99,30 @@ struct ast * newnum(double d)
 
 double calc(struct ast *tree)
 {
+    double result = 0;
     if(!tree)
-        return 0;
+        return result;
 
     switch(tree->nodetype) {
     case 'K':
-        return ((struct numval *)tree)->d;
+        result = ((struct numval *)tree)->d;
+        break;
+    case '+':
+        result = calc(tree->l) + calc(tree->r);
+        break;
+    case '-':
+        result = calc(tree->l) - calc(tree->r);
+        break;
+    case '*':
+        result = calc(tree->l) * calc(tree->r);
+        break;
+    case '/':
+        result = calc(tree->l) / calc(tree->r);
         break;
     default:
         yyerror("node type fault.\n");
         abort();
     }
+
+    return result;
 }
