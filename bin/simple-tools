@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# display all command
+set -x
+
 cmd=`echo $0 | awk -F '/' '{print $NF}'`
 current_path=`pwd`
 cmd_path=`which $cmd`
@@ -87,6 +90,44 @@ case $cmd in
         adb push $android_top/$1 $file_fspath
         adb shell chmod 644 $file_fspath
         adb shell sync
+        ;;
+    "adbi" )
+        if (($# != 1)); then
+            echo "adb install miss package"
+            exit -1
+        fi
+        #echo "adb install $1"
+        adb install $1
+        ;;
+    "bkernel-qc" )
+        outdir=$OUT/obj/KERNEL_OBJ
+        make O=$outdir ARCH=arm CROSS_COMPILE=arm-eabi-
+        ;;
+    "fabo" )
+        if (($# == 1)); then
+            adb -s 1a8d47f6 reboot bootloader
+            #fastboot flash boot boot.img
+            fastboot flash boot /home/chqw/workspace1/qcom/loong/out/msm8909/android/msm8909_android_highcha_p1/boot.img
+            fastboot reboot
+        else
+            adb reboot bootloader
+            fastboot flash boot /home/chqw/workspace1/qcom/loong/out/msm8909/android/msm8909_android_highcha_p1/boot.img
+            fastboot reboot
+        fi
+        ;;
+    "ds" )
+        if (($# == 1)); then
+            if [ -f $1 ]; then
+                dot -Tpng $1 -o $1.png
+                eog $1.png
+            else
+                echo "file cannot found: $1"
+            fi
+        fi
+        ;;
+    * )
+        echo "unknow command!"
+        st_help
         ;;
 esac
 
