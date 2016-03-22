@@ -4,8 +4,20 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#include "deamon.h"
+
 static int fd;
 static int this_running;
+static int shmid;
+
+void logd(const char * msg)
+{
+    if(fd > 0)
+        write(fd, msg, strlen(msg));
+}
 
 void kill_signal(int arg)
 {
@@ -18,11 +30,36 @@ void kill_signal(int arg)
     this_running = 0;
 }
 
+void * init_shm(void)
+{
+    int id;
+    void *p;
+
+    id = shmget((key_t)SHM_KEY, sizeof(struct deamon_shm), 0666 | IPC_CREAT);
+    if(id == -1) {
+        logd("shmget failed.\n");
+        goto err_out;
+    }
+    p = shmat(id, 0, 0);
+    if(p == (void *)-1) {
+        logd("shmat failed.\n");
+        goto err_shmat;
+    }
+    shmid = id;
+    return p;
+
+err_shmat:
+    shmctl(id, IPC_RMID, 0);
+err_out:
+    return NULL;
+}
+
 int main(void)
 {
     int pid;
     int i, rc;
     char mbuff[64];
+    struct deamon_shm *shm;
 
     pid = fork();
 
@@ -53,13 +90,29 @@ int main(void)
     /* register signal */
     signal(SIGTERM, kill_signal);
 
-    this_running = 1;
+    shm = init_shm();
+    if(!shm) {
+        logd("init shm failed.\n");
+        return -1;
+    }
 
+    this_running = 1;
     while(this_running++) {
-        sprintf(mbuff, "this loop %d\n", this_running);
+        if(shm->state == 1) {
+            shm->state = 2;
+            sprintf(mbuff, "shm: %s\n", shm->data);
+            write(fd, mbuff, strlen(mbuff));
+            shm->state = 0;
+            if(strcmp(shm->data, "deamon_exit") == 0)
+                this_running = 0;
+        }
+        sprintf(mbuff, "loopping : shm state = %d, data = %s\n", shm->state, shm->data);
         write(fd, mbuff, strlen(mbuff));
         sleep(5);
     }
+
+    shmdt(shm);
+    shmctl(shmid, IPC_RMID, 0);
 
     sprintf(mbuff, "loop end\n");
     write(fd, mbuff, strlen(mbuff));
