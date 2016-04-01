@@ -66,6 +66,9 @@ struct task_struct * task[NR_TASKS] = {&(init_task.task), };
 
 long user_stack [ PAGE_SIZE>>2 ] ;
 
+/* construct a 48bit pointer,
+ * to setup the stack segment selector and offset,
+ * through the lss instruction */
 struct {
 	long * a;
 	short b;
