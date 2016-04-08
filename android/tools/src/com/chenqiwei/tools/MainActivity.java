@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
      */
     public static class PlaceholderFragment extends Fragment {
     	private TextView tv_phone_ip;
+    	private TextView tv_version;
 
         public PlaceholderFragment() {
         }
@@ -64,10 +65,13 @@ public class MainActivity extends Activity {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             
             tv_phone_ip = (TextView) rootView.findViewById(R.id.tv_phone_ip);
+            tv_version = (TextView) rootView.findViewById(R.id.tv_version);
             
             Status status = new Status(this.getActivity());
             Log.i(tag, "ip = " + status.getIP());
             tv_phone_ip.setText(status.getIP());
+            
+            tv_version.setText(Jni.version());
             
             return rootView;
         }
