@@ -1,0 +1,6 @@
+digraph G {
+    main [ label="pin control system" ];
+    main -> parse [style=dotted];
+    my -> parse;
+    main -> she;
+}
