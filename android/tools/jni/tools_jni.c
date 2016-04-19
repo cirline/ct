@@ -14,7 +14,7 @@ extern "C" {
  */
 JNIEXPORT jstring JNICALL Java_com_chenqiwei_tools_Jni_version(JNIEnv *env, jclass cls)
 {
-	return (*env)->NewStringUTF(env, "version 0.1");
+	return (*env)->NewStringUTF(env, "0.1");
 }
 
 #ifdef __cplusplus
