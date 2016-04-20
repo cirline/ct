@@ -8,5 +8,8 @@
     <string name="phone_ip">ip:</string>
     <string name="version">version:</string>
     <string name="empty_string"></string>
+    <string name="control_tip">控制</string>
+    <string name="open_tip">打开</string>
+    <string name="close_tip">关闭</string>
 
 </resources>

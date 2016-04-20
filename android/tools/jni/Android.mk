@@ -18,5 +18,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE    := tools_jni
 LOCAL_SRC_FILES := tools_jni.c
+LOCAL_LDLIBS	:= -llog
 
 include $(BUILD_SHARED_LIBRARY)
