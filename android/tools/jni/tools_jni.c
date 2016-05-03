@@ -82,3 +82,10 @@ JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable(JNIEnv *env, jclass c
 	return 0;
 }
 
+JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
+  (JNIEnv *env, jclass cls, jstring s)
+{
+	char *sp;
+}
+
+

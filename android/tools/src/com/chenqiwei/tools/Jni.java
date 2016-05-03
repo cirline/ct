@@ -9,6 +9,8 @@ public class Jni {
 	
 	public static native int enable(boolean enable);
 	
+	public static native int exec(String s);
+	
 	public static void toString(int n) {
 		Log.i(tag, "count = " + n);
 		

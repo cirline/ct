@@ -23,6 +23,14 @@ JNIEXPORT jstring JNICALL Java_com_chenqiwei_tools_Jni_version
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable
   (JNIEnv *, jclass, jboolean);
 
+/*
+ * Class:     com_chenqiwei_tools_Jni
+ * Method:    exec
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif
