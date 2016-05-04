@@ -21,10 +21,11 @@ int main(int argc, char *argv[])
 {
     int server_fd;
     int client_fd;
-    struct sockaddr_in saddr;
+    struct sockaddr_in saddr, caddr;
     int ret;
-    char buf[1024];
+    char buf[1024] = "hello world.!";
     char buf2[1024];
+    int len;
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if(server_fd < 0) {
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
     saddr.sin_family = AF_INET;
     saddr.sin_port = htons(NET_PORT);
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    ret = bind(server_fd, (struct sockaddr *)&saddr, sizeof(saddr));
+    ret = bind(server_fd, (struct sockaddr *)(&saddr), sizeof(saddr));
     if(ret) {
         printf("bind addr & port failure. ret = %d\n", ret);
         return -1;
@@ -45,14 +46,14 @@ int main(int argc, char *argv[])
         printf("listen error: ret = %d\n", ret);
         return -1;
     } else {
-        printf("client connected!\n");
+        printf("listening ...\n");
     }
-    client_fd = accept(server_fd, (struct sockaddr *)&saddr, sizeof(saddr));
+    client_fd = accept(server_fd, (struct sockaddr *)(&caddr), &len);
     if(client_fd < 0) {
         printf("accept error: client_fd = %d: %s\n", client_fd, strerror(errno));
         return 0;
     }
-    ret = write(client_fd, "hello client!", 1024);
+    ret = write(client_fd, buf, 32);
     if(ret < 0){
         printf("write error!\n");
     }

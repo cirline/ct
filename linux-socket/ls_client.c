@@ -9,7 +9,7 @@
  * 3. read & write -- read(), write()
  */
 
-#define NET_IPADDR  "192.168.7.100"
+#define NET_IPADDR  "127.0.0.1"
 #define NET_PORT    8099
 
 int main(void)
@@ -34,7 +34,7 @@ int main(void)
         printf("connect failure, ret = %d\n", ret);
         return -1;
     }
-    ret = read(socket_fd, buf, 1024);
+    ret = read(socket_fd, buf, 32);
     if(ret < 0) {
         printf("read failure. ret = %d\n", ret);
     } else {
