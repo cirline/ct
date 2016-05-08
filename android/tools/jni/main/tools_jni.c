@@ -1,8 +1,12 @@
+#define pr_fmt(fmt)	"ToolsJNI"
+
 #include <errno.h>
 #include <pthread.h>
 #include <android/log.h>
 
 #include "com_chenqiwei_tools_Jni.h"
+
+#include "../utils/log.h"
 
 #define LOG_TAG		"ToolsJNI"
 
@@ -25,7 +29,7 @@ void * jni_loop(void *arg)
 	jmethodID cb;
 	int count = 0;
 
-	ALOGI("jni loop in");
+	pr_info("jni loop in");
 	(*g_vm)->AttachCurrentThread(g_vm, &env, NULL);
 
 	//cb = (*env)->GetMethodID(env, g_cls, "toString", "(Ljava/lang/String;)V");
@@ -42,7 +46,7 @@ void * jni_loop(void *arg)
 
 out:
 	(*g_vm)->DetachCurrentThread(g_vm);
-	ALOGI("jni loop exit");
+	pr_err("3 jni loop exit");
 
 	return NULL;
 }
