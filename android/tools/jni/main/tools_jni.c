@@ -6,20 +6,25 @@
 
 #include "com_chenqiwei_tools_Jni.h"
 
-#include "../utils/log.h"
+#include "../utils/header.h"
+#include "header.h"
 
 #define LOG_TAG		"ToolsJNI"
 
-#define ALOGI(format, args...)	__android_log_print(ANDROID_LOG_INFO, LOG_TAG, format, ##args)
+#define TOOLS_JNI_VERSION	"0.2"
+
 #define ALOGE(format, args...)	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, format, ##args)
 
 static int g_loop_en = 0;
 static JavaVM *g_vm;
 static jclass *g_cls;
 
+// ***
+extern struct thread_desc * g_mloop;
+
 JNIEXPORT jstring JNICALL Java_com_chenqiwei_tools_Jni_version(JNIEnv *env, jclass cls)
 {
-	return (*env)->NewStringUTF(env, "0.1");
+	return (*env)->NewStringUTF(env, TOOLS_JNI_VERSION);
 }
 
 void * jni_loop(void *arg)
@@ -53,36 +58,24 @@ out:
 
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable(JNIEnv *env, jclass cls, jboolean enable)
 {
-	pthread_t id;
+	int rc;
 
-	if(enable == JNI_FALSE) {
-		g_loop_en = 0;
-		return 0;
-	}
+	if(enable) {
+		rc = native_create(env, cls);
+		if(rc < 0)
+			pr_err("native_create failed.\n");
+		return rc;
+	} else {
+		if(!g_mloop) {
+			pr_err("native main loop not running.\n");
+			return -1;
+		}
 
-	g_loop_en = 1;
+		g_mloop->what = MSG_THREAD_EXIT;
+		pthread_cond_signal(&g_mloop->cond);
+	}
+	pr_info("native start!");
 
-	(*env)->GetJavaVM(env, &g_vm);
-	g_cls = (*env)->NewGlobalRef(env, cls);
-
-#if 0
-	{
-	jmethodID cb;
-	cb = (*env)->GetStaticMethodID(env, cls, "toString", "(I)V");
-	if(cb == NULL)
-		ALOGE("start get method failed.");
-	else {
-		ALOGI("start call method. 1");
-		(*env)->CallStaticVoidMethod(env, cls, cb, 93);
-	}
-	}
-#else
-	if(pthread_create(&id, NULL, jni_loop, NULL) != 0) {
-		ALOGE("pthread_create failed, %s", strerror(errno));
-		return -1;
-	}
-#endif
-	ALOGI("start finish!");
 	return 0;
 }
 
@@ -91,5 +84,4 @@ JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
 {
 	char *sp;
 }
-
 
