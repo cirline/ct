@@ -61,8 +61,19 @@ out:
 	return NULL;
 }
 
-void * native_message_handler(void *arg)
+int native_send_message(int msg)
 {
+	if(!g_mloop) {
+		pr_err("native main loop not running.\n");
+		return;
+	}
+
+	pthread_mutex_lock(&g_mloop->mutex);
+	g_mloop->what = msg;
+	pthread_cond_signal(&g_mloop->cond);
+	pthread_mutex_unlock(&g_mloop->mutex);
+
+	return 0;
 }
 
 int native_create(JNIEnv *env, jclass cls)

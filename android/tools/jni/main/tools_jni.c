@@ -58,25 +58,7 @@ out:
 
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable(JNIEnv *env, jclass cls, jboolean enable)
 {
-	int rc;
-
-	if(enable) {
-		rc = native_create(env, cls);
-		if(rc < 0)
-			pr_err("native_create failed.\n");
-		return rc;
-	} else {
-		if(!g_mloop) {
-			pr_err("native main loop not running.\n");
-			return -1;
-		}
-
-		g_mloop->what = MSG_THREAD_EXIT;
-		pthread_cond_signal(&g_mloop->cond);
-	}
-	pr_info("native start!");
-
-	return 0;
+	return enable ? native_create(env, cls) : native_send_message(MSG_THREAD_EXIT);
 }
 
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
