@@ -5,7 +5,7 @@
 
 enum _thread_message {
 	MSG_THREAD_NONE = 0,
-	MSG_THREAD_EXIT, 
+	MSG_THREAD_EXIT,
 };
 
 extern int native_create(JNIEnv *env, jclass cls);

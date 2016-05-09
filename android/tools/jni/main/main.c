@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 
 #include <jni.h>
 
@@ -69,8 +70,11 @@ int native_create(JNIEnv *env, jclass cls)
 	pr_info("%s\n", __func__);
 	if(g_mloop) {
 		/* test thread or free it */
-		pr_warn("test or free thread.\n");
-		return -1;
+		if(pthread_kill(g_mloop->id, 0) == 0) {
+			pr_warn("main loop thread already running.\n");
+			return -1;
+		}
+		free(g_mloop);
 	}
 
 	g_mloop = malloc(sizeof(*g_mloop));
