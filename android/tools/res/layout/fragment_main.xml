@@ -84,6 +84,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/close_tip" />
 
+            <Button
+                android:id="@+id/btn_filesync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sync" />
+
         </LinearLayout>
 
     </LinearLayout>

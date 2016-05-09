@@ -67,3 +67,9 @@ JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
 	char *sp;
 }
 
+JNIEXPORT void JNICALL Java_com_chenqiwei_tools_Jni_fileSync
+  (JNIEnv *env, jclass cls)
+{
+	native_send_message(MSG_THREAD_FILESYNC);
+}
+

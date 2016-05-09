@@ -5,6 +5,10 @@ import android.util.Log;
 public class Jni {
 	public static final String tag = "ToolsJniClass";
 	
+	static {
+		System.loadLibrary("tools_jni");
+	}
+	
 	public static native String version();
 	
 	public static native int enable(boolean enable);
@@ -13,11 +17,7 @@ public class Jni {
 	
 	public static void toString(int n) {
 		Log.i(tag, "count = " + n);
-		
-	}
-	
-	static {
-		System.loadLibrary("tools_jni");
 	}
 
+	public static native void fileSync();
 }

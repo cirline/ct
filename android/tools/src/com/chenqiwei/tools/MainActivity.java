@@ -57,6 +57,7 @@ public class MainActivity extends Activity {
     	private TextView tv_version;
     	
     	private Button btn_open, btn_close;
+    	private Button btn_socket;
     	
     	private Jni jni;
     	
@@ -71,6 +72,8 @@ public class MainActivity extends Activity {
 				case R.id.btn_jni_stop:
 					Jni.enable(false);
 					break;
+				case R.id.btn_filesync:
+					Jni.fileSync();
 				}
 			}
 		};
@@ -89,6 +92,8 @@ public class MainActivity extends Activity {
             btn_open = (Button) rootView.findViewById(R.id.btn_jni_start);
             btn_close = (Button) rootView.findViewById(R.id.btn_jni_stop);
             
+            btn_socket = (Button) rootView.findViewById(R.id.btn_filesync);
+            
             Status status = new Status(this.getActivity());
             Log.i(tag, "ip = " + status.getIP());
             tv_phone_ip.setText(status.getIP());
@@ -97,6 +102,7 @@ public class MainActivity extends Activity {
             
             btn_open.setOnClickListener(l);
             btn_close.setOnClickListener(l);
+            btn_socket.setOnClickListener(l);
             
             jni = new Jni();
             

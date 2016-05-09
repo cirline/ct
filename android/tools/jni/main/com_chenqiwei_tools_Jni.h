@@ -31,6 +31,14 @@ JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     com_chenqiwei_tools_Jni
+ * Method:    fileSync
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_chenqiwei_tools_Jni_fileSync
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

@@ -18,7 +18,7 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS	+= -L../../libs/armeabi
 LOCAL_MODULE    := tools_jni
-LOCAL_SRC_FILES := tools_jni.c main.c
+LOCAL_SRC_FILES := tools_jni.c main.c filesync.c
 LOCAL_LDLIBS	:= -llog
 LOCAL_STATIC_LIBRARIES	:= tools_utils
 
