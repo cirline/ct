@@ -3,6 +3,8 @@
 
 #include <jni.h>
 
+#include "config.h"
+
 enum native_message {
 	MSG_THREAD_NONE = 0,
 	MSG_THREAD_EXIT,

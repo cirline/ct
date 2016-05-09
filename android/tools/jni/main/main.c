@@ -14,25 +14,6 @@
 
 struct thread_desc *g_mloop;
 
-int socket_test(void)
-{
-	int fd;
-	char buffer[1024];
-	int rc;
-
-	fd = new_client_socket("192.168.0.187", 9877);
-	if(fd < 0) {
-		pr_err("new client socket failed.");
-		return -1;
-	}
-
-	rc = read(fd, buffer, 1024);
-
-	pr_info("receive len = %d, %s\n", rc, buffer);
-
-	return 0;
-}
-
 static void main_loop_cleanup_handler(void *arg)
 {
 	struct thread_desc *p = arg;

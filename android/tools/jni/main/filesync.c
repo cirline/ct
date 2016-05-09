@@ -40,6 +40,33 @@ int do_each_file(struct file_node *node)
 	return 0;
 }
 
+int socket_test(void)
+{
+	int fd;
+	char buffer[1024];
+	int rc;
+
+	fd = new_client_socket(SERVER_IP, 9877);
+	if(fd < 0) {
+		pr_err("new client socket failed.");
+		return -1;
+	}
+
+	while(1) {
+		read(fd, buffer, 1024);
+		pr_info("buffer: %s\n", buffer);
+		if(strcmp(buffer, "command:end") == 0)
+			break;
+		rc = 1;
+		write(fd, &rc, sizeof(rc));
+	}
+
+	pr_info("%s\n", buffer);
+
+	return 0;
+}
+
+
 int fsscan(void)
 {
 	htdesc.tbl = tn_table;
@@ -51,6 +78,8 @@ int fsscan(void)
 	dir_scan(FILESYNC_PATH, do_each_file);
 
 	hash_table_print(&htdesc);
+
+	socket_test();
 
 	return 0;
 
