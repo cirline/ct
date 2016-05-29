@@ -1,7 +1,7 @@
 CC := gcc
 CFLAGS += -ldl
 
-main: main.o dlfcn.so
+main.out: main.o dlfcn.so
 	gcc -o $@ $< -ldl -rdynamic
 
 dlfcn.so: dlfcn.c
