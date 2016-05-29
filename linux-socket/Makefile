@@ -1,4 +1,4 @@
-CC	:= gcc
+CC	:= cc
 #CFLAGS	+= -Wall
 
 sobjs	:= ls_server.o

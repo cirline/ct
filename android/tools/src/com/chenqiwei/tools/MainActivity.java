@@ -1,7 +1,6 @@
 package com.chenqiwei.tools;
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,9 +8,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
-import android.os.Build;
 
 public class MainActivity extends Activity {
 	public static final String tag = "chenqiwei.tools";
@@ -55,6 +55,28 @@ public class MainActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
     	private TextView tv_phone_ip;
     	private TextView tv_version;
+    	
+    	private Button btn_open, btn_close;
+    	private Button btn_socket;
+    	
+    	private Jni jni;
+    	
+		private OnClickListener l = new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				switch(arg0.getId()) {
+				case R.id.btn_jni_start:
+					Jni.enable(true);
+					break;
+				case R.id.btn_jni_stop:
+					Jni.enable(false);
+					break;
+				case R.id.btn_filesync:
+					Jni.fileSync();
+				}
+			}
+		};
 
         public PlaceholderFragment() {
         }
@@ -67,11 +89,22 @@ public class MainActivity extends Activity {
             tv_phone_ip = (TextView) rootView.findViewById(R.id.tv_phone_ip);
             tv_version = (TextView) rootView.findViewById(R.id.tv_version);
             
+            btn_open = (Button) rootView.findViewById(R.id.btn_jni_start);
+            btn_close = (Button) rootView.findViewById(R.id.btn_jni_stop);
+            
+            btn_socket = (Button) rootView.findViewById(R.id.btn_filesync);
+            
             Status status = new Status(this.getActivity());
             Log.i(tag, "ip = " + status.getIP());
             tv_phone_ip.setText(status.getIP());
             
             tv_version.setText(Jni.version());
+            
+            btn_open.setOnClickListener(l);
+            btn_close.setOnClickListener(l);
+            btn_socket.setOnClickListener(l);
+            
+            jni = new Jni();
             
             return rootView;
         }

@@ -3,3 +3,7 @@ gen
 obj
 
 android-support-*.jar
+
+.metadata
+
+config.h
