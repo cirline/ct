@@ -11,5 +11,6 @@
     <string name="control_tip">控制</string>
     <string name="open_tip">打开</string>
     <string name="close_tip">关闭</string>
+    <string name="tip_reboot_recovery">recovery</string>
 
 </resources>

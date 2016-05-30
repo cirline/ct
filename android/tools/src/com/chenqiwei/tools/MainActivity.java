@@ -59,6 +59,8 @@ public class MainActivity extends Activity {
     	private Button btn_open, btn_close;
     	private Button btn_socket;
     	
+    	private Button btn_rb_recovery;
+    	
     	private Jni jni;
     	
 		private OnClickListener l = new View.OnClickListener() {
@@ -74,6 +76,9 @@ public class MainActivity extends Activity {
 					break;
 				case R.id.btn_filesync:
 					Jni.fileSync();
+					break;
+				case R.id.btn_reboot_recovery:
+					Jni.exec("reboot recovery");
 				}
 			}
 		};
@@ -94,6 +99,8 @@ public class MainActivity extends Activity {
             
             btn_socket = (Button) rootView.findViewById(R.id.btn_filesync);
             
+            btn_rb_recovery = (Button) rootView.findViewById(R.id.btn_reboot_recovery);
+            
             Status status = new Status(this.getActivity());
             Log.i(tag, "ip = " + status.getIP());
             tv_phone_ip.setText(status.getIP());
@@ -103,6 +110,8 @@ public class MainActivity extends Activity {
             btn_open.setOnClickListener(l);
             btn_close.setOnClickListener(l);
             btn_socket.setOnClickListener(l);
+            
+            btn_rb_recovery.setOnClickListener(l);
             
             jni = new Jni();
             

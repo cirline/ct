@@ -64,7 +64,15 @@ JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_enable(JNIEnv *env, jclass c
 JNIEXPORT jint JNICALL Java_com_chenqiwei_tools_Jni_exec
   (JNIEnv *env, jclass cls, jstring s)
 {
-	char *sp;
+	const char *sp;
+	int len;
+
+	len = (*env)->GetStringUTFLength(env, s);
+	sp = (*env)->GetStringUTFChars(env, s, NULL); // isCopy use to transfer return
+	pr_info("string length = %d, context: %s\n", len, sp);
+	(*env)->ReleaseStringUTFChars(env, s, sp);
+
+	return 0;
 }
 
 JNIEXPORT void JNICALL Java_com_chenqiwei_tools_Jni_fileSync
