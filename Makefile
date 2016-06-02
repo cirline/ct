@@ -10,7 +10,7 @@ modules_install:
 	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) modules_install
 
 clean:
-	rm -rf *.o *.ko *.mod.o *.mod.c *.order *.symvers
+	$(MAKE) -C $(KERN_PATH) M=$(LOCAL_PATH) clean
 
 .PHONY: modules modules_install clean
 
