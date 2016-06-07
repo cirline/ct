@@ -17,6 +17,7 @@ clean:
 else
 
 obj-m += power/
+obj-m += fs/
 
 endif
 
