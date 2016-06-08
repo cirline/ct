@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int get_gcd(int a, int b)
 {
@@ -10,9 +11,19 @@ int get_gcd(int a, int b)
 	return a;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-	printf("36, 9 = %d\n", get_gcd(36, 9));
+	int a, b;
+
+	if(argc < 3) {
+		printf("less argument\n");
+		return -1;
+	}
+
+	a = atoi(argv[1]);
+	b = atoi(argv[2]);
+
+	printf("%d, %d = %d\n", a, b, get_gcd(a, b));
 	return 0;
 }
 
