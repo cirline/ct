@@ -9,6 +9,7 @@ digraph RULE {
 		node [shape = record];
 		/* here describe the data struct */
 		algo [label = "{algo|data structures \nand algorithm analysis}"];
+		kerneltools [label = "{kerneltools|linux kernel\ncommon tools}"];
 	};
 
 	subgraph table {
@@ -16,7 +17,7 @@ digraph RULE {
 		/* here describe the data struct */
 
 		_name [label = <<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
-			<tr><td>table</td></tr>
+			<tr><td>ct</td></tr>
 			</table>>];
 	}
 
@@ -34,5 +35,7 @@ digraph RULE {
 	root -> basic;
 	
 	basic -> algo;
+
+	root -> kerneltools;
 
 }
