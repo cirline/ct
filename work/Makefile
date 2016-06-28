@@ -1,0 +1,6 @@
+
+update:
+	bfiles
+
+.PHONY: update
+

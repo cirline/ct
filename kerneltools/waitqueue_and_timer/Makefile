@@ -1,1 +1,1 @@
-obj-m += kern_time.o
+obj-m += wq_timer.o
