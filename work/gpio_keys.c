@@ -8,7 +8,6 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
 #include <linux/module.h>
 
 #include <linux/init.h>
@@ -53,6 +52,25 @@ struct gpio_keys_drvdata {
 
 int (*leds_ctrl)(int keycode, int on);
 EXPORT_SYMBOL(leds_ctrl);
+
+#define ACC_KEYCODE		116
+#define ACC_WAKEUP_KEYCODE	118
+#define ACC_SLEEP_KEYCODE	117
+#define ACC_DETECT_CNT		10
+#define ACC_DETECT_GAP_S	(0)
+#define ACC_DETECT_GAP_NS	(100000000)
+struct gpio_key_acc {
+	struct gpio_button_data *data;
+	int vh, vl;
+
+	struct semaphore timer_lock;
+	struct timer_list timer;
+	struct timespec gap;
+	int count;
+	struct work_struct work;
+};
+
+static struct gpio_key_acc acc;
 
 /*
  * SYSFS interface for enabling/disabling keys and switches:
@@ -327,27 +345,49 @@ static struct attribute_group gpio_keys_attr_group = {
 	.attrs = gpio_keys_attrs,
 };
 
-static int gpio_keys_scan_accsw(struct input_dev *input, int code, int state, int type)
+static void gpio_keys_acc_report(struct work_struct *work)
 {
-	if(code != 116)
-		return 0;
-	if(state) {
-		/* sleep */
-		input_event(input, type, 117, 1);
-		input_sync(input);
-		msleep(2000);
-		input_event(input, type, 117, 0);
-		input_sync(input);
-	} else {
-		/* wakeup */
-		input_event(input, type, 118, 1);
-		input_sync(input);
-		msleep(50);
-		input_event(input, type, 118, 0);
-		input_sync(input);
-	}
+	struct gpio_key_acc *p = container_of(work, struct gpio_key_acc, work);
+	struct input_dev *input = p->data->input;
+	const struct gpio_keys_button *button = p->data->button;
+	int state = gpio_get_value(button->gpio) ? 1 : 0;
 
-	return 1;
+	dev_dbg(&input->dev, "gpio_keys_report_acc_timer = %d, state = %d\n", acc.count, state);
+	if(acc.count > 0) {
+		acc.count--;
+		state ? acc.vh++ : acc.vl++;
+		mod_timer(&acc.timer, jiffies + timespec_to_jiffies(&acc.gap));
+	} else {
+		unsigned int type = button->type ?: EV_KEY;
+
+		del_timer(&acc.timer);
+		dev_info(&input->dev, "acc result: hi = %d, lo = %d\n", acc.vh, acc.vl);
+		if(acc.vh >= acc.vl) {
+			/* wakeup */
+			input_event(input, type, ACC_WAKEUP_KEYCODE, 1);
+			input_sync(input);
+			msleep(50);
+			input_event(input, type, ACC_WAKEUP_KEYCODE, 0);
+			input_sync(input);
+		} else {
+			/* sleep */
+			input_event(input, type, ACC_SLEEP_KEYCODE, 1);
+			input_sync(input);
+			msleep(1000);
+			input_event(input, type, ACC_SLEEP_KEYCODE, 0);
+			input_sync(input);
+		}
+		up(&acc.timer_lock);
+		pm_relax(acc.data->input->dev.parent);
+	}
+}
+
+static void gpio_keys_acc_timer(unsigned long data)
+{
+	acc.data = (struct gpio_button_data *)data;
+
+	pm_stay_awake(acc.data->input->dev.parent);
+	schedule_work(&acc.work);
 }
 
 static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
@@ -360,8 +400,20 @@ static void gpio_keys_gpio_report_event(struct gpio_button_data *bdata)
     if(leds_ctrl)
         leds_ctrl(button->code, state);
 
-    if(gpio_keys_scan_accsw(input, button->code, !!state, type))
-        return;
+	if(button->code == ACC_KEYCODE) {
+		if(!down_trylock(&acc.timer_lock)) {
+			dev_dbg(&input->dev, "add timer\n");
+			acc.count = ACC_DETECT_CNT;
+			acc.vh = 0;
+			acc.vl = 0;
+			acc.timer.expires = jiffies + timespec_to_jiffies(&acc.gap);
+			acc.timer.data = (unsigned long)bdata;
+			add_timer(&acc.timer);
+		} else {
+			dev_dbg(&input->dev, "acc detecting\n");
+		}
+		return;
+	}
 
 	if (type == EV_ABS) {
 		if (state)
@@ -781,6 +833,13 @@ static int gpio_keys_probe(struct platform_device *pdev)
 		goto fail1;
 	}
 
+	acc.gap.tv_sec = ACC_DETECT_GAP_S;
+	acc.gap.tv_nsec = ACC_DETECT_GAP_NS;
+	init_timer(&acc.timer);
+	acc.timer.function = gpio_keys_acc_timer;
+	sema_init(&acc.timer_lock, 1);
+	INIT_WORK(&acc.work, gpio_keys_acc_report);
+
 	ddata->pdata = pdata;
 	ddata->input = input;
 	mutex_init(&ddata->disable_lock);
@@ -840,8 +899,8 @@ static int gpio_keys_probe(struct platform_device *pdev)
 		goto fail2;
 	}
 
-	set_bit(117, input->keybit);
-	set_bit(118, input->keybit);
+	set_bit(ACC_WAKEUP_KEYCODE, input->keybit);
+	set_bit(ACC_SLEEP_KEYCODE, input->keybit);
 	error = input_register_device(input);
 	if (error) {
 		dev_err(dev, "Unable to register input device, error: %d\n",
