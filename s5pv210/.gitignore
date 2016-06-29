@@ -1,0 +1,11 @@
+*.o
+*.bin
+*.elf
+*.dis
+*.out
+*.i
+
+*.swp
+*.asm
+
+tags

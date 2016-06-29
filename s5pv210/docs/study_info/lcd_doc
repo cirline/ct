@@ -1,0 +1,18 @@
+ ** lcd接口 **
+HSYNC / VFRAME	: GPF0[0]
+VSYNC / VLINE	: GPF0[1]
+VDEN / VM		: GPF0[2]
+VCLK			: GPF0[3]
+VD0 ~ VD23		: GPF0[4-7], GPF1[0-7], GPF2[0-7], GPF3[0-3]
+---
+LCD_PWR			: GPD0[0] / XpwmTOUT0 
+Xi2cSDA2		: GPD1[4]
+Xi2cSCL2		: GPD1[5]
+---
+TSXM1			: XadcAIN[8]
+TSXP1			: XadcAIN[9]
+---
+XEINT14			: GPH1[6]
+XpwmTOUT3		: GPD0[3]
+
+

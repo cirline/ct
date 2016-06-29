@@ -1,0 +1,3 @@
+Transflective	为半透的，可以有背光源，也可以不加背光源 
+Reflective		为反射的，不需要背光源，借住外界光源
+Transmissive	为全透的，需要背光源
