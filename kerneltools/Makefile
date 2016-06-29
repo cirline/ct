@@ -20,6 +20,7 @@ clean:
 else
 
 obj-m += waitqueue_and_timer/
+obj-m += jiffies/
 
 endif
 

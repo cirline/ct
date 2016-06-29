@@ -40,5 +40,6 @@ modules.order
 code_trash
 simple-codec/
 misc
+k
 
 *.dot.png
