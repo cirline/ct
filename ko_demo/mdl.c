@@ -1,19 +1,20 @@
+#define pr_fmt(fmt)	"" fmt
+
 #include <linux/module.h>
 
-MODULE_LICENSE("GPL");
-
-static int __init mdl_init(void)
+static int __init _init(void)
 {
-	printk(KERN_INFO"hello ---------add 0934------------------pc module\n");
+	pr_info("init\n");
 	return 0;
 }
 
-static void __exit mdl_exit(void)
+static void __exit _exit(void)
 {
-	printk(KERN_INFO"bye kernel.\n");
+	pr_info("exit\n");
 }
 
-module_init(mdl_init);
-module_exit(mdl_exit);
+module_init(_init);
+module_exit(_exit);
+MODULE_LICENSE("GPL");
 
 
