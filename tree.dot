@@ -1,0 +1,41 @@
+digraph RULE {
+
+	subgraph global_list {
+		node [color = gray, style = filled];
+		/* here list the global variable */
+	}
+
+	subgraph record {
+		node [shape = record];
+		/* here describe the data struct */
+		algo [label = "{algo|data structures \nand algorithm analysis}"];
+		kerneltools [label = "{kerneltools|linux kernel\ncommon tools}"];
+	};
+
+	subgraph table {
+		node [shape = none, margin = 0];
+		/* here describe the data struct */
+
+		_name [label = <<table border="0" cellborder="1" cellspacing="0" cellpadding="4">
+			<tr><td>ct</td></tr>
+			</table>>];
+	}
+
+	subgraph tip {
+		/* here list the long tip text */
+	}
+
+	subgraph point {
+		node [shape = point];
+		/* here describe dot connection */
+	}
+
+	/* here describe relation */
+
+	root -> basic;
+	
+	basic -> algo;
+
+	root -> kerneltools;
+
+}
