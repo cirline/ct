@@ -1,8 +1,11 @@
-include ../Makefile_common
+include Makefile_common
 
 ifdef link
 link_base	:= text 0xd0020000		# iRAM running address
 else
+
+# if change lds, must care irq vendor in start.S
+
 #link_base	:= text 0x40008000		# ddr running address
 #link_base	:= map_usb_boot.lds
 link_base	:= map_tftp_boot.lds

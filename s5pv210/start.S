@@ -51,7 +51,7 @@ reset:
  * mode:
  tftp:  0 -> 40008000
  usb:   0 -> 23e00000
- nand:  0 -> d0020000
+ nand:  0 -> d0020000 ?? 16byte ?
  */
 	ldr r0, =0x40008000
 	mcr p15, 0, r0, c12, c0, 0
@@ -75,6 +75,18 @@ led_test:
 
 # clock management unit
 	bl clock_init
+
+/********************
+ * memory map       *
+ ********************
+ * .text
+ * .rodata
+ * .bss
+ * .data
+ * sys stack
+ * irq stack
+ * svc stack
+ */
 
 # setup stack space
 set_stack:
@@ -112,7 +124,7 @@ bss_clean:
 	bl main
 
 stop:
-    b stop
+	b stop
 
 /**
  * if r0 == 0, light on the led

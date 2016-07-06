@@ -74,6 +74,10 @@ void inline uint_pending(int n)
 	uart_clear_int_pend(n);
 }
 
+/**
+ * 1. VIC0 ~ VIC3
+ * 2. write 0 to VICADDRESS when clear interrupt pending
+ */
 void irq_handler(void)
 {
 	int n;
