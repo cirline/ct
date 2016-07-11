@@ -8,7 +8,7 @@ platform	:= samsung
 board		:= s5pv210
 
 kernel_root	:= /home/ch/work/s210/linux-3.14.19
-tftp_root	:= /opt/tftproot
+tftp_root	:= /home/chenqiwei/opt/t
 
 # kernel_inc	:= -I$(kernel_root)/include
 # kernel_inc	+= -I$(kernel_root)/arch/$(arch)/mach-$(board)/include

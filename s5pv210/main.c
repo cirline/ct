@@ -1,5 +1,6 @@
-//#include <config/autoconf.h>
-//#include <mach/gpio.h>
+#define DEBUG
+#define pr_fmt(fmt)	"main "fmt
+
 #include "s5p_regs.h"
 #include "uart.h"
 #include "common.h"
@@ -113,12 +114,27 @@ int uart0_int_func(void)
 	return 0;
 }
 
+int shell_query(void)
+{
+	char buffer[2048];
+
+	getstr(buffer);
+
+	if(! *buffer)
+		return 0;
+	else if(! strcmp(buffer, "exit"))
+		return -1;
+	else
+		return 0;
+}
+
 int main(void)
 {
 	int val=0;
 	unsigned char buf[2048];
 	rtc_t rtc;
 	int i;
+	int rc;
     unsigned long taskset;
 
 #if 0
@@ -176,13 +192,15 @@ int main(void)
 
 	val = 0;
 #endif
-    task_init(&taskset);
-	while(1) {
-        task_loop(&taskset);
+    //task_init(&taskset);
+
+	for(rc = 0; rc == 0; ) {
+		printf("$ ");
+		rc = shell_query();
+		pr_debug("rc = %x\n", rc);
+        //task_loop(&taskset);
 #if 0
-//		printf("main --- loop! ... 0x%p\n", val++);
 		rtc_print();
-//		*buf = getchar();
 		buf[1] = '\0';
 //		printf("char = %s\n", buf);
 #if 0
@@ -206,6 +224,8 @@ int main(void)
 		}
 #endif
 	}
+	pr_err("sys panic\n");
+	while(1);
 
 	return 0;
 }
@@ -262,7 +282,7 @@ void task_init(unsigned long *taskset)
 //    set_task(taskset, TASK_TIMER);
 //    set_task(taskset, TASK_BACKLIGHT);
 //    set_task(taskset, TASK_GETCHAR);
-    set_task(taskset, TASK_LCD);
+    //set_task(taskset, TASK_LCD);
 }
 
 void task_loop(unsigned long *taskset)

@@ -1,19 +1,39 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#define DEBUG
-
 #include "uart.h"
 #include "s5p_regs.h"
 
 #define low_putchar(ch)		uart_send_char(ch)
 
-#define printf(format, arg...)		__s5p_printf(format, ##arg)
+#define printf(fmt, ...)	__s5p_printf(fmt, ##__VA_ARGS__)
+#define scanf(fmt, ...)		__s5p_scanf(fmt, ##__VA_ARGS__)
 #define getchar()					uart_get_char()
+#define getstr(buffer)		uart_getstr(buffer, 1)
+
 #define __raw_write(addr, val)		__s5p_write(addr, val)
 #define __raw_read(addr)			__s5p_read(addr)
 #define sleep(time)					__s5p_sleep(time)
 typedef __s5p_addr_t				addr_t;
+
+/**
+ * pr series
+ */
+#ifndef pr_fmt
+#define pr_fmt(fmt)		""fmt
+#endif
+
+#ifdef DEBUG
+#define pr_debug(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
+#else
+#define pr_debug(fmt, ...)
+#endif
+#define pr_info(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
+#define pr_warn(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
+#define pr_err(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
+
+#define pr_here(fmt, ...)	pr_debug(fmt" ( %s: 0x%x )\n", __func__,__LINE__, ##__VA_ARGS__)
+
 
 #ifdef DEBUG
 #define debug(format, arg...)		printf(format, ##arg)
@@ -45,6 +65,9 @@ extern void inline set2clear(addr_t addr, int mask, int index);
 extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
 extern int inline __s5p_sleep(int ms);
+
+/* string */
+extern int strcmp(const char *a, const char *b);
 
 #endif
 

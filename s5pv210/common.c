@@ -1,3 +1,6 @@
+#define DEBUG
+#define pr_fmt(fmt)	"common " fmt
+
 #include <stdarg.h>
 #include "common.h"
 #include "timer.h"
@@ -35,6 +38,19 @@ void inline set2clear(addr_t addr, int mask, int index)
 	__raw_write(addr, (mask << index));
 }
 
+/*    string    */
+int strcmp(const char *a, const char *b)
+{
+	while(*a && (*a == *b)) {
+		pr_debug("a = %c, b = %c\n", *a, *b);
+		a++;
+		b++;
+	}
+
+	pr_debug("a = %c, b = %c\n", *a, *b);
+	return *a || *b;
+}
+
 char *i2hs(unsigned int n, char *ds)
 {
 	char *tb = "0123456789ABCDEF";
@@ -50,6 +66,15 @@ char *i2hs(unsigned int n, char *ds)
 		*++tsp = '0';
 	while((*dsp++ = *tsp--));
 	return ds;
+}
+
+/**
+ * fmt
+ * %s: string
+ */
+int __s5p_scanf(char *fmt, ...)
+{
+	return 0;
 }
 
 /**
