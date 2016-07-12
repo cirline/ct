@@ -76,6 +76,11 @@ unsigned char uart_get_char(void)
 	return __raw_read(URXHx(0)) & 0xff;
 }
 
+/**
+ * uart_getstr - get a string for uart
+ * @buffer: string buffer
+ * @echo: is echo the char
+ */
 char * uart_getstr(char *buffer, int echo)
 {
 	int i;

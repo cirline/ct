@@ -1,5 +1,5 @@
-#define DEBUG
-#define pr_fmt(fmt)	"main "fmt
+//#define DEBUG
+#define pr_fmt(fmt)	"main: "fmt
 
 #include "s5p_regs.h"
 #include "uart.h"
@@ -12,6 +12,47 @@
 #include "lcd.h"
 #include "keyboard.h"
 #include "task.h"
+#include "list.h"
+
+static LIST_HEAD_INIT(gcmds_head);
+
+static struct shell_command * sc_malloc(void)
+{
+	static struct shell_command g_cmds[16];
+	int i;
+
+	for(i = 0; i < 16; i++)
+		if(!g_cmds[i].cmd)
+			return g_cmds + i;
+
+	return NULL;
+
+}
+
+int register_shell_command(struct shell_command *sc)
+{
+	list_add_tail(&gcmds_head, &sc->list);
+
+	return 0;
+}
+
+int register_shell_command_quick(char *cmd, int (*func)(void *), char *msg)
+{
+	struct shell_command *sc = sc_malloc();
+
+	if(!sc) {
+		pr_err("sc_malloc failed\n");
+		return -1;
+	}
+
+	sc->cmd = cmd;
+	sc->process = func;
+	sc->help_msg = msg;
+
+	pr_info("register command %s\n", sc->cmd);
+
+	return register_shell_command(sc);
+}
 
 int key0_func(void)
 {
@@ -114,18 +155,48 @@ int uart0_int_func(void)
 	return 0;
 }
 
+int do_help(void * p)
+{
+	struct shell_command *sc;
+	struct list_head *l;
+	int i = 0;
+
+	for(l = gcmds_head.next; l != &gcmds_head; l = l->next, i++) {
+		sc = container_of(l, struct shell_command, list);
+		printf(" %s - %s\n", sc->cmd, sc->help_msg);
+	}
+
+	printf("  total %x commands\n", i);
+
+	return 0;
+}
+
 int shell_query(void)
 {
 	char buffer[2048];
+	int rc;
+	struct shell_command *sc;
+	struct list_head *l;
 
 	getstr(buffer);
 
-	if(! *buffer)
-		return 0;
-	else if(! strcmp(buffer, "exit"))
-		return -1;
-	else
-		return 0;
+	if(! *buffer) {
+		/* nothing to be done */
+		rc = 0;
+	} else {
+		rc = -1;
+		for(l = gcmds_head.next; l != &gcmds_head; l = l->next) {
+			sc = container_of(l, struct shell_command, list);
+			if(! strcmp(buffer, sc->cmd)) {
+				/* process command */
+				rc = sc->process ? sc->process(NULL) : 0;
+			}
+		}
+		if(rc < 0)
+			printf(" '%s' not found, 'help' for more information\n", buffer);
+	}
+
+	return rc;
 }
 
 int main(void)
@@ -194,7 +265,15 @@ int main(void)
 #endif
     //task_init(&taskset);
 
-	for(rc = 0; rc == 0; ) {
+	uart_init();
+	for(i = 0xff; i > 0; i--) {
+	}
+	pr_info("====== uart support ! ======\n");
+
+	register_shell_command_quick("help", do_help, "show this message");
+	register_shell_command_quick("exit", NULL, "exit");
+
+	for(rc = 0; rc <= 0; ) {
 		printf("$ ");
 		rc = shell_query();
 		pr_debug("rc = %x\n", rc);
@@ -289,16 +368,6 @@ void task_loop(unsigned long *taskset)
 {
     int task[1] = {0};
 
-    /* uart support */
-    if(test_task(*taskset, TASK_UART)) {
-        int i = 0xff;
-        uart_init();
-        while(i--);
-        uart_send_string("====== uart support ! ======\r\n");
-        printf("hello world!\n");
-        clr_task(taskset, TASK_UART);
-    }
-
     /* test timer delay */
     test_task(*taskset, TASK_DELAY) && test_delay(taskset);
 
@@ -347,5 +416,4 @@ void task_loop(unsigned long *taskset)
 }
 
 /* task_loop end */
-
 

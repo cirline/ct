@@ -3,6 +3,10 @@
 
 #include "uart.h"
 #include "s5p_regs.h"
+#include "list.h"
+
+#undef NULL
+#define NULL	(0)
 
 #define low_putchar(ch)		uart_send_char(ch)
 
@@ -56,6 +60,13 @@ enum mask_defined {
 	MASK_BITS_24 = 0xffffff,
 };
 
+struct shell_command {
+	char *cmd;
+	int (*process)(void *p);
+	char *help_msg;
+	struct list_head list;
+};
+
 extern void inline mdelay(int ms);
 extern unsigned int ioread32(const volatile addr_t addr);
 extern void iowrite32(unsigned int w, const volatile addr_t addr);
@@ -66,8 +77,8 @@ extern char *i2hs(unsigned int n, char *ds);
 extern int __s5p_printf(char *s, ...);
 extern int inline __s5p_sleep(int ms);
 
-/* string */
 extern int strcmp(const char *a, const char *b);
+extern int register_shell_command(struct shell_command *sc);
 
 #endif
 

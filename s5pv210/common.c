@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 #define pr_fmt(fmt)	"common " fmt
 
 #include <stdarg.h>
@@ -38,7 +38,14 @@ void inline set2clear(addr_t addr, int mask, int index)
 	__raw_write(addr, (mask << index));
 }
 
-/*    string    */
+/**
+ * strcmp - string compare
+ * @a: a string
+ * @b: other string
+ *
+ * the return value is an integer less than, equal to, or greater than zero
+ * if @a less than, equal to, or greater than @b
+ */
 int strcmp(const char *a, const char *b)
 {
 	while(*a && (*a == *b)) {
@@ -48,7 +55,7 @@ int strcmp(const char *a, const char *b)
 	}
 
 	pr_debug("a = %c, b = %c\n", *a, *b);
-	return *a || *b;
+	return *a - *b;
 }
 
 char *i2hs(unsigned int n, char *ds)

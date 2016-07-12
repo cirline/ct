@@ -43,3 +43,8 @@ clean:
 install:
 	cp $(bin_file) $(tftp_root)/units.bin
 
+tag:
+	ctags -R .
+
+.PHONY: tag
+
