@@ -206,7 +206,6 @@ int main(void)
 	rtc_t rtc;
 	int i;
 	int rc;
-    unsigned long taskset;
 
 #if 0
 	__raw_write(VICxADDRESS(0), 0);
@@ -261,9 +260,7 @@ int main(void)
 		printf("[%p]\t= %p\n", val, buf[val]);
 	}
 
-	val = 0;
 #endif
-    //task_init(&taskset);
 
 	uart_init();
 	for(i = 0xff; i > 0; i--) {
@@ -271,13 +268,13 @@ int main(void)
 	pr_info("====== uart support ! ======\n");
 
 	register_shell_command_quick("help", do_help, "show this message");
-	register_shell_command_quick("exit", NULL, "exit");
+	//register_shell_command_quick("exit", NULL, "exit");
+	register_shell_command_quick("buzz", timer_1hz_buzz_test, "1hz buzz");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");
 		rc = shell_query();
 		pr_debug("rc = %x\n", rc);
-        //task_loop(&taskset);
 #if 0
 		rtc_print();
 		buf[1] = '\0';
@@ -307,14 +304,6 @@ int main(void)
 	while(1);
 
 	return 0;
-}
-
-/* task_loop */
-#define TASK_BUZZ		1<<3
-
-void inline set_task(unsigned long *taskset, int task)
-{
-    *taskset |= 1<<task;
 }
 
 void inline clr_task(unsigned long *taskset, int task)
@@ -353,31 +342,11 @@ int test_delay(unsigned long *taskset)
     return 0;
 }
 
-void task_init(unsigned long *taskset)
-{
-    *taskset = 0;
-    set_task(taskset, TASK_UART);
-//    set_task(taskset, TASK_DELAY);
-//    set_task(taskset, TASK_TIMER);
-//    set_task(taskset, TASK_BACKLIGHT);
-//    set_task(taskset, TASK_GETCHAR);
-    //set_task(taskset, TASK_LCD);
-}
-
 void task_loop(unsigned long *taskset)
 {
-    int task[1] = {0};
-
     /* test timer delay */
     test_task(*taskset, TASK_DELAY) && test_delay(taskset);
 
-	/* test getchar */
-	if(test_task(*taskset, TASK_GETCHAR)) {
-		char c;
-		printf("test getchar------------->\n");
-		c = getchar();
-		printf("input char is -----------> [%c]\n", c);
-	}
 	/* test backlight */
 	if(test_task(*taskset, TASK_BACKLIGHT)) {
 		int i;
@@ -391,28 +360,6 @@ void task_loop(unsigned long *taskset)
 	}
 	/* test LCD */
     test_task(*taskset, TASK_LCD) && test_lcd(taskset);
-
-	/* test buzz */
-	if(*task & TASK_BUZZ) {
-        printf("test buzz------------------>\n");
-		struct timer timer;
-		timer_default_cfg(&timer);
-		timer.sn = TIMER1;
-		timer.auto_reload = TIMER_INTERVAL;
-		timer_init(&timer);
-		timer_toggle(timer.sn, 1);
-	}
-
-    /* test the timer by 1Hz buzz */
-    if(test_task(*taskset, TASK_TIMER)) {
-        struct timer timer;
-        timer_default_cfg(&timer);
-        timer.sn = TIMER1;
-        timer.auto_reload = TIMER_INTERVAL;
-        timer_init(&timer);
-        timer_toggle(timer.sn, 1);
-        clr_task(taskset, TASK_TIMER);
-    }
 }
 
 /* task_loop end */
