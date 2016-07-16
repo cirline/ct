@@ -10,4 +10,5 @@ extern int uart_send_string(char *s);
 extern int uart_irq_init(irq_func_t func);
 extern void uart_clear_int_pend(int n);
 extern unsigned char uart_get_char(void);
+extern char * uart_getstr(char *buffer, int echo);
 #endif

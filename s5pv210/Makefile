@@ -27,6 +27,7 @@ objs	+= rtc.o
 objs	+= i2c.o
 objs	+= lcd.o
 objs	+= keyboard.o
+objs	+= task.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)
@@ -42,4 +43,9 @@ clean:
 
 install:
 	cp $(bin_file) $(tftp_root)/units.bin
+
+tag:
+	ctags -R .
+
+.PHONY: tag
 
