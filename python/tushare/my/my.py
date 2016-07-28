@@ -24,6 +24,13 @@ def check_record(cursor, table, column, value):
     count = cursor.fetchall()
     return (len(count) > 0)
 
+def update_record(cursor, table, code, column, value):
+    if check_record(cursor, table, "code", code):
+        sql = "update %s set %s = '%s' where code = '%s';" % (table, column, value, code)
+    else:
+        sql = "insert into %s (code, %s) values ('%s', '%s');" % (table, column, code, value)
+    cursor.execute(sql)
+
 def get_lowest(code):
     now = datetime.now()
     date_now = now.strftime('%Y-%m-%d')
@@ -42,16 +49,18 @@ def get_lowest(code):
             lowest = p
     return lowest
 
-try:
-    conn = sqlite3.connect('my.db')
-    cursor = conn.cursor()
-    if not check_column(cursor, "stocks", "lowest"):
-        insert_column(cursor, "stocks", "lowest", "varchar", 16)
+def update_stock_lowest(cursor, code):
+    lowest = get_lowest(code)
+    update_record(cursor, "stocks", code, "lowest", lowest)
 
-    print(get_lowest('601398'))
+conn = sqlite3.connect('my.db')
+cursor = conn.cursor()
+if not check_column(cursor, "stocks", "lowest"):
+    insert_column(cursor, "stocks", "lowest", "varchar", 16)
 
-except Exception as e:
-    print(e)
-check_record(cursor, "stocks", "code", "601398")
-check_record(cursor, "stocks", "code", 601398)
+update_stock_lowest(cursor, "601398")
 
+
+cursor.close()
+conn.commit()
+conn.close()
