@@ -36,7 +36,7 @@ typedef __s5p_addr_t				addr_t;
 #define pr_warn(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
 #define pr_err(fmt, ...)	printf(pr_fmt(fmt), ##__VA_ARGS__)
 
-#define pr_here(fmt, ...)	pr_debug(fmt" ( %s: 0x%x )\n", __func__,__LINE__, ##__VA_ARGS__)
+#define pr_here(fmt)		pr_debug("%s: [0x%x] " fmt "\n", __func__,__LINE__)
 
 
 #ifdef DEBUG

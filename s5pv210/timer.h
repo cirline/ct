@@ -25,7 +25,12 @@ enum timer_tcon {
 };
 
 enum { TIMER_INVERT_OFF = 0, TIMER_INVERT_ON };
-enum { TIMER_ONESHOT = 0, TIMER_INTERVAL };
+enum {
+	/* one shot */
+	TIMER_ONESHOT = 0,
+	/* auto reload */
+	TIMER_INTERVAL,
+};
 
 struct timer {
     /* timer serial number */
