@@ -59,13 +59,28 @@ class mydb(object):
         else:
             return True
 
-    def insert_column(self, table, column, dtype, bits):
+    """
+    * insert_column - insert a column into a table
+    * @table: table name
+    * @column: column will be insert
+    * @dtype: column date type
+    *
+    * the return is a boolean value
+    """
+    def insert_column(self, table, column, dtype):
         if(self.cursor == None):
             return False
-        sql = "alter table %s add column %s %s(%d);" % (table, column, dtype, bits)
+        sql = "alter table '%s' add column %s %s;" % (table, column, dtype)
         self.cursor.execute(sql)
         return True
 
+    """
+    * column_index - map column label to index by sqlite_master
+    * @table: table name
+    * @column: column label
+    *
+    * the return value is a integer for column index, or -1 while column not exist
+    """
     def column_index(self, table, column):
         if(self.cursor == None):
             return -1
@@ -74,17 +89,35 @@ class mydb(object):
         result = self.cursor.fetchone()
         if(result != None):
             table_sql = result[4]
-            print("create table sql: %s" % table_sql)
             index = table_sql.count(',', 0, table_sql.find(', %s' % column)) + 1
-            print(index)
             return index
         else:
             return -1
 
+    """
+    * get_last_record - get last record
+    * @table: table name
+    * @order: record order key
+    * @desc: is order by desc ?
+    """
+    def get_last_record(self, table, order = 'id', desc = ''):
+        if(self.cursor == None):
+            return None
+        sql = "select * from '%s' order by %s %s;" % (table, order, desc)
+        self.execute(sql)
+        return self.fetchone()
+
+    """
+    * get_onecell - get one cell value
+    * @table: table name
+    * @key: record key
+    * @key: record key value
+    * @column: the cell to be read
+    """
     def get_onecell(self, table, key, keyval, column):
         if(self.cursor == None):
             return None
-        sql = "select %s from %s where %s = '%s'" % (column, table, key, keyval)
+        sql = "select %s from %s where %s = '%s';" % (column, table, key, keyval)
         # print("getonecell sql: %s" % sql)
         self.cursor.execute(sql)
         result = self.cursor.fetchone()
@@ -95,17 +128,23 @@ class mydb(object):
 
     def update_onecell(self, table, key, keyval, cell, cellval):
         if(self.get_onecell(table, key, keyval, key) != None):
-            sql = "update %s set %s = '%s' where %s = '%s';" % (table, cell, cellval, key, keyval)
+            sql = "update '%s' set %s = '%s' where %s = '%s';" % (table, cell, cellval, key, keyval)
         else:
-            sql = "insert into %s (%s, %s) values ('%s', '%s');" % (table, key, cell, keyval, cellval)
+            sql = "insert into '%s' (%s, %s) values ('%s', '%s');" % (table, key, cell, keyval, cellval)
         self.execute(sql)
 
-    def check_db(self, table, columns):
+    """
+    * check_table_and_creat - check table and creat it while not exist
+    * @table: table name
+    * @columns: column group
+    * @subsql: create table subsql, for some constraint columns
+    """
+    def check_table_and_creat(self, table, columns, subsql = None):
         if(not self.check_table(table)):
-            sql = 'create table %s (id integer primary key autoincrement)' % table
+            sql = "create table '%s' (id integer primary key autoincrement %s);" % (table, subsql)
             self.execute(sql)
 
         for column in columns:
             if(not self.check_column(table, column[0])):
-                self.insert_column(table, column[0], 'varchar', column[1])
+                self.insert_column(table, column[0], column[1])
 
