@@ -39,7 +39,24 @@ modules.order
 # ignore folder
 code_trash
 simple-codec/
-misc
 k
 
 *.dot.png
+
+# automake
+*_demo
+*_out
+config.*
+.deps
+.dirstamp
+autom4te.cache
+stamp-h1
+autoscan.log
+configure.scan
+Makefile.in
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
