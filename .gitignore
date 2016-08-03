@@ -40,6 +40,10 @@ modules.order
 code_trash
 simple-codec/
 k
+lab/ccutils
+lab/filesync
+/test
+/demo
 
 *.dot.png
 
