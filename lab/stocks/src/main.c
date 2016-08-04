@@ -3,7 +3,11 @@
 
 int main(void)
 {
+	sqlite3 *db;
 	pr_info("main start ...\n");
+
+
+
 	return 0;
 }
 
