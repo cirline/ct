@@ -15,7 +15,7 @@ static struct hist_data_ui dui[] = {
 	{"name", 12},
 	{"date", 10},
 	{"action", 8},
-	{"price", 8},
+	{"price", 12},
 	{"volume", 8},
 	{"counter_fee", 12},
 	{"stamp_tax", 10},
@@ -58,7 +58,7 @@ static int ui_get_hist_data(struct hist_data *data)
 	io_getdata(tipbuf, "%s", 8, data->date);
 
 	do {
-		sprintf(tipbuf, "action(%s): ", data->action);
+		sprintf(tipbuf, "action(buy, sell, divi)(%s): ", data->action);
 		io_getdata(tipbuf, "%s", 0, data->action);
 		a = strcmp(data->action, "buy");
 		b = strcmp(data->action, "sell");
