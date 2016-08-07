@@ -1,9 +1,11 @@
 #define pr_fmt(fmt)	"main: " fmt
 
 #include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 
 #include <ccutils/log.h>
+#include <ccutils/io.h>
 
 #include "db_if.h"
 #include "ui.h"
@@ -33,6 +35,7 @@ int main(int argc, char *argv[])
 	enum stock_action action = ACTION_NULL;
 	int rmid;
 	int debug = 0;
+	char db_uptodate[16];
 
 	while((optc = getopt_long(argc, argv, "alr:d", longopts, NULL)) != -1) {
 		switch(optc) {
@@ -56,6 +59,14 @@ int main(int argc, char *argv[])
 
 	if(lose || optind < argc) {
 		pr_err("arg error\n");
+	}
+
+	if(!debug) {
+		io_getdata("database is update(yes/no)? ", "%s", 1, db_uptodate);
+		if(strcmp(db_uptodate, "yes")) {
+			pr_err("please update database!\n");
+			return -1;
+		}
 	}
 
 	rc = db_open(debug ? "stocks.local.db" : "stock.db", &db);
