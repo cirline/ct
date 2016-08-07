@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	int rc;
 	int optc;
 	int lose = 0;
-	enum stock_action action = ACTION_NULL;
+	enum stock_action action = ACTION_LIST;
 	int rmid;
 	int debug = 0;
 	char db_uptodate[16];

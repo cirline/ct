@@ -13,7 +13,7 @@ static struct hist_data_ui dui[] = {
 	{"id", 4},
 	{"code", 8},
 	{"name", 12},
-	{"date", 12},
+	{"date", 10},
 	{"action", 8},
 	{"price", 8},
 	{"volume", 8},
@@ -39,43 +39,46 @@ void ui_show_record_detail(char *title, struct hist_data *data)
 	printf(" %16s: %.2f\n", "transfer fee", data->transfer_fee);
 }
 
-int ui_insert_record(sqlite3 *db)
+static int ui_get_hist_data(struct hist_data *data)
 {
-	struct hist_data dat;
-	struct hist_data *data = &dat;
 	int rc;
 	int len;
 	int a, b, c;
 	char confirm[16];
+	int input[16];
+	char tipbuf[1024];
+
+	sprintf(tipbuf, "code(%s): ", data->code);
+	io_getdata(tipbuf, "%s", 6, data->code);
+
+	sprintf(tipbuf, "name(%s): ", data->name);
+	io_getdata(tipbuf, "%s", 0, data->name);
+
+	sprintf(tipbuf, "date(%s): ", data->date);
+	io_getdata(tipbuf, "%s", 8, data->date);
 
 	do {
-		printf("code: ");
-		rc = scanf("%s", data->code);
-	} while(rc != 1 || strlen(data->code) != 6);
-
-	do {
-		printf("name: ");
-		rc = scanf("%s", data->name);
-	} while(rc != 1);
-
-	do {
-		printf("date: ");
-		rc = scanf("%s", data->date);
-	} while (rc != 1 || strlen(data->date) != (4 + 1 + 2 + 1 + 2));
-
-	do {
-		printf("action(buy, sell, divi): ");
-		rc = scanf("%s", data->action);
+		sprintf(tipbuf, "action(%s): ", data->action);
+		io_getdata(tipbuf, "%s", 0, data->action);
 		a = strcmp(data->action, "buy");
 		b = strcmp(data->action, "sell");
 		c = strcmp(data->action, "divi");
-	} while (rc != 1 || (a && b && c));
+	} while (a && b && c);
 
-	io_getdata("price: ", "%f", 1, &data->price);
-	io_getdata("volume: ", "%d", 1, &data->volume);
-	io_getdata("counter_fee: ", "%f", 1, &data->counter_fee);
-	io_getdata("stamp_tax: ", "%f", 1, &data->stamp_tax);
-	io_getdata("transfer_fee: ", "%f", 1, &data->transfer_fee);
+	sprintf(tipbuf, "price(%8.2f): ", data->price);
+	io_getdata(tipbuf, "%f", 0, &data->price);
+
+	sprintf(tipbuf, "volume(%d): ", data->volume);
+	io_getdata(tipbuf, "%d", 0, &data->volume);
+
+	sprintf(tipbuf, "counter_fee(%8.2f): ", data->counter_fee);
+	io_getdata(tipbuf, "%f", 0, &data->counter_fee);
+
+	sprintf(tipbuf, "stamp_tax(%8.2f): ", data->stamp_tax);
+	io_getdata(tipbuf, "%f", 0, &data->stamp_tax);
+
+	sprintf(tipbuf, "transfer_fee(%8.2f): ", data->transfer_fee);
+	io_getdata(tipbuf, "%f", 0, &data->transfer_fee);
 
 	data->id = 0;
 	ui_show_record_detail("Confirm:", data);
@@ -87,7 +90,20 @@ int ui_insert_record(sqlite3 *db)
 	if(strcmp(confirm, "yes"))
 		return -1;
 
-	rc = stock_insert_record(db, data);
+
+	return 0;
+}
+
+int ui_insert_record(sqlite3 *db)
+{
+	struct hist_data data;
+	int rc;
+
+	memset(&data, 0, sizeof(struct hist_data));
+	while(ui_get_hist_data(&data) < 0)
+		pr_err("input again...\n");
+
+	rc = stock_insert_record(db, &data);
 	if(rc < 0){
 		pr_err("insert error\n");
 		return -1;

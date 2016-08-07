@@ -61,9 +61,9 @@ int stock_get_records(sqlite3 *db, char *code, int (*cb)(void *, int, char**, ch
 	int rc;
 
 	if(code)
-		rc = asprintf(&sql, "select * from history where code = '%s';", code);
+		rc = asprintf(&sql, "select * from history where code = '%s' order by date;", code);
 	else
-		rc = asprintf(&sql, "select * from history;");
+		rc = asprintf(&sql, "select * from history order by date;");
 
 	if(rc < 0) {
 		pr_err("%s, asprintf sql error\n", __func__);
