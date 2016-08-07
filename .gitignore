@@ -46,6 +46,7 @@ lab/filesync
 /demo
 
 *.dot.png
+*.local.db
 
 # automake
 *_demo

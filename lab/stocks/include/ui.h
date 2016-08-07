@@ -3,5 +3,6 @@
 
 int ui_insert_record(sqlite3 *db);
 int ui_list_records(sqlite3 *db, char *code);
+int ui_delete_record(sqlite3 *db, int id);
 
 #endif

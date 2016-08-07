@@ -1,5 +1,6 @@
 #define pr_fmt(fmt)	"main: " fmt
 
+#include <stdlib.h>
 #include <getopt.h>
 
 #include <ccutils/log.h>
@@ -10,7 +11,17 @@
 static const struct option longopts[] = {
 	{"add", no_argument, NULL, 'a'},
 	{"list", no_argument, NULL, 'l'},
+	{"rm", required_argument, NULL, 'r'},
+	{"debug", no_argument, NULL, 'd'},
 	{NULL, 0, NULL, 0}
+};
+
+enum stock_action {
+	ACTION_ADD = 0,
+	ACTION_LIST,
+	ACTION_RM,
+
+	ACTION_NULL,
 };
 
 int main(int argc, char *argv[])
@@ -19,30 +30,54 @@ int main(int argc, char *argv[])
 	int rc;
 	int optc;
 	int lose = 0;
+	enum stock_action action = ACTION_NULL;
+	int rmid;
+	int debug = 0;
 
-	rc = db_open("stocks.local.db", &db);
+	while((optc = getopt_long(argc, argv, "alr:d", longopts, NULL)) != -1) {
+		switch(optc) {
+			case 'a':
+				action = ACTION_ADD;
+				break;
+			case 'l':
+				action = ACTION_LIST;
+				break;
+			case 'r':
+				action = ACTION_RM;
+				rmid = atoi(optarg);
+				break;
+			case 'd':
+				debug = 1;
+				break;
+			default:
+				lose = 1;
+		}
+	}
+
+	if(lose || optind < argc) {
+		pr_err("arg error\n");
+	}
+
+	rc = db_open(debug ? "stocks.local.db" : "stock.db", &db);
 	if(rc != SQLITE_OK) {
 		pr_err("open: %s\n", sqlite3_errmsg(db));
 		return -1;
 	}
 	stock_database_init(db);
 
-	while((optc = getopt_long(argc, argv, "al", longopts, NULL)) != -1) {
-		switch(optc) {
-			case 'a':
-				ui_insert_record(db);
-				break;
-			case 'l':
-				ui_list_records(db, NULL);
-				break;
-			default:
-				lose = 1;
-				break;
-		}
-	}
+	switch(action) {
+		case ACTION_ADD:
+			ui_insert_record(db);
+			break;
+		case ACTION_LIST:
+			ui_list_records(db, NULL);
+			break;
+		case ACTION_RM:
+			ui_delete_record(db, rmid);
+			break;
+		default:
+			pr_err("unkown action %d\n", action);
 
-	if(lose || optind < argc) {
-		pr_err("arg error\n");
 	}
 
 	return 0;

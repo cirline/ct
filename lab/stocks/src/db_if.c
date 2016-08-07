@@ -80,3 +80,49 @@ int stock_get_records(sqlite3 *db, char *code, int (*cb)(void *, int, char**, ch
 
 	return rc;
 }
+
+int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb)
+{
+	char *sql;
+	char *errmsg;
+	int rc;
+
+	rc = asprintf(&sql, "select * from history where id = %d;", id);
+	if(rc < 0) {
+		pr_err("%s, asprintf error\n", __func__);
+		return -1;
+	}
+
+	rc = db_exec(db, sql, cb, NULL, &errmsg);
+	if(rc != SQLITE_OK) {
+		pr_err("%s, select error: %s\n", __func__, errmsg);
+		free(errmsg);
+		rc = -1;
+	}
+	free(sql);
+
+	return rc;
+}
+
+int stock_delete_record(sqlite3 *db, int id)
+{
+	char *sql;
+	char *errmsg;
+	int rc;
+
+	rc = asprintf(&sql, "delete from history where id = %d;", id);
+	if(rc < 0) {
+		pr_err("%s, asprintf error\n", __func__);
+		return -1;
+	}
+
+	rc = db_exec(db, sql, NULL, NULL, &errmsg);
+	if(rc != SQLITE_OK) {
+		pr_err("delete error: %s", errmsg);
+		free(errmsg);
+		rc = -1;
+	}
+	free(sql);
+
+	return rc;
+}

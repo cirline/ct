@@ -23,6 +23,22 @@ static struct hist_data_ui dui[] = {
 	{NULL, 0}
 };
 
+void ui_show_record_detail(char *title, struct hist_data *data)
+{
+	printf("%s\n", title);
+
+	printf(" %16s: %d\n", "id", data->id);
+	printf(" %16s: %s\n", "code", data->code);
+	printf(" %16s: %s\n", "name", data->name);
+	printf(" %16s: %s\n", "date", data->date);
+	printf(" %16s: %s\n", "action", data->action);
+	printf(" %16s: %.2f\n", "price", data->price);
+	printf(" %16s: %d\n", "volume", data->volume);
+	printf(" %16s: %.2f\n", "counter fee", data->counter_fee);
+	printf(" %16s: %.2f\n", "stamp tax", data->stamp_tax);
+	printf(" %16s: %.2f\n", "transfer fee", data->transfer_fee);
+}
+
 int ui_insert_record(sqlite3 *db)
 {
 	struct hist_data dat;
@@ -61,17 +77,8 @@ int ui_insert_record(sqlite3 *db)
 	io_getdata("stamp_tax: ", "%f", 1, &data->stamp_tax);
 	io_getdata("transfer_fee: ", "%f", 1, &data->transfer_fee);
 
-	printf("Confirm:\n");
-	printf(" %16s: %s\n", "code", data->code);
-	printf(" %16s: %s\n", "name", data->name);
-	printf(" %16s: %s\n", "date", data->date);
-	printf(" %16s: %s\n", "action", data->action);
-	printf(" %16s: %.2f\n", "price", data->price);
-	printf(" %16s: %d\n", "volume", data->volume);
-	printf(" %16s: %.2f\n", "counter fee", data->counter_fee);
-	printf(" %16s: %.2f\n", "stamp tax", data->stamp_tax);
-	printf(" %16s: %.2f\n", "transfer fee", data->transfer_fee);
-
+	data->id = 0;
+	ui_show_record_detail("Confirm:", data);
 	do {
 		printf("\nRight(yes/no) ? ");
 		rc = scanf("%s", confirm);
@@ -119,6 +126,50 @@ int ui_list_records(sqlite3 *db, char *code)
 	ui_record_header();
 
 	stock_get_records(db, code, ui_list_records_callback, NULL);
+
+	return 0;
+}
+
+static int ui_list_record_byid_callback(void *param, int nc, char **cv, char **cn)
+{
+	int i;
+
+	for(i = 0; i < nc; i++)
+		printf("%16s: %s\n", cn[i], cv[i]);
+	printf("\n");
+
+	return 0;
+}
+
+int ui_delete_record(sqlite3 *db, int id)
+{
+	char *sql;
+	int rc;
+	char confirm[16];
+
+	if(!db || id < 0) {
+		pr_err("%s, invalid value\n");
+		return -1;
+	}
+
+	rc = stock_get_record_byid(db, id, ui_list_record_byid_callback);
+	if(rc < 0) {
+		pr_err("record id = %d not exist\n", id);
+		return -1;
+	}
+
+	io_getdata("delete(yes/no) ?", "%s", 1, confirm);
+	if(strcmp(confirm, "yes")) {
+		pr_info("ignore\n");
+		return -1;
+	}
+	rc = stock_delete_record(db, id);
+	if(rc < 0) {
+		pr_err("delete error\n");
+		return -1;
+	}
+
+	pr_info("delete %d success\n", id);
 
 	return 0;
 }
