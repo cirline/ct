@@ -3,6 +3,8 @@
 
 #include <ccutils/db.h>
 
+#define COUNTER_FEE_RATE	0.0005
+
 typedef int (*exec_cb_t)(void *param, int ncol, char **cval, char **cname);
 
 struct hist_data {
@@ -16,6 +18,13 @@ struct hist_data {
 	float counter_fee;
 	float stamp_tax;
 	float transfer_fee;
+};
+
+struct hist_data_analysis {
+	int keep_volume;
+	float total_cost;
+	float total_divi;
+	float cost_price;
 };
 
 struct hist_data_ui {

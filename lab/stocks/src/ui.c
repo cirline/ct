@@ -2,6 +2,7 @@
 #define pr_fmt(fmt)	"ui: " fmt
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <ccutils/log.h>
@@ -37,6 +38,37 @@ void ui_show_record_detail(char *title, struct hist_data *data)
 	printf(" %16s: %.2f\n", "counter fee", data->counter_fee);
 	printf(" %16s: %.2f\n", "stamp tax", data->stamp_tax);
 	printf(" %16s: %.2f\n", "transfer fee", data->transfer_fee);
+}
+
+static int ui_construct_data(void *param, int nc, char **cv, char **cn)
+{
+	struct hist_data *data = param;
+	int i;
+
+	for(i = 0; i < nc; i++) {
+		if(! strcmp("id", cn[i]))
+			data->id = atoi(cv[i]);
+		else if(! strcmp(cn[i], "code"))
+			strcpy(data->code, cv[i]);
+		else if(! strcmp(cn[i], "name"))
+			strcpy(data->name, cv[i]);
+		else if(! strcmp(cn[i], "date"))
+			strcpy(data->date, cv[i]);
+		else if(! strcmp(cn[i], "action"))
+			strcpy(data->action, cv[i]);
+		else if(! strcmp(cn[i], "price"))
+			sscanf(cv[i], "%f", &data->price);
+		else if(! strcmp(cn[i], "volume"))
+			data->volume = atoi(cv[i]);
+		else if(! strcmp(cn[i], "counter_fee"))
+			sscanf(cv[i], "%f", &data->counter_fee);
+		else if(! strcmp(cn[i], "stamp_tax"))
+			sscanf(cv[i], "%f", &data->stamp_tax);
+		else if(! strcmp(cn[i], "transfer_fee"))
+			sscanf(cv[i], "%f", &data->transfer_fee);
+	}
+
+	return 0;
 }
 
 static int ui_get_hist_data(struct hist_data *data)
@@ -79,6 +111,12 @@ static int ui_get_hist_data(struct hist_data *data)
 
 	sprintf(tipbuf, "transfer_fee(%8.2f): ", data->transfer_fee);
 	io_getdata(tipbuf, "%f", 0, &data->transfer_fee);
+
+	if(data->counter_fee == 0 && (! strcmp(data->action, "buy") || ! strcmp(data->action, "sell"))) {
+		data->counter_fee = data->price * data->volume * COUNTER_FEE_RATE;
+		if(data->counter_fee < 5)
+			data->counter_fee = 5;
+	}
 
 	ui_show_record_detail("Confirm:", data);
 	do {
@@ -125,6 +163,26 @@ void ui_record_header(void)
 static int ui_list_records_callback(void *param, int nc, char **cv, char **cn)
 {
 	int i;
+	struct hist_data_analysis * pana = param;
+	struct hist_data data;
+
+	if(pana) {
+		ui_construct_data(&data, nc, cv, cn);
+		if(! strcmp(data.action, "buy")) {
+			pana->keep_volume += data.volume;
+			pana->total_cost += data.volume * data.price;
+			pana->total_cost += data.counter_fee;
+			pana->total_cost += data.transfer_fee;
+		} else if(! strcmp(data.action, "sell")) {
+			pana->keep_volume -= data.volume;
+			pana->total_cost -= data.volume * data.price;
+			pana->total_cost += data.counter_fee;
+			pana->total_cost += data.stamp_tax;
+			pana->total_cost += data.transfer_fee;
+		} else if(! strcmp(data.action, "divi")) {
+			pana->total_divi += data.price;
+		}
+	}
 
 	for(i = 0; i < nc; i++)
 		printf("%*s", dui[i].slen, cv[i]);
@@ -135,13 +193,26 @@ static int ui_list_records_callback(void *param, int nc, char **cv, char **cn)
 
 int ui_list_records(sqlite3 *db, char *code)
 {
+	struct hist_data_analysis *analysis = NULL;
+
 	if(code && (strlen(code) != 6)) {
 		pr_err("error code %s\n", code);
+		return -1;
+	}
+	if(code) {
+		analysis = malloc(sizeof(struct hist_data_analysis));
+		memset(analysis, 0, sizeof(struct hist_data_analysis));
 	}
 
 	ui_record_header();
+	stock_get_records(db, code, ui_list_records_callback, analysis);
 
-	stock_get_records(db, code, ui_list_records_callback, NULL);
+	if(analysis) {
+		float cp = (analysis->total_cost - analysis->total_divi) / analysis->keep_volume;
+		printf("\n### keep: %d, cost: %.2f, divi: %.2f, cost_price: %.2f ###\n\n",
+				analysis->keep_volume, analysis->total_cost, analysis->total_divi, cp);
+		free(analysis);
+	}
 
 	return 0;
 }
@@ -189,36 +260,6 @@ int ui_delete_record(sqlite3 *db, int id)
 	return 0;
 }
 
-static int ui_construct_data(void *param, int nc, char **cv, char **cn)
-{
-	struct hist_data *data = param;
-	int i;
-
-	for(i = 0; i < nc; i++) {
-		if(! strcmp("id", cn[i]))
-			data->id = atoi(cv[i]);
-		else if(! strcmp(cn[i], "code"))
-			strcpy(data->code, cv[i]);
-		else if(! strcmp(cn[i], "name"))
-			strcpy(data->name, cv[i]);
-		else if(! strcmp(cn[i], "date"))
-			strcpy(data->date, cv[i]);
-		else if(! strcmp(cn[i], "action"))
-			strcpy(data->action, cv[i]);
-		else if(! strcmp(cn[i], "price"))
-			sscanf(cv[i], "%f", &data->price);
-		else if(! strcmp(cn[i], "volume"))
-			data->volume = atoi(cv[i]);
-		else if(! strcmp(cn[i], "counter_fee"))
-			sscanf(cv[i], "%f", &data->counter_fee);
-		else if(! strcmp(cn[i], "stamp_tax"))
-			sscanf(cv[i], "%f", &data->stamp_tax);
-		else if(! strcmp(cn[i], "transfer_fee"))
-			sscanf(cv[i], "%f", &data->transfer_fee);
-	}
-
-	return 0;
-}
 
 int ui_edit_record(sqlite3 *db, int id)
 {
