@@ -34,7 +34,7 @@ int stock_insert_record(sqlite3 *db, struct hist_data *d)
 
 	rc = asprintf(&sql, "insert into history (code, name, date, action,"
 			"price, volume, counter_fee, stamp_tax, transfer_fee)"
-			"values ('%s', '%s', '%s', '%s', %f, %d, %f, %f, %f);",
+			"values ('%s', '%s', '%s', '%s', %.3f, %d, %.3f, %.3f, %.3f);",
 			d->code, d->name, d->date, d->action,
 			d->price, d->volume, d->counter_fee, d->stamp_tax, d->transfer_fee);
 	if(rc < 0) {
@@ -47,6 +47,34 @@ int stock_insert_record(sqlite3 *db, struct hist_data *d)
 	if(rc != SQLITE_OK) {
 		pr_err("insert error: %s\n", errmsg);
 		free(errmsg);
+		rc = -1;
+	}
+	free(sql);
+
+	return rc;
+}
+
+int stock_update_record(sqlite3 *db, struct hist_data *d)
+{
+	char *sql;
+	char *errmsg;
+	int rc;
+
+	rc = asprintf(&sql, "update history set code = '%s', name = '%s', date = '%s', action = '%s', "
+			"price = %.3f, volume = %d, counter_fee = %.3f, stamp_tax = %.3f, transfer_fee = %.3f "
+			"where id = %d;",
+			d->code, d->name, d->date, d->action,
+			d->price, d->volume, d->counter_fee, d->stamp_tax, d->transfer_fee,
+			d->id);
+	if(rc < 0) {
+		pr_err("%s, asprintf error\n", __func__);
+		return -1;
+	}
+	pr_info("update sql: %s\n", sql);
+	rc = db_exec(db, sql, NULL, NULL, &errmsg);
+	if(rc != SQLITE_OK) {
+		pr_err("update fail: %s\n", errmsg);
+		sqlite3_free(errmsg);
 		rc = -1;
 	}
 	free(sql);
@@ -81,7 +109,7 @@ int stock_get_records(sqlite3 *db, char *code, int (*cb)(void *, int, char**, ch
 	return rc;
 }
 
-int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb)
+int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb, void *param)
 {
 	char *sql;
 	char *errmsg;
@@ -93,7 +121,7 @@ int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb)
 		return -1;
 	}
 
-	rc = db_exec(db, sql, cb, NULL, &errmsg);
+	rc = db_exec(db, sql, cb, param, &errmsg);
 	if(rc != SQLITE_OK) {
 		pr_err("%s, select error: %s\n", __func__, errmsg);
 		free(errmsg);

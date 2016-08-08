@@ -80,18 +80,18 @@ static int ui_get_hist_data(struct hist_data *data)
 	sprintf(tipbuf, "transfer_fee(%8.2f): ", data->transfer_fee);
 	io_getdata(tipbuf, "%f", 0, &data->transfer_fee);
 
-	data->id = 0;
 	ui_show_record_detail("Confirm:", data);
 	do {
-		printf("\nRight(yes/no) ? ");
+		printf("\nRight(yes/no/abort) ? ");
 		rc = scanf("%s", confirm);
 	} while(rc != 1);
 
-	if(strcmp(confirm, "yes"))
+	if(!strcmp(confirm, "yes"))
+		return 0;
+	else if(!strcmp(confirm, "abort"))
+		return 1;
+	else
 		return -1;
-
-
-	return 0;
 }
 
 int ui_insert_record(sqlite3 *db)
@@ -159,22 +159,21 @@ static int ui_list_record_byid_callback(void *param, int nc, char **cv, char **c
 
 int ui_delete_record(sqlite3 *db, int id)
 {
-	char *sql;
 	int rc;
 	char confirm[16];
 
 	if(!db || id < 0) {
-		pr_err("%s, invalid value\n");
+		pr_err("%s, invalid value\n", __func__);
 		return -1;
 	}
 
-	rc = stock_get_record_byid(db, id, ui_list_record_byid_callback);
+	rc = stock_get_record_byid(db, id, ui_list_record_byid_callback, NULL);
 	if(rc < 0) {
 		pr_err("record id = %d not exist\n", id);
 		return -1;
 	}
 
-	io_getdata("delete(yes/no) ?", "%s", 1, confirm);
+	io_getdata("delete(yes/no) ?", "%s", 0, confirm);
 	if(strcmp(confirm, "yes")) {
 		pr_info("ignore\n");
 		return -1;
@@ -186,6 +185,71 @@ int ui_delete_record(sqlite3 *db, int id)
 	}
 
 	pr_info("delete %d success\n", id);
+
+	return 0;
+}
+
+static int ui_construct_data(void *param, int nc, char **cv, char **cn)
+{
+	struct hist_data *data = param;
+	int i;
+
+	for(i = 0; i < nc; i++) {
+		if(! strcmp("id", cn[i]))
+			data->id = atoi(cv[i]);
+		else if(! strcmp(cn[i], "code"))
+			strcpy(data->code, cv[i]);
+		else if(! strcmp(cn[i], "name"))
+			strcpy(data->name, cv[i]);
+		else if(! strcmp(cn[i], "date"))
+			strcpy(data->date, cv[i]);
+		else if(! strcmp(cn[i], "action"))
+			strcpy(data->action, cv[i]);
+		else if(! strcmp(cn[i], "price"))
+			sscanf(cv[i], "%f", &data->price);
+		else if(! strcmp(cn[i], "volume"))
+			data->volume = atoi(cv[i]);
+		else if(! strcmp(cn[i], "counter_fee"))
+			sscanf(cv[i], "%f", &data->counter_fee);
+		else if(! strcmp(cn[i], "stamp_tax"))
+			sscanf(cv[i], "%f", &data->stamp_tax);
+		else if(! strcmp(cn[i], "transfer_fee"))
+			sscanf(cv[i], "%f", &data->transfer_fee);
+	}
+
+	return 0;
+}
+
+int ui_edit_record(sqlite3 *db, int id)
+{
+	int rc;
+	struct hist_data data;
+
+	if(!db || id < 0) {
+		pr_err("%s, invalid value\n", __func__);
+		return -1;
+	}
+
+	rc = stock_get_record_byid(db, id, ui_construct_data, &data);
+	if(rc < 0) {
+		pr_err("record id = %d not exist\n", id);
+		return -1;
+	}
+
+	while((rc = ui_get_hist_data(&data)) < 0)
+		pr_err("input again...\n");
+
+	if(rc > 0) {
+		pr_warn("abort ...\n");
+		return 0;
+	}
+
+	rc = stock_update_record(db, &data);
+	if(rc < 0) {
+		pr_err("update %d fail\n", id);
+		return -1;
+	}
+	pr_info("update %d success\n", id);
 
 	return 0;
 }

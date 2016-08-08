@@ -14,14 +14,16 @@ static const struct option longopts[] = {
 	{"add", no_argument, NULL, 'a'},
 	{"list", no_argument, NULL, 'l'},
 	{"rm", required_argument, NULL, 'r'},
+	{"edit", required_argument, NULL, 'e'},
 	{"debug", no_argument, NULL, 'd'},
 	{NULL, 0, NULL, 0}
 };
 
 enum stock_action {
-	ACTION_ADD = 0,
-	ACTION_LIST,
+	ACTION_LIST = 0,
+	ACTION_ADD,
 	ACTION_RM,
+	ACTION_EDIT,
 
 	ACTION_NULL,
 };
@@ -33,11 +35,11 @@ int main(int argc, char *argv[])
 	int optc;
 	int lose = 0;
 	enum stock_action action = ACTION_LIST;
-	int rmid;
+	int id;
 	int debug = 0;
 	char db_uptodate[16];
 
-	while((optc = getopt_long(argc, argv, "alr:d", longopts, NULL)) != -1) {
+	while((optc = getopt_long(argc, argv, "alr:e:d", longopts, NULL)) != -1) {
 		switch(optc) {
 			case 'a':
 				action = ACTION_ADD;
@@ -47,7 +49,11 @@ int main(int argc, char *argv[])
 				break;
 			case 'r':
 				action = ACTION_RM;
-				rmid = atoi(optarg);
+				id = atoi(optarg);
+				break;
+			case 'e':
+				action = ACTION_EDIT;
+				id = atoi(optarg);
 				break;
 			case 'd':
 				debug = 1;
@@ -59,6 +65,7 @@ int main(int argc, char *argv[])
 
 	if(lose || optind < argc) {
 		pr_err("arg error\n");
+		return -1;
 	}
 
 	if(!debug && action == ACTION_ADD) {
@@ -84,7 +91,10 @@ int main(int argc, char *argv[])
 			ui_list_records(db, NULL);
 			break;
 		case ACTION_RM:
-			ui_delete_record(db, rmid);
+			ui_delete_record(db, id);
+			break;
+		case ACTION_EDIT:
+			ui_edit_record(db, id);
 			break;
 		default:
 			pr_err("unkown action %d\n", action);

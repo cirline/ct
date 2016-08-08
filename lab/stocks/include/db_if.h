@@ -25,8 +25,9 @@ struct hist_data_ui {
 
 int stock_database_init(sqlite3 *db);
 int stock_insert_record(sqlite3 *db, struct hist_data *d);
+int stock_update_record(sqlite3 *db, struct hist_data *d);
 int stock_get_records(sqlite3 *db, char *code, exec_cb_t cb, void *param);
-int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb);
+int stock_get_record_byid(sqlite3 *db, int id, exec_cb_t cb, void *param);
 int stock_delete_record(sqlite3 *db, int id);
 
 #endif
