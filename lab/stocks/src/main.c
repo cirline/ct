@@ -12,7 +12,7 @@
 
 static const struct option longopts[] = {
 	{"add", no_argument, NULL, 'a'},
-	{"list", no_argument, NULL, 'l'},
+	{"list", optional_argument, NULL, 'l'},
 	{"rm", required_argument, NULL, 'r'},
 	{"edit", required_argument, NULL, 'e'},
 	{"debug", no_argument, NULL, 'd'},
@@ -38,14 +38,17 @@ int main(int argc, char *argv[])
 	int id;
 	int debug = 0;
 	char db_uptodate[16];
+	char *code = NULL;
 
-	while((optc = getopt_long(argc, argv, "alr:e:d", longopts, NULL)) != -1) {
+	while((optc = getopt_long(argc, argv, "al::r:e:d", longopts, NULL)) != -1) {
 		switch(optc) {
 			case 'a':
 				action = ACTION_ADD;
 				break;
 			case 'l':
 				action = ACTION_LIST;
+				if(optarg)
+					code = strdup(optarg);
 				break;
 			case 'r':
 				action = ACTION_RM;
@@ -88,7 +91,9 @@ int main(int argc, char *argv[])
 			ui_insert_record(db);
 			break;
 		case ACTION_LIST:
-			ui_list_records(db, NULL);
+			ui_list_records(db, code);
+			if(code)
+				free(code);
 			break;
 		case ACTION_RM:
 			ui_delete_record(db, id);

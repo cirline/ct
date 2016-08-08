@@ -70,7 +70,6 @@ int stock_update_record(sqlite3 *db, struct hist_data *d)
 		pr_err("%s, asprintf error\n", __func__);
 		return -1;
 	}
-	pr_info("update sql: %s\n", sql);
 	rc = db_exec(db, sql, NULL, NULL, &errmsg);
 	if(rc != SQLITE_OK) {
 		pr_err("update fail: %s\n", errmsg);
