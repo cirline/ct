@@ -15,7 +15,7 @@ static struct hist_data_ui dui[] = {
 	{"name", 12},
 	{"date", 10},
 	{"action", 8},
-	{"price", 12},
+	{"price", 8},
 	{"volume", 8},
 	{"counter_fee", 12},
 	{"stamp_tax", 10},

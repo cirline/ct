@@ -18,7 +18,7 @@ void io_getdata(const char *tip, const char *fmt, int slen, void *p)
 		input[i] = 0;
 		//pr_info("input: %s\n", input);
 		if(i > 0) {
-			if(!strcmp(input, ",")) {
+			if(!strcmp(input, "...")) {
 				break;
 			} else if(slen == 0 || (slen > 0 && strlen(input) == slen)) {
 				sscanf(input, fmt, p);

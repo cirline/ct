@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if(!debug && action == ACTION_ADD) {
+	if(!debug && action != ACTION_LIST) {
 		io_getdata("database is update(yes/no)? ", "%s", 0, db_uptodate);
 		if(strcmp(db_uptodate, "yes")) {
 			pr_err("please update database!\n");
