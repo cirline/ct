@@ -1,0 +1,18 @@
+[STD]
+
+printf				标准输出
+getchar				字符输入
+
+[IRQ]
+
+irq_init			中断申请
+
+[TIMER]
+
+timer_init			定时器初始化函数
+timer_set_period	定时器周期设置
+timer_update		定时器周期更新
+timer_toggle		定时器开关
+
+
+

@@ -1,0 +1,15 @@
+TBM: tftp boot mode
+UBM: usb boot mode
+NBM: nand boot mode
+
+uart_send_yes__TBM:
+* uart send string success at tftp boot mode
+
+uart_getchar_yes--TBM:
+* uart get char success at tftp boot mode
+
+lcd_backlight_yes--TBM:
+* lcd backlight 3 level success at tftp boot mode
+
+timer_mdelay_success--TBM:
+* use timer do mdelay success at tftp boot mode

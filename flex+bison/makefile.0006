@@ -1,0 +1,10 @@
+all:a.out file.inc
+	./a.out
+
+a.out:0006*.l
+	flex 0006*.l
+	gcc lex.yy.c
+
+clean:
+	rm -rf *.out *.tab.* lex.yy.c
+

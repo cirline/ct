@@ -1,0 +1,12 @@
+*.o
+*.bin
+*.elf
+*.dis
+*.out
+*.i
+
+*.swp
+*.asm
+
+tags
+git_ignore

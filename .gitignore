@@ -31,8 +31,30 @@
 # Debug files
 *.dSYM/
 
-tags
 
+
+# i define
+tags
+*.dis
+
+# kernel
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+.tmp_versions
+*.tmp
+
+
+# ignore folder
+code_trash
+simple-codec/
+k
+lab/filesync
+/test
+/demo
+
+*.dot.png
 *.local.db
 
 # automake
@@ -57,5 +79,3 @@ ar-lib
 libtool
 m4
 ltmain.sh
-
-Makefile

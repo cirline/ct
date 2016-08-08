@@ -1,0 +1,11 @@
+all:a.out file.in
+	cat file.in | ./a.out
+
+a.out:0004-fb1-5.y 0003-fb1-4.l
+	bison -d 0004-fb1-5.y
+	flex 0003-fb1-4.l
+	gcc lex.yy.c 0004-fb1-5.tab.c -lfl
+
+clean:
+	rm -rf *.out *.tab.* lex.yy.c
+
