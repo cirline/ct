@@ -12,18 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-LOCAL_PATH := $(call my-dir)
-
-include $(CLEAR_VARS)
-
-LOCAL_CFLAGS	+= -DANDROID=1 -Wall
-LOCAL_MODULE    := ccutils
-LOCAL_SRC_FILES := \
-	src/log.c
-	#unet.c \
-	#ufile.c \
-	#utable.c \
-	#ustring.c
-
-include $(BUILD_STATIC_LIBRARY)
-
+include $(call all-subdir-makefiles)

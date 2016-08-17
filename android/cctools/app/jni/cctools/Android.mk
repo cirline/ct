@@ -16,14 +16,12 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_CFLAGS	+= -DANDROID=1 -Wall
-LOCAL_MODULE    := ccutils
-LOCAL_SRC_FILES := \
-	src/log.c
-	#unet.c \
-	#ufile.c \
-	#utable.c \
-	#ustring.c
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/../ccutils/include
+LOCAL_CFLAGS	+= -L../../../app/obj/local/armeabi
+LOCAL_MODULE    := cctools
+LOCAL_SRC_FILES := cctools_jni.c
+LOCAL_LDLIBS	:= -llog
+LOCAL_STATIC_LIBRARIES	:= ccutils
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
 
