@@ -96,6 +96,7 @@ typedef unsigned long				__s5p_addr_t;
 #define TCNTBx(x)		(TIMER_BASE + 0xC + ((x)<<4) - ((x)<<2))
 #define TCMPBx(x)		(TIMER_BASE + 0x10 + ((x)<<4) - ((x)<<2))
 #define TCNTOx(x)		(TIMER_BASE + 0x14 + ((x)<<4) - ((x)<<2))
+/** timer interrupt contrl and status */
 #define TINT_CSTAT		(TIMER_BASE + 0x44)
 
 /**  RTC  **/

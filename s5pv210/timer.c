@@ -31,6 +31,9 @@ void timer_set_period(enum timer_sn t_sn, int cnt, int cmp)
 }
 
 /**
+ * timer_init - support timer0 ~ timer3 init
+ * @pt: timer config
+ *
  * t_sn: timer sn
  * cnt: count buffer, down-counter load initial number from cnt
  * cmp: TCMPBn register, pwm high level region 0 < cmp < cnt, in other words, pwm will invert when cnt == cmp

@@ -1,11 +1,81 @@
+# Object files
 *.o
-*.bin
+*.ko
+*.obj
 *.elf
-*.dis
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
 *.out
-*.i
+*.app
+*.i*86
+*.x86_64
+*.hex
 
-*.swp
-*.asm
+# Debug files
+*.dSYM/
 
+
+
+# i define
 tags
+*.dis
+
+# kernel
+*.mod.c
+*.cmd
+Module.symvers
+modules.order
+.tmp_versions
+*.tmp
+
+
+# ignore folder
+code_trash
+simple-codec/
+k
+lab/filesync
+/test
+/demo
+
+*.dot.png
+*.local.db
+
+# automake
+*_demo
+*_out
+config.*
+.deps
+.dirstamp
+.libs
+autom4te.cache
+stamp-h1
+autoscan.log
+configure.scan
+Makefile.in
+aclocal.m4
+compile
+configure
+depcomp
+install-sh
+missing
+ar-lib
+libtool
+m4
+ltmain.sh

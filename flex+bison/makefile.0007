@@ -1,0 +1,11 @@
+all:a.out
+	./a.out
+
+a.out:0007*.l 0008*.y
+	bison -d 0008*.y
+	flex 0007*.l
+	gcc lex.yy.c 0008*.tab.c
+
+clean:
+	rm -rf *.out *.tab.* lex.yy.c
+

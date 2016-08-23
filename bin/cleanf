@@ -1,0 +1,27 @@
+#!/bin/bash
+
+this_name=cleanf
+trash_dir=$HOME/cd/code-test/code_trash
+cur_dir=`pwd`
+
+help() {
+    echo "$this_name file, move file to $trash_dir"
+    echo "$this_name clean, clean *.orig & *.rej files"
+}
+
+if [ $# -lt 1 ]; then
+    help
+    exit 1
+fi
+
+if [ "$1" = "clean" ]; then
+    echo "clean files"
+    find $cur_dir -name "*.orig" | xargs rm
+    find $cur_dir -name "*.rej" | xargs rm
+else
+    echo "move $1 to $HOME/cd/code-test/code_trash/"
+    mv $1 $HOME/cd/code-test/code_trash/
+fi
+
+
+

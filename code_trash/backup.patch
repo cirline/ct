@@ -1,0 +1,115 @@
+diff --git a/etc/init.rc b/etc/init.rc
+index eaccafc..610ddcc 100755
+--- a/etc/init.rc
++++ b/etc/init.rc
+@@ -12,7 +12,6 @@ on init
+ 
+     insmod /sw-device.ko debug_mask=0xff ctp_mask=1
+ 
+-    symlink /system/etc /etc
+ 
+     mkdir /sdcard
+     mkdir /system
+@@ -20,6 +19,10 @@ on init
+     mkdir /cache
+     mount /tmp /tmp tmpfs
+ 
++    mkdir /system/bin
++    symlink /system/etc /etc
++    symlink /sbin/busyboxr /system/bin/sh
++
+     chown root shell /tmp
+     chmod 0775 /tmp
+ 
+@@ -32,6 +35,7 @@ on init
+     write /sys/class/android_usb/android0/iSerial ${ro.serialno}
+ 
+ 
++
+ on boot
+ 
+     ifup lo
+diff --git a/insmodctp.cpp b/insmodctp.cpp
+index 7a3f50a..b4b9eb7 100755
+--- a/insmodctp.cpp
++++ b/insmodctp.cpp
+@@ -94,10 +94,10 @@ static int insmod_modules(void)
+                  
+                 printf("start to insmod %s\n",module_name);
+             
+-                if (insmod(module_name, "") < 0) {
++                if (insmod("/gslX680new.ko", "") < 0) {
+                         printf(" %s insmod failed!\n",insmod_name);
+                         rmmod(module_name);//it may be load driver already,try remove it and insmod again.
+-                        if (insmod(module_name, "") < 0){
++                        if (insmod("/gslX680new.ko", "") < 0){
+                                 printf("%s,Once again fail to load!",module_name);
+                                 return 0;
+                         }
+@@ -108,6 +108,7 @@ static int insmod_modules(void)
+ 
+ int insmodctp()
+ { 
++    printf("chqw ---> insmodctp. start... \n");
+         if(!insmod_modules()){
+                 printf("%s:insmod fail!\n",__FILE__);
+         }
+diff --git a/minui/events.c b/minui/events.c
+index 2918afa..32c9301 100644
+--- a/minui/events.c
++++ b/minui/events.c
+@@ -69,7 +69,7 @@ int ev_init(ev_callback input_cb, void *data)
+ 
+             /* TODO: add ability to specify event masks. For now, just assume
+              * that only EV_KEY and EV_REL event types are ever needed. */
+-            if (!test_bit(EV_KEY, ev_bits) && !test_bit(EV_REL, ev_bits)) {
++            if (!test_bit(EV_KEY, ev_bits) && !test_bit(EV_REL, ev_bits) && !test_bit(EV_ABS, evbits)) {
+                 close(fd);
+                 continue;
+             }
+diff --git a/recovery.cpp b/recovery.cpp
+index ce744ae..3702dbf 100755
+--- a/recovery.cpp
++++ b/recovery.cpp
+@@ -601,7 +601,7 @@ prepend_title(const char* const* headers) {
+ 
+     const char** new_headers = (const char**)malloc((count+1) * sizeof(char*));
+     const char** h = new_headers;
+-    *(h++) = "Android system recovery <" EXPAND(RECOVERY_API_VERSION) "e>";
++    *(h++) = "  Android system recovery <" EXPAND(RECOVERY_API_VERSION) "e>";
+     *(h++) = recovery_version;
+     *(h++) = "";
+     for (p = headers; *p; ++p, ++h) *h = *p;
+@@ -852,28 +852,19 @@ wipe_data(int confirm, Device* device) {
+         static const char** title_headers = NULL;
+ 
+         if (title_headers == NULL) {
+-            const char* headers[] = { "Confirm wipe of all user data?",
+-                                      "  THIS CAN NOT BE UNDONE.",
++            const char* headers[] = { "  CONFERMI LA CANCELLAZIONE DI TUTTI I DATI UTENTE?",
++                                      "  DOPO AVER CONFERMATO NON SI PUO' TORNARE INDIETRO.",
+                                       "",
+                                       NULL };
+             title_headers = prepend_title((const char**)headers);
+         }
+ 
+-        const char* items[] = { " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " Yes -- delete all user data",   // [7]
+-                                " No",
+-                                " No",
++        const char* items[] = { " SI. CANCELLA TUTTI I DATI",   // [7]
+                                 " No",
+                                 NULL };
+ 
+         int chosen_item = get_menu_selection(title_headers, items, 1, 0, device);
+-        if (chosen_item != 7) {
++        if (chosen_item != 0) {
+             return;
+         }
+     }

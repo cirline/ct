@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">tools</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="text_status">状态</string>
+    <string name="phone_ip">ip:</string>
+    <string name="version">version:</string>
+    <string name="empty_string"></string>
+    <string name="control_tip">控制</string>
+    <string name="open_tip">打开</string>
+    <string name="close_tip">关闭</string>
+    <string name="tip_reboot_recovery">recovery</string>
+
+</resources>

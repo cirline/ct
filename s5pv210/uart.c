@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2015 Qiwei Chen
  */
+//#define DEBUG
+#define pr_fmt(fmt)	"uart: " fmt
 
 #include "s5p_regs.h"
 #include "irq.h"
@@ -68,10 +70,29 @@ int inline uart_rx_ready(void)
 
 unsigned char uart_get_char(void)
 {
-    int ret = 0;
-	fstart();
-    while(!uart_rx_ready());
+	pr_here();
+	while(!uart_rx_ready());
 
 	return __raw_read(URXHx(0)) & 0xff;
+}
+
+/**
+ * uart_getstr - get a string for uart
+ * @buffer: string buffer
+ * @echo: is echo the char
+ */
+char * uart_getstr(char *buffer, int echo)
+{
+	int i;
+
+	for(i = 0; (buffer[i] = uart_get_char()) != '\r'; i++) {
+		if(echo)
+			uart_send_char(buffer[i]);
+	}
+	buffer[i] = 0;
+	if(echo)
+		uart_send_string("\r\n");
+
+	return buffer;
 }
 

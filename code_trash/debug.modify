@@ -1,0 +1,327 @@
+diff --git a/Android.mk b/Android.mk
+index c2e4f03..dc3501b 100755
+--- a/Android.mk
++++ b/Android.mk
+@@ -92,7 +92,8 @@ LOCAL_MODULE_TAGS := tests
+ LOCAL_SRC_FILES := \
+     verifier_test.cpp \
+     verifier.cpp \
+-    ui.cpp
++    ui.cpp \
++	filelog.cpp
+ LOCAL_STATIC_LIBRARIES := \
+     libmincrypt \
+     libminui \
+diff --git a/etc/init.rc b/etc/init.rc
+index eaccafc..46669b0 100755
+--- a/etc/init.rc
++++ b/etc/init.rc
+@@ -12,7 +12,6 @@ on init
+ 
+     insmod /sw-device.ko debug_mask=0xff ctp_mask=1
+ 
+-    symlink /system/etc /etc
+ 
+     mkdir /sdcard
+     mkdir /system
+@@ -20,6 +19,10 @@ on init
+     mkdir /cache
+     mount /tmp /tmp tmpfs
+ 
++    mkdir /system/bin
++    symlink /system/etc /etc
++    symlink /sbin/busybox /system/bin/sh
++
+     chown root shell /tmp
+     chmod 0775 /tmp
+ 
+@@ -32,6 +35,7 @@ on init
+     write /sys/class/android_usb/android0/iSerial ${ro.serialno}
+ 
+ 
++
+ on boot
+ 
+     ifup lo
+diff --git a/insmodctp.cpp b/insmodctp.cpp
+index 7a3f50a..b4b9eb7 100755
+--- a/insmodctp.cpp
++++ b/insmodctp.cpp
+@@ -94,10 +94,10 @@ static int insmod_modules(void)
+                  
+                 printf("start to insmod %s\n",module_name);
+             
+-                if (insmod(module_name, "") < 0) {
++                if (insmod("/gslX680new.ko", "") < 0) {
+                         printf(" %s insmod failed!\n",insmod_name);
+                         rmmod(module_name);//it may be load driver already,try remove it and insmod again.
+-                        if (insmod(module_name, "") < 0){
++                        if (insmod("/gslX680new.ko", "") < 0){
+                                 printf("%s,Once again fail to load!",module_name);
+                                 return 0;
+                         }
+@@ -108,6 +108,7 @@ static int insmod_modules(void)
+ 
+ int insmodctp()
+ { 
++    printf("chqw ---> insmodctp. start... \n");
+         if(!insmod_modules()){
+                 printf("%s:insmod fail!\n",__FILE__);
+         }
+diff --git a/minui/events.c b/minui/events.c
+index 2918afa..fde5f9a 100644
+--- a/minui/events.c
++++ b/minui/events.c
+@@ -45,6 +45,17 @@ static unsigned ev_count = 0;
+ static unsigned ev_dev_count = 0;
+ static unsigned ev_misc_count = 0;
+ 
++#define LOGFILE "/tmp/logfile.test"
++#define LOGPRE  "chqw ---> "
++static int fd = -1;
++void logfile_write(const char * s)
++{
++    if(fd < 0)
++        fd = open(LOGFILE, O_CREAT | O_APPEND | O_RDWR, 0644);
++    write(fd, LOGPRE, strlen(LOGPRE));
++    write(fd, s, strlen(s));
++}
++
+ int ev_init(ev_callback input_cb, void *data)
+ {
+     DIR *dir;
+@@ -69,7 +80,7 @@ int ev_init(ev_callback input_cb, void *data)
+ 
+             /* TODO: add ability to specify event masks. For now, just assume
+              * that only EV_KEY and EV_REL event types are ever needed. */
+-            if (!test_bit(EV_KEY, ev_bits) && !test_bit(EV_REL, ev_bits)) {
++            if (!test_bit(EV_KEY, ev_bits) && !test_bit(EV_REL, ev_bits) && !test_bit(EV_ABS, ev_bits)) {
+                 close(fd);
+                 continue;
+             }
+diff --git a/minui/minui.h b/minui/minui.h
+index 4d5656a..9364cd4 100644
+--- a/minui/minui.h
++++ b/minui/minui.h
+@@ -54,6 +54,7 @@ struct input_event;
+ typedef int (*ev_callback)(int fd, short revents, void *data);
+ typedef int (*ev_set_key_callback)(int code, int value, void *data);
+ 
++void logfile_write(const char * s);
+ int ev_init(ev_callback input_cb, void *data);
+ void ev_exit(void);
+ int ev_add_fd(int fd, ev_callback cb, void *data);
+diff --git a/recovery.cpp b/recovery.cpp
+index ce744ae..a9f1ddd 100755
+--- a/recovery.cpp
++++ b/recovery.cpp
+@@ -601,7 +601,7 @@ prepend_title(const char* const* headers) {
+ 
+     const char** new_headers = (const char**)malloc((count+1) * sizeof(char*));
+     const char** h = new_headers;
+-    *(h++) = "Android system recovery <" EXPAND(RECOVERY_API_VERSION) "e>";
++    *(h++) = "  Android system recovery <" EXPAND(RECOVERY_API_VERSION) "e>";
+     *(h++) = recovery_version;
+     *(h++) = "";
+     for (p = headers; *p; ++p, ++h) *h = *p;
+@@ -620,6 +620,7 @@ get_menu_selection(const char* const * headers, const char* const * items,
+     ui->StartMenu(headers, items, initial_selection);
+     int selected = initial_selection;
+     int chosen_item = -1;
++    int action;
+ 
+     while (chosen_item < 0) {
+         int key = ui->WaitKey();
+@@ -633,8 +634,10 @@ get_menu_selection(const char* const * headers, const char* const * items,
+                 ui->EndMenu();
+                 return 0; // XXX fixme
+             }
+-        }
+-        int action = device->HandleMenuKey(key, visible);
++        } else if(key <= Device::kHighlightUp && key >= Device::kInvokeItem)
++            action = key;
++        else
++            action = device->HandleMenuKey(key, visible);
+ 
+         if (action < 0) {
+             switch (action) {
+@@ -852,28 +855,19 @@ wipe_data(int confirm, Device* device) {
+         static const char** title_headers = NULL;
+ 
+         if (title_headers == NULL) {
+-            const char* headers[] = { "Confirm wipe of all user data?",
+-                                      "  THIS CAN NOT BE UNDONE.",
++            const char* headers[] = { "  CONFERMI LA CANCELLAZIONE DI TUTTI I DATI UTENTE?",
++                                      "  DOPO AVER CONFERMATO NON SI PUO' TORNARE INDIETRO.",
+                                       "",
+                                       NULL };
+             title_headers = prepend_title((const char**)headers);
+         }
+ 
+-        const char* items[] = { " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " No",
+-                                " Yes -- delete all user data",   // [7]
+-                                " No",
+-                                " No",
++        const char* items[] = { " SI. CANCELLA TUTTI I DATI",   // [7]
+                                 " No",
+                                 NULL };
+ 
+         int chosen_item = get_menu_selection(title_headers, items, 1, 0, device);
+-        if (chosen_item != 7) {
++        if (chosen_item != 0) {
+             return;
+         }
+     }
+diff --git a/ui.cpp b/ui.cpp
+index 9b95ed9..964cbd0 100755
+--- a/ui.cpp
++++ b/ui.cpp
+@@ -35,6 +35,7 @@
+ #include "minui/minui.h"
+ #include "screen_ui.h"
+ #include "ui.h"
++#include "filelog.h"
+ 
+ #define UI_WAIT_KEY_TIMEOUT_SEC    120
+ #define ROTATION BOARD_RECOVERY_ROTATION
+@@ -68,17 +69,21 @@ int RecoveryUI::menu_select(-1);
+ int RecoveryUI::touch_handle_input(input_event ev){
+     int touch_code = 0;
+ 	int rotation = ROTATION;
++    char buff[1024];
+     if(ev.type==EV_ABS){
+         switch(ev.code){
+-            case ABS_MT_TRACKING_ID:
++            case ABS_MT_TRACKING_ID:/*
+                 if (touchStage==0)
+                 {
+                     touchStage=1;
+                 }
+                 eventStage=1;
+-                tmpEvent.point_id = ev.value;
++                tmpEvent.point_id = ev.value;*/
++                touch_id = ev.value;
++                sprintf(buff, "touch id = %d\n", touch_id);
++                logfile_write(buff);
+                 break;
+-            case ABS_MT_POSITION_X:
++            case ABS_MT_POSITION_X:/*
+                 if (touchStage==0)
+                 {
+                     touchStage=1;
+@@ -91,9 +96,17 @@ int RecoveryUI::touch_handle_input(input_event ev){
+                 else if(270 == rotation)
+ 		    tmpEvent.y = ev.value;
+                 else
+-                     tmpEvent.x = ev.value;
++                     tmpEvent.x = ev.value;*/
++                last_event.x = ev.value;
++                if(touch_event[touch_id].x == 0)
++                    touch_event[touch_id].x = ev.value;
++                if(first_event.x == 0 && touch_id == 1)
++                    first_event.x = ev.value;
++                //sprintf(buff, "ABS_MT_POSITION_X = %d\n", ev.value);
++                sprintf(buff, "last.x=%d, first.x=%d\n", last_event.x, first_event.x);
++                logfile_write(buff);
+                 break;
+-            case ABS_MT_POSITION_Y:
++            case ABS_MT_POSITION_Y:/*
+                 if (touchStage==0)
+                 {
+                     touchStage=1;
+@@ -106,13 +119,70 @@ int RecoveryUI::touch_handle_input(input_event ev){
+                 else if(270 == rotation)
+ 		    tmpEvent.x = ev.value;
+                 else
+-		    tmpEvent.y = ev.value;
+-		   break;
++		    tmpEvent.y = ev.value;*/
++                if((ev.value - last_event.y) * move_pile < 0) {
++                    move_pile = 0;
++                    key_queue_len = 0;
++                } else if(last_event.y != 0)
++                    move_pile += ev.value - last_event.y;
++                last_event.y = ev.value;
++                if(first_event.y == 0 && touch_id == 1)
++                    first_event.y = ev.value;
++                if(touch_event[touch_id].y == 0)
++                    touch_event[touch_id].y = ev.value;
++                else if(ev.value - touch_event[touch_id].y > 20) {
++                    touch_code = Device::kHighlightDown;
++                    touch_event[touch_id].y = ev.value;
++                    touch_event[touch_id].x = last_event.x;
++                } else if(ev.value - touch_event[touch_id].y < -20) {
++                    touch_code = Device::kHighlightUp;
++                    touch_event[touch_id].y = ev.value;
++                    touch_event[touch_id].x = last_event.x;
++                }
++                //sprintf(buff, "ABS_MT_POSITION_Y = %d\n", ev.value);
++                sprintf(buff, "last.y=%d, first.y=%d\n", last_event.y, first_event.y);
++                logfile_write(buff);
++                break;
++            case ABS_MT_TOUCH_MAJOR:
++                sprintf(buff, "ABS_MT_TOUCH_MAJOR, ev.value = %d\n", ev.value);
++                logfile_write(buff);
++                sprintf(buff, "last.y=%d, first.y=%d\n", last_event.y, first_event.y);
++                logfile_write(buff);
++                if(ev.value == 0) {
++                    logfile_write("ev.value = 0, all finger out\n");
++                    if(first_event.y == last_event.y && last_event.y != 0) {
++                        int *para = self->GetScreenPara();
++                        int select = last_event.y / para[2] - para[0];
++                        sprintf(buff, "first_event.y == last_event.y = %d, para[2] = %d, para[1] = %d, para[0] = %d, select = %d\n", last_event.y, para[2], para[1], para[0], select);
++                        logfile_write(buff);
++                        if(select >= 0 && select < para[1]) {
++                            logfile_write("select >= 0 && select < para[1], finger touch event\n");
++                            menu_select = select;   //record touch menu id
++                            touch_code = Device::kInvokeItem;
++                        }
++                    } else
++                        logfile_write("last_event.y = 0\n");
++                    for(int i = 0; i < 5; i++) {
++                        touch_event[i].x = 0;
++                        touch_event[i].y = 0;
++                    }
++                    last_event.x = last_event.y = 0;
++                    first_event.x = first_event.y = 0;
++                }
++                break;
+             default :
+                 break;
+         }
++        pthread_mutex_lock(&key_queue_mutex);
++        const int queue_max = sizeof(key_queue) / sizeof(key_queue[0]);
++        if(key_queue_len < queue_max && touch_code != 0) {
++            key_queue[key_queue_len++] = touch_code;
++            pthread_cond_signal(&key_queue_cond);
++        }
++        pthread_mutex_unlock(&key_queue_mutex);
+         return 1;
+     }else if(ev.type == EV_SYN){
++        //logfile_write("hi this is ev_SYN --------------------- <> \n");
+         switch(ev.code){
+             case SYN_MT_REPORT:
+                 if (touchStage==1)
+diff --git a/ui.h b/ui.h
+index 9b6fc19..74e4425 100755
+--- a/ui.h
++++ b/ui.h
+@@ -139,6 +139,12 @@ private:
+     }lastEvent,firstEvent,tmpEvent;
+     int touchStage,eventStage;
+ 
++    struct {
++        int x;
++        int y;
++    } last_event, first_event, touch_event[6];
++    int touch_id, move_pile;
++
+     pthread_t input_t;
+ 
+     static void* input_thread(void* cookie);

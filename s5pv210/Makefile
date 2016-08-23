@@ -1,8 +1,11 @@
-include ../Makefile_common
+include Makefile_common
 
 ifdef link
 link_base	:= text 0xd0020000		# iRAM running address
 else
+
+# if change lds, must care irq vendor in start.S
+
 #link_base	:= text 0x40008000		# ddr running address
 #link_base	:= map_usb_boot.lds
 link_base	:= map_tftp_boot.lds
@@ -24,6 +27,7 @@ objs	+= rtc.o
 objs	+= i2c.o
 objs	+= lcd.o
 objs	+= keyboard.o
+objs	+= task.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)
@@ -39,4 +43,9 @@ clean:
 
 install:
 	cp $(bin_file) $(tftp_root)/units.bin
+
+tag:
+	ctags -R .
+
+.PHONY: tag
 

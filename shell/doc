@@ -1,0 +1,25 @@
+command format:
+<command> [-option] [value]
+
+command:
+[feild operation]
+ * fl: field list
+ * fc: field create 
+ * fu: field update 
+ * fg: field generate
+ * fd: field delete
+
+common option:
+
+
+field attribute:
+ * rank uint
+ * description char[]
+ * name char[]
+ * list_type char[]
+ * data_type char[]
+ * is_crypt uchar
+ * add_visible uchar
+ * list_visible uchar
+ * is_gen uchar
+

@@ -1,0 +1,15 @@
+#!/usr/bin/expect
+
+#set port 22
+set username [lindex $argv 0 ]
+set password $username
+set hostname codesvr
+set timeout -1
+
+spawn ssh $username@$hostname
+expect "*assword:*"
+
+send "$password\r"
+
+interact
+

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">cctools</string>
+    <string name="info_title">设备信息</string>
+    <string name="info_location">位置信息：</string>
+</resources>
