@@ -9,7 +9,7 @@ import string
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title = title, size = (80, 80))
+        wx.Frame.__init__(self, parent, title = title, size = (85, 80))
 
         ws = self.GetWindowStyle()
         self.SetWindowStyle(ws | wx.STAY_ON_TOP)
@@ -44,22 +44,27 @@ class main_window(wx.Frame):
         layout.Add(st)
         return st
 
-    def updateUI(self, time, msg, update):
+    def updateUI(self, status, df_list, update):
         #self.statusBar.SetStatusText(time)
-        self.statusBar.SetLabel(time)
+        self.statusBar.SetLabel(status)
         if(update):
             i = 0
             while(i < len(slist)):
-                pp = self.sPrice[i].GetLabel()
-                self.sPrice[i].SetLabel(msg[i])
-                ppf = string.atof(pp)
-                nnf = string.atof(msg[i])
-                if(nnf > ppf):
+                df = df_list[i]
+                price = df['price'][0]
+                nnf = string.atof(price)
+                pre_close = df['pre_close'][0]
+                ccf = string.atof(pre_close)
+                crange = (nnf - ccf) / ccf * 100
+                if(crange > 0):
                     self.sPrice[i].SetForegroundColour('red')
-                elif(nnf < ppf):
+                elif(crange < 0):
                     self.sPrice[i].SetForegroundColour('blue')
+                    crange = -1 * crange
                 else:
                     self.sPrice[i].SetForegroundColour('blank')
+
+                self.sPrice[i].SetLabel("%s %.2f" % (price, crange))
                 i = i + 1
 
 class TushareThread(threading.Thread):
@@ -71,14 +76,14 @@ class TushareThread(threading.Thread):
         print('running ...')
         i = 0
         update = False
-        price = []
+        df_list = []
         while(True):
             now = datetime.now().strftime('%H:%M:%S')
             if(i == 0):
-                price = []
+                df_list = []
                 for ss in slist:
                     df = ts.get_realtime_quotes(ss)
-                    price.append(df['price'][0])
+                    df_list.append(df)
                 update = True
             if(i == 0):
                 now = '.'
@@ -90,7 +95,7 @@ class TushareThread(threading.Thread):
                 now = '....'
             elif(i == 4):
                 now = '.....'
-            wx.CallAfter(self.context.updateUI, now, price, update)
+            wx.CallAfter(self.context.updateUI, now, df_list, update)
             ostm.sleep(1)
             if(i < 4):
                 i = i + 1
