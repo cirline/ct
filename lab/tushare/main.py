@@ -9,12 +9,15 @@ import string
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title = title, size = (80, 100))
+        wx.Frame.__init__(self, parent, title = title, size = (80, 80))
+
+        ws = self.GetWindowStyle()
+        self.SetWindowStyle(ws | wx.STAY_ON_TOP)
 
         self.initUI()
 
     def initUI(self):
-        self.statusBar = self.CreateStatusBar()
+        # self.statusBar = self.CreateStatusBar()
 
         self.mainPanel = wx.Panel(self)
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -28,6 +31,8 @@ class main_window(wx.Frame):
             st = self.initStaticText(self.mainPanel, '0', sbs)
             self.sPrice.append(st)
 
+        self.statusBar = self.initStaticText(self.mainPanel, '0', sbs)
+
     def initStaticBoxSizer(self, parent, label, ori, layout):
         sb = wx.StaticBox(parent, label = label)
         sbs = wx.StaticBoxSizer(sb, ori)
@@ -40,7 +45,8 @@ class main_window(wx.Frame):
         return st
 
     def updateUI(self, time, msg, update):
-        self.statusBar.SetStatusText(time)
+        #self.statusBar.SetStatusText(time)
+        self.statusBar.SetLabel(time)
         if(update):
             i = 0
             while(i < len(slist)):
@@ -74,6 +80,16 @@ class TushareThread(threading.Thread):
                     df = ts.get_realtime_quotes(ss)
                     price.append(df['price'][0])
                 update = True
+            if(i == 0):
+                now = '.'
+            elif(i == 1):
+                now = '..'
+            elif(i == 2):
+                now = '...'
+            elif(i == 3):
+                now = '....'
+            elif(i == 4):
+                now = '.....'
             wx.CallAfter(self.context.updateUI, now, price, update)
             ostm.sleep(1)
             if(i < 4):
