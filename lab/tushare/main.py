@@ -10,7 +10,7 @@ from cfg_editor import *
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title = title, size = (85, 80))
+        wx.Frame.__init__(self, parent, title = title, size = (85, 85))
 
         ws = self.GetWindowStyle()
         self.SetWindowStyle(ws | wx.STAY_ON_TOP)
@@ -79,7 +79,7 @@ class main_window(wx.Frame):
                     self.sPrice[i].SetForegroundColour('blue')
                     crange = -1 * crange
                 else:
-                    self.sPrice[i].SetForegroundColour('blank')
+                    self.sPrice[i].SetForegroundColour('black')
 
                 self.sPrice[i].SetLabel("%5.2f %5.2f" % (nnf, crange))
                 i = i + 1
