@@ -6,6 +6,7 @@ import time as ostm
 import tushare as ts
 from datetime import *
 import string
+from cfg_editor import *
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
@@ -14,9 +15,11 @@ class main_window(wx.Frame):
         ws = self.GetWindowStyle()
         self.SetWindowStyle(ws | wx.STAY_ON_TOP)
 
+        self.actions = ui_action(self)
         self.initUI()
 
     def initUI(self):
+        self.initMenuBar()
         # self.statusBar = self.CreateStatusBar()
 
         self.mainPanel = wx.Panel(self)
@@ -32,6 +35,20 @@ class main_window(wx.Frame):
             self.sPrice.append(st)
 
         self.statusBar = self.initStaticText(self.mainPanel, '0', sbs)
+
+    def add_menu_item(self, menu, itemid, text, desc, func):
+        item = menu.Append(itemid, text, desc)
+        if(func != None):
+            self.Bind(wx.EVT_MENU, func, item)
+
+    def initMenuBar(self):
+        menubar = wx.MenuBar()
+        self.SetMenuBar(menubar)
+
+        menu = wx.Menu()
+        self.add_menu_item(menu, wx.NewId(), 'config', 'config', self.actions.opencfg)
+        self.add_menu_item(menu, wx.ID_CLOSE, 'close\tctrl+x', 'close', self.actions.close)
+        menubar.Append(menu, 'Menu')
 
     def initStaticBoxSizer(self, parent, label, ori, layout):
         sb = wx.StaticBox(parent, label = label)
@@ -64,8 +81,25 @@ class main_window(wx.Frame):
                 else:
                     self.sPrice[i].SetForegroundColour('blank')
 
-                self.sPrice[i].SetLabel("%s %.2f" % (price, crange))
+                self.sPrice[i].SetLabel("%5.2f %5.2f" % (nnf, crange))
                 i = i + 1
+
+class config_window(wx.Frame):
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent, title = title)
+
+class ui_action:
+    def __init__(self, parent):
+        self.parent = parent
+
+    def opencfg(self, event):
+        print('open config panel')
+        oc_frame = config_window(self.parent, 'config')
+        oc_frame.Show()
+
+    def close(self, event):
+        print('bye')
+        self.parent.Close()
 
 class TushareThread(threading.Thread):
     def __init__(self, context):
@@ -78,24 +112,21 @@ class TushareThread(threading.Thread):
         update = False
         df_list = []
         while(True):
-            now = datetime.now().strftime('%H:%M:%S')
+            # now = datetime.now().strftime('%H:%M:%S')
             if(i == 0):
-                df_list = []
-                for ss in slist:
-                    df = ts.get_realtime_quotes(ss)
-                    df_list.append(df)
-                update = True
-            if(i == 0):
-                now = '.'
-            elif(i == 1):
-                now = '..'
-            elif(i == 2):
-                now = '...'
-            elif(i == 3):
-                now = '....'
-            elif(i == 4):
-                now = '.....'
-            wx.CallAfter(self.context.updateUI, now, df_list, update)
+                try:
+                    list_temp = []
+                    for ss in slist:
+                        df = ts.get_realtime_quotes(ss)
+                        list_temp.append(df)
+                    df_list = list_temp
+                    update = True
+                except Exception as e:
+                    print('get_realtime_quotes: %s' % e)
+            s = '.'
+            for x in range(i):
+                s = s + '.'
+            wx.CallAfter(self.context.updateUI, s, df_list, update)
             ostm.sleep(1)
             if(i < 4):
                 i = i + 1
@@ -108,8 +139,13 @@ slist.append('601398')
 slist.append('601766')
 slist.append('601668')
 
+slist = []
+cfg = cfg_editor('cfg.conf')
+for section in cfg.sections():
+    slist.append(section)
+
 app = wx.App(False)
-mframe = main_window(None, "main")
+mframe = main_window(None, "oooo")
 mframe.Centre()
 mframe.Show()
 point = mframe.GetPosition()
