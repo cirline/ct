@@ -17,7 +17,7 @@ enum display_vidcon0 {
     CLKVAL_F    = 6,
     CLKVALUP    = 16,
     PNRMODE     = 17,
-    RGBSPSEL     = 18,
+    RGBSPSEL    = 18,
     VIDOUT      = 26,
 };
 
