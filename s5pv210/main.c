@@ -122,12 +122,14 @@ int key_mux(void)
 	return 0;
 }
 
+#if 0
 int timer1_int_func(void)
 {
 	fstart();
 	tint_pending(1);
 	return 0;
 }
+#endif
 
 int rtcalm_int_func(void)
 {
@@ -270,6 +272,7 @@ int main(void)
 	register_shell_command_quick("help", do_help, "show this message");
 	//register_shell_command_quick("exit", NULL, "exit");
 	register_shell_command_quick("buzz", timer_1hz_buzz_test, "1hz buzz");
+	//register_shell_command_quick("dumpr", dump_registers, "dump registers");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");
