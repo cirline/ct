@@ -10,7 +10,7 @@ from cfg_editor import *
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title = title, size = (85, 80))
+        wx.Frame.__init__(self, parent, title = title, size = (190, 80))
 
         ws = self.GetWindowStyle()
         self.SetWindowStyle(ws | wx.STAY_ON_TOP)
@@ -57,7 +57,7 @@ class main_window(wx.Frame):
         return sbs
 
     def initStaticText(self, parent, txt, layout):
-        st = wx.StaticText(parent, label = txt)
+        st = wx.StaticText(parent, label = txt, style = wx.ALIGN_RIGHT)
         layout.Add(st)
         return st
 
@@ -75,13 +75,20 @@ class main_window(wx.Frame):
                 crange = (nnf - ccf) / ccf * 100
                 if(crange > 0):
                     self.sPrice[i].SetForegroundColour('red')
+                    self.sPrice[i].SetBackgroundColour('black')
                 elif(crange < 0):
                     self.sPrice[i].SetForegroundColour('blue')
                     crange = -1 * crange
                 else:
                     self.sPrice[i].SetForegroundColour('blank')
 
-                self.sPrice[i].SetLabel("%5.2f %5.2f" % (nnf, crange))
+                if(nnf > 1000):
+                    nnf = nnf % 1000
+
+                s = "%6.2f %5.2f" % (nnf, crange)
+                print(s)
+
+                self.sPrice[i].SetLabel(s)
                 i = i + 1
 
 class config_window(wx.Frame):
@@ -112,8 +119,12 @@ class TushareThread(threading.Thread):
         update = False
         df_list = []
         while(True):
-            # now = datetime.now().strftime('%H:%M:%S')
-            if(i == 0):
+            #now = datetime.now().strftime('%H:%M:%S')
+            now = datetime.now()
+            pull = (now > active_time[0] and now < active_time[1]) or \
+                    (now > active_time[2] and now < active_time[3])
+            pull = True
+            if(i == 0 and pull):
                 try:
                     list_temp = []
                     for ss in slist:
@@ -121,6 +132,7 @@ class TushareThread(threading.Thread):
                         list_temp.append(df)
                     df_list = list_temp
                     update = True
+                    print('get_realtime_quotes update')
                 except Exception as e:
                     print('get_realtime_quotes: %s' % e)
             s = '.'
@@ -135,14 +147,16 @@ class TushareThread(threading.Thread):
             update = False
 
 slist = []
-slist.append('601398')
-slist.append('601766')
-slist.append('601668')
-
-slist = []
 cfg = cfg_editor('cfg.conf')
 for section in cfg.sections():
     slist.append(section)
+
+now = datetime.now()
+active_time = []
+active_time.append(now.replace(hour=9, minute=30, second=0))
+active_time.append(now.replace(hour=11, minute=30, second=0))
+active_time.append(now.replace(hour=13, minute=00, second=0))
+active_time.append(now.replace(hour=15, minute=00, second=0))
 
 app = wx.App(False)
 mframe = main_window(None, "oooo")
