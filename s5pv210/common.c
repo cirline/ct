@@ -1,5 +1,5 @@
 //#define DEBUG
-#define pr_fmt(fmt)	"common " fmt
+#define pr_fmt(fmt)	"[common] " fmt
 
 #include <stdarg.h>
 #include "common.h"
@@ -134,5 +134,34 @@ int __s5p_printf(char *s, ...)
 int inline __s5p_sleep(int ms)
 {
 	return timer_spin_lock(TIMER4, ms);
+}
+
+/**
+ * dump_registers - dump parent stack frame
+ *
+ * c call:
+ * mov	ip sp
+ * push	{fp, ip, lr, pc}
+ */
+int dump_registers(void)
+{
+	unsigned long *fp;
+	unsigned long *parent_sp, *parent_fp, *parent_lr;
+	unsigned long *pmem;
+
+	__asm__ __volatile__ (
+			"mov %0, fp \n\t"
+			: "=r"(fp)
+			: );
+	parent_lr = *(fp - 1);
+	parent_sp = *(fp - 2);
+	parent_fp = *(fp - 3);
+
+	pr_info("here: %x\n", parent_lr);
+	pr_info("stack frame [%x ~ %x]\n", parent_sp, parent_fp);
+	for(pmem = parent_fp; pmem >= parent_sp; pmem--) {
+		pr_info("%x:\t0x%x\n", pmem, *pmem);
+	}
+	return 0;
 }
 

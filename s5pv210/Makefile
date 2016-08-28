@@ -1,5 +1,8 @@
 include Makefile_common
 
+CFLAGS	:= -Wall
+CFLAGS	+= -I. -Iinclude
+
 ifdef link
 link_base	:= text 0xd0020000		# iRAM running address
 else
@@ -28,6 +31,8 @@ objs	+= i2c.o
 objs	+= lcd.o
 objs	+= keyboard.o
 objs	+= task.o
+
+objs	+= shell/shell.o
 
 $(bin_file): $(objs)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

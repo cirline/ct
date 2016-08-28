@@ -13,6 +13,7 @@
 #include "keyboard.h"
 #include "task.h"
 #include "list.h"
+#include <shell.h>
 
 static LIST_HEAD_INIT(gcmds_head);
 
@@ -272,7 +273,7 @@ int main(void)
 	register_shell_command_quick("help", do_help, "show this message");
 	//register_shell_command_quick("exit", NULL, "exit");
 	register_shell_command_quick("buzz", timer_1hz_buzz_test, "1hz buzz");
-	//register_shell_command_quick("dumpr", dump_registers, "dump registers");
+	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");
