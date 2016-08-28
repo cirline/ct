@@ -33,7 +33,7 @@ _start:
 # remain
 	b	reset
 # IRQ interrupt
-	b	irq_request
+	b	vector_irq
 # FIQ interrupt
 	b	reset
 
@@ -201,13 +201,9 @@ wait_lock:
 
 	mov pc, lr
 
-irq_request:
-	stmfd sp!, {r0-r12, lr}
-	bl	irq_handler
-	ldmfd sp!, {r0-r12, pc}^
-	subs pc, lr, #4
-
 vector_irq:
-	b vector_irq
-
+	sub	lr, lr, #4
+	stmdb	sp!, {r0-r13, lr}
+	bl	irq_handler
+	ldmia	sp!, {r0-r13, pc}^
 

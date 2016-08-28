@@ -32,7 +32,6 @@ objs	+= rtc.o
 objs	+= i2c.o
 objs	+= lcd.o
 objs	+= keyboard.o
-objs	+= task.o
 
 objs	+= shell/shell.o
 
