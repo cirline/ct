@@ -22,6 +22,7 @@ typedef enum {
 #define IRQ_CHANNEL(cls, minor)	\
 	((((cls) & IRQCLASSMASK) << IC_OFFSET) + ((minor) & IRQMINORMASK))
 
+/* interrupt channel define */
 #define EINT(x)			IRQ_CHANNEL(ic_ext, x)
 #define TIMERINT(x)		IRQ_CHANNEL(ic_timer, x)
 #define RTCALMINT()		IRQ_CHANNEL(ic_timer, MINOR_RTCALM)

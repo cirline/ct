@@ -6,7 +6,6 @@
 #include "common.h"
 #include "irq.h"
 #include "nf.h"
-#include "timer.h"
 #include "rtc.h"
 #include "i2c.h"
 #include "lcd.h"
@@ -123,15 +122,6 @@ int key_mux(void)
 	return 0;
 }
 
-#if 0
-int timer1_int_func(void)
-{
-	fstart();
-	tint_pending(1);
-	return 0;
-}
-#endif
-
 int rtcalm_int_func(void)
 {
 	fstart();
@@ -225,7 +215,6 @@ int main(void)
 	nf_init();
 	rtc_init();
 	i2c_init();
-	irq_init(TIMERINT(1), timer1_int_func);
 	irq_init(UARTINT(0), uart0_int_func);
 
 //	lcd_init();
@@ -257,7 +246,6 @@ int main(void)
 	}
 	sleep(0);
 */
-//	timer_toggle(1);
 	nf_read(0, buf);
 	for(val=0; val<32; val++) {
 		printf("[%p]\t= %p\n", val, buf[val]);
@@ -272,7 +260,7 @@ int main(void)
 
 	register_shell_command_quick("help", do_help, "show this message");
 	//register_shell_command_quick("exit", NULL, "exit");
-	register_shell_command_quick("buzz", timer_1hz_buzz_test, "1hz buzz");
+	register_shell_command_quick("buzz", shell_timer_1hz_buzz, "1hz buzz");
 	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
 
 	for(rc = 0; rc <= 0; ) {
