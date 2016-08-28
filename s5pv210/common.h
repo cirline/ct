@@ -91,6 +91,7 @@ extern int inline __s5p_sleep(int ms);
 
 extern int strcmp(const char *a, const char *b);
 extern int register_shell_command(struct shell_command *sc);
+extern int dump_stack_frame(void);
 extern int dump_registers(void);
 
 #endif
