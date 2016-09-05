@@ -1,5 +1,5 @@
 //#define DEBUG
-#define pr_fmt(fmt)	"common " fmt
+#define pr_fmt(fmt)	"[common] " fmt
 
 #include <stdarg.h>
 #include "common.h"
@@ -134,5 +134,58 @@ int __s5p_printf(char *s, ...)
 int inline __s5p_sleep(int ms)
 {
 	return timer_spin_lock(TIMER4, ms);
+}
+
+/**
+ * dump_stack_frame - dump parent stack frame
+ *
+ * c call:
+ * mov	ip sp
+ * push	{fp, ip, lr, pc}
+ */
+int dump_stack_frame(void)
+{
+	unsigned long *fp;
+	unsigned long *parent_sp, *parent_fp, *parent_lr;
+	unsigned long *pmem;
+
+	__asm__ __volatile__ (
+			"mov %0, fp \n\t"
+			: "=r"(fp)
+			: );
+	parent_lr = *(fp - 1);
+	parent_sp = *(fp - 2);
+	parent_fp = *(fp - 3);
+
+	pr_info("%s here: %x\n", __func__, parent_lr - 1);
+	pr_info("stack frame [%x ~ %x]\n", parent_sp, parent_fp);
+	for(pmem = parent_fp; pmem >= parent_sp; pmem--) {
+		pr_info("%x:\t0x%x\n", pmem, *pmem);
+	}
+
+	return 0;
+}
+
+/**
+ * dump_registers - dump r0 - r12 registers
+ */
+int dump_registers(void)
+{
+	union arm_regs *pr;
+	unsigned long r0, r1;
+	int i;
+
+	__asm__ __volatile__ (
+			"push {r0-r12} \n\t"
+			"mov %0, sp \n\t"
+			: "=r"(pr)
+			: );
+	dump_stack_frame();
+	pr_info("registers:\n");
+	for(i = 0; i < 13; i++)
+		pr_info("r[0x%x] = 0x%x\n", i, pr->r[i]);
+	__asm__ __volatile__ ("pop {r0-r12}": :);
+
+	return 0;
 }
 

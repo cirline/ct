@@ -15,7 +15,5 @@ int inline test_task(unsigned long taskset, int task);
 void task_init(unsigned long *taskset);
 void task_loop(unsigned long *taskset);
 
-int timer_1hz_buzz_test(void *p);
-
 #endif
 

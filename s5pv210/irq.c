@@ -62,6 +62,12 @@ static int irq_set_uart(unsigned int minor, irq_func_t func)
 	}
 }
 
+/**
+ * irq_init - set interrupt service routine
+ *
+ * @channel: irq channel, define in irq.h
+ * @func: isr function
+ */
 int irq_init(unsigned int channel, irq_func_t func)
 {
 	pr_info("IRF(%x) address 0x%p\n", channel, func);

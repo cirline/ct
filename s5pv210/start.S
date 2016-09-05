@@ -33,7 +33,7 @@ _start:
 # remain
 	b	reset
 # IRQ interrupt
-	b	irq_request
+	b	vector_irq
 # FIQ interrupt
 	b	reset
 
@@ -96,15 +96,15 @@ set_stack:
 #	ldr r2, =stack_top		@# r2 = relative stack_top
 #	sub r1, r2, r1			@# r1 = address gap
 #	add r0, r0, r1			@# r0 = absolute stack_top
-	ldr r0, =(__data_end + 0x3000)
+	ldr r0, =(__data_end + 0x300000)
 # svc mode
 	msr cpsr_c, #0xd3
 	mov sp, r0
-	sub r0, r0, #0x1000
+	sub r0, r0, #0x100000
 # irq mode
 	msr cpsr_c, #0xd2
 	mov sp, r0
-	sub r0, r0, #0x1000
+	sub r0, r0, #0x100000
 # sys mode, and enable irq
 	msr cpsr_c, #0xdf
 	mov sp, r0
@@ -201,10 +201,9 @@ wait_lock:
 
 	mov pc, lr
 
-irq_request:
-	stmfd sp!, {r0-r12, lr}
+vector_irq:
+	sub	lr, lr, #4
+	stmdb	sp!, {r0-r13, lr}
 	bl	irq_handler
-	ldmfd sp!, {r0-r12, pc}^
-	subs pc, lr, #4
-
+	ldmia	sp!, {r0-r13, pc}^
 

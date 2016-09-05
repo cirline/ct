@@ -67,6 +67,18 @@ struct shell_command {
 	struct list_head list;
 };
 
+union arm_regs {
+	unsigned long r[16];
+	struct {
+		unsigned long r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10;
+		unsigned long fp;
+		unsigned long ip;
+		unsigned long sp;
+		unsigned long lr;
+		unsigned long pc;
+	};
+};
+
 extern void inline mdelay(int ms);
 extern unsigned int ioread32(const volatile addr_t addr);
 extern void iowrite32(unsigned int w, const volatile addr_t addr);
@@ -79,6 +91,8 @@ extern int inline __s5p_sleep(int ms);
 
 extern int strcmp(const char *a, const char *b);
 extern int register_shell_command(struct shell_command *sc);
+extern int dump_stack_frame(void);
+extern int dump_registers(void);
 
 #endif
 
