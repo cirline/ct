@@ -8,6 +8,7 @@ from datetime import *
 import string
 from cfg_editor import *
 import os
+import sys
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
@@ -146,7 +147,9 @@ class TushareThread(threading.Thread):
                 i = 19
             update = False
 
-script_path = os.getcwd()
+current_path = os.getcwd()
+script_path = sys.path[0]
+print script_path
 config_path = script_path + '/cfg.conf'
 print('config: ' + config_path)
 
