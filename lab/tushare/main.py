@@ -7,10 +7,12 @@ import tushare as ts
 from datetime import *
 import string
 from cfg_editor import *
+import os
+import sys
 
 class main_window(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title = title, size = (110, 85))
+        wx.Frame.__init__(self, parent, title = title, size = (90, 100))
 
         ws = self.GetWindowStyle()
         self.SetWindowStyle(ws | wx.STAY_ON_TOP)
@@ -134,31 +136,37 @@ class TushareThread(threading.Thread):
                     print('get_realtime_quotes update')
                 except Exception as e:
                     print('get_realtime_quotes: %s' % e)
-            s = '.'
+            s = ''
             for x in range(i):
                 s = s + '.'
             wx.CallAfter(self.context.updateUI, s, df_list, update)
             ostm.sleep(1)
-            if(i < 4):
-                i = i + 1
+            if(i > 0):
+                i = i - 1
             else:
-                i = 0
+                i = 19
             update = False
 
+current_path = os.getcwd()
+script_path = sys.path[0]
+print script_path
+config_path = script_path + '/cfg.conf'
+print('config: ' + config_path)
+
 slist = []
-cfg = cfg_editor('cfg.conf')
+cfg = cfg_editor(config_path)
 for section in cfg.sections():
     slist.append(section)
 
 now = datetime.now()
 active_time = []
-active_time.append(now.replace(hour=9, minute=30, second=0))
+active_time.append(now.replace(hour=9, minute=00, second=0))
 active_time.append(now.replace(hour=11, minute=30, second=0))
 active_time.append(now.replace(hour=13, minute=00, second=0))
 active_time.append(now.replace(hour=15, minute=00, second=0))
 
 app = wx.App(False)
-mframe = main_window(None, "oooo")
+mframe = main_window(None, "main")
 mframe.Centre()
 mframe.Show()
 point = mframe.GetPosition()
