@@ -93,7 +93,7 @@ void inline timer_irq_clear(enum timer_sn t_sn)
 	set2clear(TINT_CSTAT, MASK_BITS_1, t_sn+5);
 }
 
-int timer_spin_lock(enum timer_sn t_sn, int ms)
+int timer_spin_delay(enum timer_sn t_sn, int ms)
 {
     struct timer timer;
 	int n;

@@ -261,6 +261,7 @@ int main(void)
 	register_shell_command_quick("help", do_help, "show this message");
 	//register_shell_command_quick("exit", NULL, "exit");
 	register_shell_command_quick("buzz", shell_timer_1hz_buzz, "1hz buzz");
+	register_shell_command_quick("sleep_test", shell_sleep_test, "sleep test");
 	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
 
 	for(rc = 0; rc <= 0; ) {
@@ -322,23 +323,8 @@ int test_lcd(unsigned long *taskset)
     return 0;
 }
 
-int test_delay(unsigned long *taskset)
-{
-    int i;
-    printf("--- test delay ---\n");
-    for(i=0; i<9; i++) {
-        printf("test sleep count %x ...\n", i);
-        mdelay(1000);
-        //timer_spin_lock(TIMER4, 1000);
-    }
-    return 0;
-}
-
 void task_loop(unsigned long *taskset)
 {
-    /* test timer delay */
-    test_task(*taskset, TASK_DELAY) && test_delay(taskset);
-
 	/* test backlight */
 	if(test_task(*taskset, TASK_BACKLIGHT)) {
 		int i;

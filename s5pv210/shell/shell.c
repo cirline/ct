@@ -47,3 +47,19 @@ int shell_timer_1hz_buzz(void *p)
 	return 0;
 }
 
+int shell_sleep_test(void *p)
+{
+	int i = 0;
+
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(1000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(2000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(3000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(4000);
+
+	return 0;
+}
+
