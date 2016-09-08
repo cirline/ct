@@ -263,6 +263,7 @@ int main(void)
 	register_shell_command_quick("buzz", shell_timer_1hz_buzz, "1hz buzz");
 	register_shell_command_quick("sleep_test", shell_sleep_test, "sleep test");
 	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
+	register_shell_command_quick("lcd_test", shell_lcd_test, "lcd test");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");
