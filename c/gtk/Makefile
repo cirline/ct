@@ -2,7 +2,7 @@ CFLAGS	+= $(shell pkg-config --libs --cflags gtk+-2.0)
 
 fout	:= a.out
 
-objs	:= basic_win.o
+objs	:= gtk_layout.o
 
 $(fout):$(objs)
 	$(CC) -o $@ $^ $(CFLAGS)
