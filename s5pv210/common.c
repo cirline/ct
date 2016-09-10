@@ -133,7 +133,7 @@ int __s5p_printf(char *s, ...)
 
 int inline __s5p_sleep(int ms)
 {
-	return timer_spin_lock(TIMER4, ms);
+	return timer_spin_delay(TIMER4, ms);
 }
 
 /**

@@ -34,6 +34,7 @@ objs	+= lcd.o
 objs	+= keyboard.o
 
 objs	+= shell/shell.o
+objs	+= drivers/display.o
 
 $(bin_file): $(objs) $(debug_out)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

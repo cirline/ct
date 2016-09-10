@@ -5,6 +5,7 @@
 #include <common.h>
 #include <timer.h>
 #include <irq.h>
+#include <display.h>
 
 int shell_dump_registers(void *p)
 {
@@ -43,6 +44,59 @@ int shell_timer_1hz_buzz(void *p)
 
         timer_init(&timer);
         timer_toggle(timer.sn, 1);
+
+	return 0;
+}
+
+int shell_sleep_test(void *p)
+{
+	int i = 0;
+
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(1000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(2000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(3000);
+	pr_info("%s --> %x\n", __func__, i++);
+	mdelay(4000);
+
+	return 0;
+}
+
+int shell_lcd_test(void)
+{
+#if 0
+	struct hv_config at070tn92_lcd = {
+		.hozval = 800,
+		.linehoz = 1056,
+		.hspw = 10,
+		.hbpd = 46,
+		.hfpd = 210,
+		.lineval = 480,
+		.frameline = 525,
+		.vspw = 10,
+		.vbpd = 23,
+		.vfpd = 22,
+		.dclk = 33,
+	};
+#else
+	struct hv_config at070tn92_lcd = {
+		.hozval = 5,
+		.linehoz = 12,
+		.hspw = 1,
+		.hbpd = 3,
+		.hfpd = 4,
+		.lineval = 4,
+		.frameline = 9,
+		.vspw = 1,
+		.vbpd = 2,
+		.vfpd = 3,
+		.dclk = 33,
+	};
+#endif
+
+	generate_hv_signal(&at070tn92_lcd);
 
 	return 0;
 }

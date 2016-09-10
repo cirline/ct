@@ -56,7 +56,7 @@ extern int timer_init(struct timer *pt);
 extern void inline timer_irq_toggle(enum timer_sn t_sn, int enable);
 extern int inline timer_irq_status(enum timer_sn t_sn);
 extern void inline timer_irq_clear(enum timer_sn t_sn);
-extern int timer_spin_lock(enum timer_sn t_sn, int ms);
+extern int timer_spin_delay(enum timer_sn t_sn, int ms);
 
 #endif
 
