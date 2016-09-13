@@ -1,5 +1,4 @@
-#define DEBUG
-
+//#define DEBUG
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -139,5 +138,28 @@ int http_get(const char *url, char *buffer, int buffer_len)
 	pr_debug("recv:\n%s", buffer);
 
 	return rc;
+}
+
+char *split_http_response_header(char *buffer)
+{
+	char *p;
+
+	for(p = buffer; *p != 0; p++) {
+		if(*p != '\r')
+			continue;
+		p++;
+		if(*p != '\n')
+			continue;
+		p++;
+		if(*p != '\r')
+			continue;
+		p++;
+		if(*p != '\n')
+			continue;
+
+		return p + 1;
+	}
+
+	return NULL;
 }
 
