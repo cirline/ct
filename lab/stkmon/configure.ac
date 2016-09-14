@@ -6,6 +6,8 @@ AC_INIT([stkmon], [0.1], [chqiwei89@163.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2)
+
 # Checks for programs.
 AC_PROG_CC
 
@@ -18,6 +20,7 @@ AC_CHECK_LIB([dl], [main])
 AC_CHECK_LIB([pthread], [main])
 
 # Checks for header files.
+AC_CHECK_HEADERS([stdlib.h string.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
