@@ -1,17 +1,38 @@
 #include <unistd.h>
 #include <gtk/gtk.h>
 
+gchar buf[256];
+
+gboolean on_expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	cairo_t *cr;
+	g_printf("%s -- pid = %d\n", __func__, getpid());
+
+	cr = gdk_cairo_create(widget->window);
+	cairo_move_to(cr, 30, 30);
+	cairo_set_font_size(cr, 15);
+	cairo_show_text(cr, buf);
+
+	cairo_destroy(cr);
+
+	return FALSE;
+}
+
 gboolean timer_handler(GtkWidget *widget)
 {
+	if(widget->window == NULL)
+		return FALSE;
 	g_printf("%s -- pid = %d\n", __func__, getpid());
 
 	GDateTime *now = g_date_time_new_now_local();
 	gchar *my_time = g_date_time_format(now, "%H:%M:%S");
 
-	gtk_label_set_text(GTK_LABEL(widget), my_time);
+	g_sprintf(buf, "%s", my_time);
+	g_printf("time is : %s\n", my_time);
 
 	g_free(my_time);
 	g_date_time_unref(now);
+	gtk_widget_queue_draw(widget);
 
 	return TRUE;
 }
@@ -25,10 +46,10 @@ int main(int argc, char *argv[])
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_default_size(GTK_WINDOW(win), 300, 200);
 
-	GtkWidget *label = gtk_label_new("hello label");
-	gtk_container_add(GTK_CONTAINER(win), label);
-
-	g_timeout_add(1000, (GSourceFunc)timer_handler, (gpointer)label);
+	GtkWidget *darea = gtk_drawing_area_new();
+	gtk_container_add(GTK_CONTAINER(win), darea);
+	g_signal_connect(darea, "expose-event", G_CALLBACK(on_expose_event), NULL);
+	g_timeout_add(1000, (GSourceFunc)timer_handler, (gpointer)win);
 
 	g_signal_connect(G_OBJECT(win), "destroy", G_CALLBACK(gtk_main_quit), G_OBJECT(win));
 
