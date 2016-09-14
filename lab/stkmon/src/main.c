@@ -10,12 +10,30 @@
 
 int main_ui(int argc, char *argv[])
 {
-	GtkWidget *win;
 	gtk_init(&argc, &argv);
 
-	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "center");
+	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_title(GTK_WINDOW(win), "stkmon");
 	gtk_window_set_default_size(GTK_WINDOW(win), 250, 100);
+
+	GtkWidget *mbox = gtk_vbox_new(TRUE, 1);
+	gtk_container_add(GTK_CONTAINER(win), mbox);
+
+	GtkWidget *hbox = gtk_hbox_new(TRUE, 1);
+	gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
+
+	GtkWidget *align = gtk_alignment_new(0, 0, 0, 0);
+	//GtkWidget *label = gtk_button_new_with_label("hello");
+	GtkWidget *label = gtk_label_new("hello");
+	gtk_container_add(GTK_CONTAINER(align), label);
+	gtk_container_add(GTK_CONTAINER(hbox), align);
+
+	GtkWidget *align1 = gtk_alignment_new(0, 0, 0, 0);
+	//GtkWidget *label1 = gtk_button_new_with_label("world");
+	GtkWidget *label1 = gtk_label_new("world");
+	gtk_container_add(GTK_CONTAINER(align1), label1);
+	gtk_container_add(GTK_CONTAINER(hbox), align1);
+
 	gtk_widget_show_all(win);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
