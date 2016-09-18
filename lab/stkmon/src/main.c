@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include <gtk/gtk.h>
 
@@ -8,34 +9,60 @@
 
 #include "sinajs.h"
 
-int main_ui(int argc, char *argv[])
+struct stkui {
+	char *code;
+	GtkWidget *label_code;
+	GtkWidget *label_price;
+};
+
+gboolean hdlr_1s(gpointer *);
+
+int main_ui(int argc, char *argv[], struct stkui sp[])
 {
+	int i;
+	int px, py;
+
 	gtk_init(&argc, &argv);
 
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "stkmon");
-	gtk_window_set_default_size(GTK_WINDOW(win), 250, 100);
+	gtk_window_set_default_size(GTK_WINDOW(win), 0, 0);
+	gtk_window_set_position(GTK_WINDOW(win), GTK_WIN_POS_CENTER);
+	gtk_window_get_position(GTK_WINDOW(win), &px, &py);
+	gtk_window_move(GTK_WINDOW(win), px * 2, py);
+	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
 	GtkWidget *mbox = gtk_vbox_new(TRUE, 1);
 	gtk_container_add(GTK_CONTAINER(win), mbox);
 
-	GtkWidget *hbox = gtk_hbox_new(TRUE, 1);
-	gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
+	for(i = 0; sp[i].code; i++) {
+		GtkWidget *align;
+		GtkWidget *label;
 
-	GtkWidget *align = gtk_alignment_new(0, 0, 0, 0);
-	//GtkWidget *label = gtk_button_new_with_label("hello");
-	GtkWidget *label = gtk_label_new("hello");
-	gtk_container_add(GTK_CONTAINER(align), label);
-	gtk_container_add(GTK_CONTAINER(hbox), align);
+		g_printf("init code = %s\n", sp[i].code);
+		GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
+		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
 
-	GtkWidget *align1 = gtk_alignment_new(0, 0, 0, 0);
-	//GtkWidget *label1 = gtk_button_new_with_label("world");
-	GtkWidget *label1 = gtk_label_new("world");
-	gtk_container_add(GTK_CONTAINER(align1), label1);
-	gtk_container_add(GTK_CONTAINER(hbox), align1);
+		align = gtk_alignment_new(0, 0, 0, 0);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
+		label = gtk_label_new(sp[i].code);
+		gtk_container_add(GTK_CONTAINER(align), label);
+		gtk_container_add(GTK_CONTAINER(hbox), align);
+		sp[i].label_code = label;
+		//
+		align = gtk_alignment_new(1, 0, 0, 0);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
+		label = gtk_label_new("0");
+		gtk_container_add(GTK_CONTAINER(align), label);
+		gtk_container_add(GTK_CONTAINER(hbox), align);
+		sp[i].label_price = label;
+	}
+
+	g_timeout_add(1000, (GSourceFunc)hdlr_1s, (gpointer)sp);
+	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	gtk_widget_show_all(win);
-	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	hdlr_1s((gpointer)sp);
 
 	gtk_main();
 
@@ -125,24 +152,47 @@ void sinajs_decode(char *buffer, struct sinajs *sj)
 	strcpy(sj->date, token);
 	token = strtok_r(NULL, ",", &sptr2);
 	strcpy(sj->time, token);
+}
 
-	//psinajs(sj);
+gboolean hdlr_1s(gpointer *p)
+{
+	char buffer[4096];
+	char *bp;
+	struct sinajs data;
+	int i;
+	struct stkui *sp = (struct stkui *)p;
+	int rc;
+
+	for(i = 0; sp[i].code; i++) {
+		char *url;
+		rc = asprintf(&url, "hq.sinajs.cn/list=%s", sp[i].code);
+		if(rc < 0) {
+			g_printf("%d: %s\n", __LINE__, strerror(errno));
+			continue;
+		}
+
+		http_get(url, buffer, 4096);
+		free(url);
+		bp = split_http_response_header(buffer);
+		sinajs_decode(bp, &data);
+		sprintf(buffer, "%.2f", data.price);
+		gtk_label_set_text(GTK_LABEL(sp[i].label_price), buffer);
+		g_printf("code = %s, price = %.2f\n", data.code, data.price);
+	}
+
+
+	return TRUE;
 }
 
 int main(int argc, char *argv[])
 {
-	char buffer[4096];
-	char *p;
-	struct sinajs data;
-	char *token;
+	struct stkui stk[] = {
+		{ "sh601766", },
+		{ "sh601398", },
+		{ "sh601668", },
+		{ NULL, },
+	};
+	main_ui(argc, argv, stk);
 
-	http_get("hq.sinajs.cn/list=sh601766", buffer, 4096);
-	p = split_http_response_header(buffer);
-
-	sinajs_decode(p, &data);
-
-	printf("code = %s, price = %.2f\n", data.code, data.price);
-
-	main_ui(argc, argv);
 	return 0;
 }
