@@ -1,6 +1,6 @@
 <root>
 	<configure>
-		<delay_ms>3000</delay_ms>
+		<delay_ms>5000</delay_ms>
 	</configure>
 
 	<stocks>

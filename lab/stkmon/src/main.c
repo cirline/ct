@@ -19,10 +19,11 @@ struct stkui {
 gboolean hdlr_1s(gpointer *);
 int parse_xmlconfig(struct sm_desc *);
 
-int main_ui(int argc, char *argv[], struct stkui sp[])
+int main_ui(int argc, char *argv[], struct sm_desc *desc)
 {
 	int i;
 	int px, py;
+	struct sm_stock *stock;
 
 	gtk_init(&argc, &argv);
 
@@ -37,34 +38,33 @@ int main_ui(int argc, char *argv[], struct stkui sp[])
 	GtkWidget *mbox = gtk_vbox_new(TRUE, 1);
 	gtk_container_add(GTK_CONTAINER(win), mbox);
 
-	for(i = 0; sp[i].code; i++) {
+	for(stock = desc->stock; stock; stock = stock->next) {
 		GtkWidget *align;
 		GtkWidget *label;
 
-		g_printf("init code = %s\n", sp[i].code);
 		GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
 		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
 
 		align = gtk_alignment_new(0, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
-		label = gtk_label_new(sp[i].code);
+		label = gtk_label_new(stock->code);
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
-		sp[i].label_code = label;
+		stock->ui.label_code = label;
 		//
 		align = gtk_alignment_new(1, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
 		label = gtk_label_new("0");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
-		sp[i].label_price = label;
+		stock->ui.label_price = label;
 	}
 
-	g_timeout_add(5000, (GSourceFunc)hdlr_1s, (gpointer)sp);
+	g_timeout_add(desc->cfg.delay_ms, (GSourceFunc)hdlr_1s, (gpointer)desc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	gtk_widget_show_all(win);
-	hdlr_1s((gpointer)sp);
+	hdlr_1s((gpointer)desc);
 
 	gtk_main();
 
@@ -162,42 +162,36 @@ gboolean hdlr_1s(gpointer *p)
 	char *bp;
 	struct sinajs data;
 	int i;
-	struct stkui *sp = (struct stkui *)p;
+	struct sm_desc *desc = (struct sm_desc *)p;
+	struct sm_stock *stock;
 	int rc;
 
-	for(i = 0; sp[i].code; i++) {
+	for(stock = desc->stock; stock; stock = stock->next) {
 		char *url;
-		rc = asprintf(&url, "hq.sinajs.cn/list=%s", sp[i].code);
+		rc = asprintf(&url, "hq.sinajs.cn/list=%s%s", stock->stkex, stock->code);
 		if(rc < 0) {
 			g_printf("%d: %s\n", __LINE__, strerror(errno));
 			continue;
 		}
-
 		http_get(url, buffer, 4096);
 		free(url);
+
 		bp = split_http_response_header(buffer);
 		sinajs_decode(bp, &data);
 		sprintf(buffer, "%.2f", data.price);
-		gtk_label_set_text(GTK_LABEL(sp[i].label_price), buffer);
-		g_printf("code = %s, price = %.2f\n", data.code, data.price);
+		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
+		pr_info("code = %s, price = %.2f\n", data.code, data.price);
 	}
-
 
 	return TRUE;
 }
 
 int main(int argc, char *argv[])
 {
-	struct stkui stk[] = {
-		{ "sh601766", },
-		{ "sh601398", },
-		{ "sh601668", },
-		{ NULL, },
-	};
 	struct sm_desc desc;
 
 	parse_xmlconfig(&desc);
-	main_ui(argc, argv, stk);
+	main_ui(argc, argv, &desc);
 
 	return 0;
 }

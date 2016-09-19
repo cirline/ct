@@ -124,6 +124,12 @@ void print_configure(struct sm_desc *desc)
 	}
 }
 
+void check_configure(struct sm_desc *desc)
+{
+	if(desc->cfg.delay_ms <= 0)
+		desc->cfg.delay_ms = SM_DEFAULT_DELAY_MS;
+}
+
 int parse_xmlconfig(struct sm_desc *desc)
 {
 	xmlDocPtr docp;
@@ -156,6 +162,7 @@ int parse_xmlconfig(struct sm_desc *desc)
 
 	xmlFreeDoc(docp);
 
+	check_configure(desc);
 	print_configure(desc);
 
 	return 0;
