@@ -15,6 +15,7 @@ struct sm_cfg {
 struct sm_stkui {
 	GtkWidget *label_code;
 	GtkWidget *label_price;
+	GtkWidget *label_raise;
 };
 
 struct sm_stock {

@@ -44,13 +44,14 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 
 		GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
 		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
-
+#if 0
 		align = gtk_alignment_new(0, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
 		label = gtk_label_new(stock->code);
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
 		stock->ui.label_code = label;
+#endif
 		//
 		align = gtk_alignment_new(1, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
@@ -58,6 +59,13 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
 		stock->ui.label_price = label;
+
+		align = gtk_alignment_new(1, 0, 0, 0);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
+		label = gtk_label_new("0.00");
+		gtk_container_add(GTK_CONTAINER(align), label);
+		gtk_container_add(GTK_CONTAINER(hbox), align);
+		stock->ui.label_raise = label;
 	}
 
 	g_timeout_add(desc->cfg.delay_ms, (GSourceFunc)hdlr_1s, (gpointer)desc);
@@ -188,6 +196,9 @@ gboolean hdlr_1s(gpointer *p)
 		else
 			gdk_color_parse("black", &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
+		float raise = (data.price - data.pre_close) / data.pre_close * 100;
+		sprintf(buffer, "%.2f", raise);
+		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 		pr_info("code = %s, price = %.2f, pre_close = %.2f\n", data.code, data.price, data.pre_close);
 	}
 
