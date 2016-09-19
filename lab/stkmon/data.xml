@@ -1,0 +1,20 @@
+<root>
+	<configure>
+		<delay_ms>3000</delay_ms>
+	</configure>
+
+	<stocks>
+		<stock>
+			<code>601398</code>
+			<stkex>sh</stkex>
+		</stock>
+		<stock>
+			<code>601668</code>
+			<stkex>sh</stkex>
+		</stock>
+		<stock>
+			<code>601766</code>
+			<stkex>sh</stkex>
+		</stock>
+	</stocks>
+</root>

@@ -8,6 +8,7 @@
 #include <ccutils/log.h>
 
 #include "sinajs.h"
+#include "stkmon.h"
 
 struct stkui {
 	char *code;
@@ -16,6 +17,7 @@ struct stkui {
 };
 
 gboolean hdlr_1s(gpointer *);
+int parse_xmlconfig(struct sm_desc *);
 
 int main_ui(int argc, char *argv[], struct stkui sp[])
 {
@@ -58,7 +60,7 @@ int main_ui(int argc, char *argv[], struct stkui sp[])
 		sp[i].label_price = label;
 	}
 
-	g_timeout_add(1000, (GSourceFunc)hdlr_1s, (gpointer)sp);
+	g_timeout_add(5000, (GSourceFunc)hdlr_1s, (gpointer)sp);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	gtk_widget_show_all(win);
@@ -192,6 +194,9 @@ int main(int argc, char *argv[])
 		{ "sh601668", },
 		{ NULL, },
 	};
+	struct sm_desc desc;
+
+	parse_xmlconfig(&desc);
 	main_ui(argc, argv, stk);
 
 	return 0;
