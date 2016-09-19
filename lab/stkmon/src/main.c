@@ -165,6 +165,7 @@ gboolean hdlr_1s(gpointer *p)
 	struct sm_desc *desc = (struct sm_desc *)p;
 	struct sm_stock *stock;
 	int rc;
+	GdkColor color;
 
 	for(stock = desc->stock; stock; stock = stock->next) {
 		char *url;
@@ -180,7 +181,14 @@ gboolean hdlr_1s(gpointer *p)
 		sinajs_decode(bp, &data);
 		sprintf(buffer, "%.2f", data.price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
-		pr_info("code = %s, price = %.2f\n", data.code, data.price);
+		if(data.price > data.pre_close)
+			gdk_color_parse("red", &color);
+		else if(data.price < data.pre_close)
+			gdk_color_parse("blue", &color);
+		else
+			gdk_color_parse("black", &color);
+		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
+		pr_info("code = %s, price = %.2f, pre_close = %.2f\n", data.code, data.price, data.pre_close);
 	}
 
 	return TRUE;
