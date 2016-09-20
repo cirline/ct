@@ -11,3 +11,7 @@ dir_demo_LDADD = -lccutils -ldl -lpthread
 check_PROGRAMS += db_demo
 db_demo_SOURCES = test_db.c
 db_demo_LDADD = -lccutils -ldl -lpthread
+
+check_PROGRAMS += net_demo
+net_demo_SOURCES = test_net.c
+net_demo_LDADD = -lccutils -ldl -lpthread
