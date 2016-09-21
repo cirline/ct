@@ -3,6 +3,10 @@
 
 #include <gtk/gtk.h>
 
+#define COLOR_RISE	"red"
+#define COLOR_DROP	"blue"
+#define COLOR_EQ	"black"
+
 #define SM_DEFAULT_DELAY_MS	5
 
 #define SM_CODE_SZ	16
@@ -29,6 +33,10 @@ struct sm_stock {
 struct sm_desc {
 	struct sm_cfg cfg;
 	struct sm_stock *stock;
+};
+
+struct sm_xmlcfg {
+	char *delay_ms;
 };
 
 #endif

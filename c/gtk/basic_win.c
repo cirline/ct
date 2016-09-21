@@ -167,13 +167,14 @@ int main(int argc, char *argv[])
 
 	// toolbar
 	GtkWidget *toolbar = create_toolbar(win);
-	gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
+	//gtk_box_pack_start(GTK_BOX(vbox), toolbar, FALSE, FALSE, 0);
 
 	// statusbar
 	statusbar = gtk_statusbar_new();
 	gtk_box_pack_end(GTK_BOX(vbox), statusbar, FALSE, TRUE, 0);
-#if 1
 	btn = gtk_button_new_with_label("Button");
+	gtk_box_pack_start(GTK_BOX(vbox), btn, FALSE, FALSE, 0);
+#if 0
 	gtk_widget_set_tooltip_text(btn, "Button tooltip");
 	halign = gtk_alignment_new(0, 0, 0, 0);
 
