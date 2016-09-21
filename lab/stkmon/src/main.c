@@ -53,14 +53,14 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 		stock->ui.label_code = label;
 #endif
 		//
-		align = gtk_alignment_new(1, 0, 0, 0);
+		align = gtk_alignment_new(1, 0, 0.6, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
 		label = gtk_label_new("0");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
 		stock->ui.label_price = label;
 
-		align = gtk_alignment_new(1, 0, 0, 0);
+		align = gtk_alignment_new(1, 0, 0.4, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
 		label = gtk_label_new("0.00");
 		gtk_container_add(GTK_CONTAINER(align), label);
@@ -187,19 +187,23 @@ gboolean hdlr_1s(gpointer *p)
 
 		bp = split_http_response_header(buffer);
 		sinajs_decode(bp, &data);
+		pr_info("code = %s, price = %.2f, pre_close = %.2f\n", data.code, data.price, data.pre_close);
+
 		sprintf(buffer, "%.2f", data.price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
-		if(data.price > data.pre_close)
-			gdk_color_parse("red", &color);
-		else if(data.price < data.pre_close)
-			gdk_color_parse("blue", &color);
-		else
-			gdk_color_parse("black", &color);
-		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
+
 		float raise = (data.price - data.pre_close) / data.pre_close * 100;
 		sprintf(buffer, "%.2f", raise);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
-		pr_info("code = %s, price = %.2f, pre_close = %.2f\n", data.code, data.price, data.pre_close);
+
+		if(data.price > data.pre_close)
+			gdk_color_parse(COLOR_RISE, &color);
+		else if(data.price < data.pre_close)
+			gdk_color_parse(COLOR_DROP, &color);
+		else
+			gdk_color_parse(COLOR_EQ, &color);
+		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
+		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
 	}
 
 	return TRUE;

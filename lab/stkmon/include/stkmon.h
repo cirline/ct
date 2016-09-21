@@ -3,6 +3,10 @@
 
 #include <gtk/gtk.h>
 
+#define COLOR_RISE	"red"
+#define COLOR_DROP	"blue"
+#define COLOR_EQ	"black"
+
 #define SM_DEFAULT_DELAY_MS	5
 
 #define SM_CODE_SZ	16
