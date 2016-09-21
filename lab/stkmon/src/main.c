@@ -3,6 +3,7 @@
 #include <errno.h>
 
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 
 #include <ccutils/net.h>
 #include <ccutils/log.h>
@@ -10,14 +11,37 @@
 #include "sinajs.h"
 #include "stkmon.h"
 
-struct stkui {
-	char *code;
-	GtkWidget *label_code;
-	GtkWidget *label_price;
-};
+static int gx = 99;
 
 gboolean hdlr_1s(gpointer *);
 int parse_xmlconfig(struct sm_desc *);
+void configure_main(GtkWidget *widget, gpointer p);
+
+GtkWidget *create_menubar(GtkWidget *win)
+{
+	GtkAccelGroup *accel_grp = gtk_accel_group_new();
+	gtk_window_add_accel_group(GTK_WINDOW(win), accel_grp);
+
+	GtkWidget *menubar = gtk_menu_bar_new();
+	GtkWidget *file_item = gtk_menu_item_new_with_mnemonic("_File");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
+
+	// file menu
+	GtkWidget *file_menu = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
+
+	GtkWidget *quit_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_QUIT, accel_grp);
+	gtk_widget_add_accelerator(quit_item, "activate", accel_grp, GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	g_signal_connect(G_OBJECT(quit_item), "activate", G_CALLBACK(gtk_main_quit), NULL);
+
+	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
+	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
+
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), item_config);
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), quit_item);
+
+	return menubar;
+}
 
 int main_ui(int argc, char *argv[], struct sm_desc *desc)
 {
@@ -35,8 +59,11 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 	gtk_window_move(GTK_WINDOW(win), px * 2, py);
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
-	GtkWidget *mbox = gtk_vbox_new(TRUE, 1);
+	GtkWidget *mbox = gtk_vbox_new(FALSE, 1);
 	gtk_container_add(GTK_CONTAINER(win), mbox);
+
+	GtkWidget *menubar = create_menubar(win);
+	gtk_box_pack_start(GTK_BOX(mbox), menubar, FALSE, FALSE, 0);
 
 	for(stock = desc->stock; stock; stock = stock->next) {
 		GtkWidget *align;

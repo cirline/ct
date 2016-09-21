@@ -35,4 +35,8 @@ struct sm_desc {
 	struct sm_stock *stock;
 };
 
+struct sm_xmlcfg {
+	char *delay_ms;
+};
+
 #endif

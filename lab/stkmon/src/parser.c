@@ -133,9 +133,6 @@ void check_configure(struct sm_desc *desc)
 int parse_xmlconfig(struct sm_desc *desc)
 {
 	xmlDocPtr docp;
-	xmlNodePtr nodep;
-	int level;
-	int i;
 	xmlXPathObjectPtr object;
 
 	docp = xmlParseFile(DATAFILE_PATH);
@@ -164,6 +161,41 @@ int parse_xmlconfig(struct sm_desc *desc)
 
 	check_configure(desc);
 	print_configure(desc);
+
+	return 0;
+}
+
+int do_save_xmlconfig(xmlNodePtr node, void *p)
+{
+	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
+	if(strcmp(node->name, "delay_ms") == 0) {
+		printf("save: delay_ms = %s\n", smxc->delay_ms);
+		xmlNodeSetContent(node, smxc->delay_ms);
+	}
+
+	return 0;
+}
+
+int save_xmlconfig(struct sm_xmlcfg *smxc)
+{
+	xmlDocPtr docp;
+	xmlXPathObjectPtr object;
+	unsigned char *cfg_path = "/root/configure";
+
+	docp = xmlParseFile(DATAFILE_PATH);
+	if(!docp) {
+		printf("%d, parse error %s\n", __LINE__, strerror(errno));
+		return -1;
+	}
+
+	object = get_xpath_object(docp, cfg_path);
+	if(object) {
+		parse_xojbect(object, do_save_xmlconfig, smxc);
+		xmlXPathFreeObject(object);
+	}
+
+	xmlSaveFile(DATAFILE_PATH, docp);
+	xmlFreeDoc(docp);
 
 	return 0;
 }
