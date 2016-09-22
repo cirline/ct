@@ -60,7 +60,6 @@ lab/filesync
 # automake
 *_demo
 *_out
-config.*
 .deps
 .dirstamp
 .libs
@@ -79,3 +78,6 @@ ar-lib
 libtool
 m4
 ltmain.sh
+config.status
+config.log
+*~

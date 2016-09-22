@@ -43,6 +43,33 @@ GtkWidget *create_menubar(GtkWidget *win)
 	return menubar;
 }
 
+int show_popup(GtkWidget *widget, GdkEvent *event)
+{
+	if(event->type == GDK_BUTTON_PRESS) {
+		GdkEventButton *button_event = (GdkEventButton *)event;
+
+		if(button_event->button == 3) {
+			gtk_menu_popup(GTK_MENU(widget), NULL, NULL, NULL, NULL, button_event->button, button_event->time);
+
+		}
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void create_popupmenu(GtkWidget *ebox)
+{
+	GtkWidget *popup_menu = gtk_menu_new();
+
+	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
+	gtk_widget_show(item_config);
+	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
+	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item_config);
+
+	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
+}
+
 int main_ui(int argc, char *argv[], struct sm_desc *desc)
 {
 	int i;
@@ -59,11 +86,15 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 	gtk_window_move(GTK_WINDOW(win), px * 2, py);
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
+	GtkWidget *ebox = gtk_event_box_new();
 	GtkWidget *mbox = gtk_vbox_new(FALSE, 1);
-	gtk_container_add(GTK_CONTAINER(win), mbox);
+	gtk_container_add(GTK_CONTAINER(win), ebox);
+	gtk_container_add(GTK_CONTAINER(ebox), mbox);
 
 	GtkWidget *menubar = create_menubar(win);
 	gtk_box_pack_start(GTK_BOX(mbox), menubar, FALSE, FALSE, 0);
+
+	create_popupmenu(ebox);
 
 	for(stock = desc->stock; stock; stock = stock->next) {
 		GtkWidget *align;

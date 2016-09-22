@@ -169,7 +169,7 @@ int do_save_xmlconfig(xmlNodePtr node, void *p)
 {
 	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
 	if(strcmp(node->name, "delay_ms") == 0) {
-		printf("save: delay_ms = %s\n", smxc->delay_ms);
+		printf("save: interval = %s\n", smxc->delay_ms);
 		xmlNodeSetContent(node, smxc->delay_ms);
 	}
 
