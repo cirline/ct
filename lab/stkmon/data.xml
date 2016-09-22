@@ -2,6 +2,7 @@
 <root>
 	<configure>
 		<delay_ms>30000</delay_ms>
+		<interval>30000</interval>	<!-- update interval ms -->
 	</configure>
 
 	<stocks>
