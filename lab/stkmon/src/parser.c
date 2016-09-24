@@ -96,6 +96,8 @@ int do_parse_stock(xmlNodePtr node, void *data)
 		strcpy(p->code, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "stkex") == 0) {
 		strcpy(p->stkex, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "trigger") == 0) {
+		strcpy(p->trigger, xmlNodeGetContent(node));
 	}
 
 	return 0;

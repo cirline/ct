@@ -9,14 +9,17 @@
 		<stock>
 			<code>601398</code>
 			<stkex>sh</stkex>
+			<trigger>5.0</trigger>
 		</stock>
 		<stock>
 			<code>601668</code>
 			<stkex>sh</stkex>
+			<trigger>6.0</trigger>
 		</stock>
 		<stock>
 			<code>601766</code>
 			<stkex>sh</stkex>
+			<trigger>8.0</trigger>
 		</stock>
 	</stocks>
 </root>

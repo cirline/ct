@@ -7,6 +7,8 @@ int save_xmlconfig(struct sm_xmlcfg *);
 
 struct {
 	GtkWidget *entry_delay_ms;
+	GtkWidget *entry_code;
+	GtkWidget *entry_stkex;
 } ui;
 
 struct sm_xmlcfg smxc;
@@ -30,13 +32,14 @@ void add_list(GtkWidget *list, unsigned char *str)
 	gtk_list_store_set(store, &iter, 0, str, -1);
 }
 
-void load_stocks(GtkWidget *box, struct sm_xmlcfg *smxc)
+GtkWidget *create_stocks_list(struct sm_xmlcfg *smxc)
 {
 	GtkListStore *store;
 	struct sm_stock *stock;
 
 	GtkWidget *list = gtk_tree_view_new();
-	gtk_box_pack_start(GTK_BOX(box), list, FALSE, FALSE, 0);
+	gtk_widget_set_size_request(list, 120, 120);
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(list), FALSE);
 
 	GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
 	GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
@@ -51,18 +54,23 @@ void load_stocks(GtkWidget *box, struct sm_xmlcfg *smxc)
 	for(stock = smxc->stock; stock; stock = stock->next) {
 		add_list(list, stock->code);
 	}
+	add_list(list, "add ...");
 
 	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(list));
+
+	return list;
 }
 
 void configure_main(GtkWidget *widget, gpointer p)
 {
-	GtkWidget *hbox;
 	GtkWidget *label;
+	GtkWidget *table;
+	GtkWidget *hbox;
 	GtkWidget *align;
 	struct sm_desc desc;
 	char buffer[1024];
 	struct sm_xmlcfg smxc;
+	int curcol;
 
 	g_printf("%s\n", __func__);
 	parse_xmlconfig(&desc);
@@ -76,30 +84,54 @@ void configure_main(GtkWidget *widget, gpointer p)
 	GtkWidget *mbox = gtk_vbox_new(FALSE, 1);
 	gtk_container_add(GTK_CONTAINER(win), mbox);
 
-	hbox = gtk_hbox_new(FALSE, 1);
-	gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
+	table = gtk_table_new(1, 2, FALSE);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
+	gtk_box_pack_start(GTK_BOX(mbox), table, FALSE, FALSE, 1);
 
+	curcol = 0;
 	label = gtk_label_new("interval(ms): ");
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 	ui.entry_delay_ms = gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), ui.entry_delay_ms, FALSE, FALSE, 0);
 	sprintf(buffer, "%d", desc.cfg.delay_ms);
 	gtk_entry_set_text(GTK_ENTRY(ui.entry_delay_ms), buffer);
 
-	hbox = gtk_hbox_new(FALSE, 1);
-	gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
-	load_stocks(hbox, &smxc);
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, curcol, curcol + 1);
+	gtk_table_attach_defaults(GTK_TABLE(table), ui.entry_delay_ms, 1, 2, curcol, curcol + 1);
+
+	table = gtk_table_new(4, 4, FALSE);
+	gtk_table_set_row_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
+	gtk_box_pack_start(GTK_BOX(mbox), table, FALSE, FALSE, 1);
+
+	curcol = 0;
+	GtkWidget *stocks_list = create_stocks_list(&smxc);
+	gtk_table_attach_defaults(GTK_TABLE(table), stocks_list, 0, 1, curcol, curcol + 2);
+	label = gtk_label_new("code");
+	ui.entry_code = gtk_entry_new();
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, curcol, curcol + 1);
+	gtk_table_attach_defaults(GTK_TABLE(table), ui.entry_code, 2, 3, curcol, curcol + 1);
+	label = gtk_label_new("stkex");
+	ui.entry_stkex = gtk_entry_new();
+	gtk_table_attach_defaults(GTK_TABLE(table), label, 1, 2, curcol + 1, curcol + 2);
+	gtk_table_attach_defaults(GTK_TABLE(table), ui.entry_stkex, 2, 3, curcol + 1, curcol + 2);
 
 	align = gtk_alignment_new(1, 0, 0, 0);
-	hbox = gtk_hbox_new(TRUE, 1);
+	hbox = gtk_hbox_new(TRUE, 5);
 	gtk_container_add(GTK_CONTAINER(align), hbox);
-	gtk_box_pack_start(GTK_BOX(mbox), align, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(mbox), align, FALSE, FALSE, 1);
+
+	GtkWidget *btn_add = gtk_button_new_with_mnemonic("_Add");
+	gtk_container_add(GTK_CONTAINER(hbox), btn_add);
+
+	GtkWidget *btn_update = gtk_button_new_with_mnemonic("_Update");
+	gtk_container_add(GTK_CONTAINER(hbox), btn_update);
+
+	GtkWidget *btn_delete = gtk_button_new_with_mnemonic("_Delete");
+	gtk_container_add(GTK_CONTAINER(hbox), btn_delete);
 
 	GtkWidget *btn_ok = gtk_button_new_with_mnemonic("_OK");
-	GtkWidget *btn_apply = gtk_button_new_with_mnemonic("_Apply");
 	g_signal_connect(G_OBJECT(btn_ok), "clicked", G_CALLBACK(configure_save), NULL);
 	gtk_container_add(GTK_CONTAINER(hbox), btn_ok);
-	gtk_container_add(GTK_CONTAINER(hbox), btn_apply);
 
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	gtk_widget_show_all(win);

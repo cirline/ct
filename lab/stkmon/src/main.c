@@ -10,6 +10,7 @@
 
 #include "sinajs.h"
 #include "stkmon.h"
+#include "stkxml.h"
 
 static int gx = 99;
 
@@ -60,17 +61,24 @@ int show_popup(GtkWidget *widget, GdkEvent *event)
 
 void create_popupmenu(GtkWidget *ebox)
 {
+	GtkWidget *item;
+
 	GtkWidget *popup_menu = gtk_menu_new();
 
 	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
 	gtk_widget_show(item_config);
-	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item_config);
+	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
+
+	item = gtk_menu_item_new_with_label("list detail");
+	gtk_widget_show(item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item);
+	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(configure_main), &gx);
 
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
 
-int main_ui(int argc, char *argv[], struct sm_desc *desc)
+int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc)
 {
 	int i;
 	int px, py;
@@ -102,28 +110,29 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc)
 
 		GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
 		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
-#if 0
-		align = gtk_alignment_new(0, 0, 0, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
-		label = gtk_label_new(stock->code);
-		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_container_add(GTK_CONTAINER(hbox), align);
-		stock->ui.label_code = label;
-#endif
-		//
+
 		align = gtk_alignment_new(1, 0, 0.6, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
 		label = gtk_label_new("0");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
 		stock->ui.label_price = label;
 
 		align = gtk_alignment_new(1, 0, 0.4, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 5, 5);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
 		label = gtk_label_new("0.00");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_container_add(GTK_CONTAINER(hbox), align);
 		stock->ui.label_raise = label;
+
+		hbox = gtk_hbox_new(FALSE, 1);
+		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
+		align = gtk_alignment_new(1, 0, 0, 0);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
+		label = gtk_label_new("0.00");
+		gtk_container_add(GTK_CONTAINER(align), label);
+		gtk_container_add(GTK_CONTAINER(hbox), align);
+		stock->ui.label_trigger = label;
 	}
 
 	g_timeout_add(desc->cfg.delay_ms, (GSourceFunc)hdlr_1s, (gpointer)desc);
@@ -245,7 +254,6 @@ gboolean hdlr_1s(gpointer *p)
 
 		bp = split_http_response_header(buffer);
 		sinajs_decode(bp, &data);
-		pr_info("code = %s, price = %.2f, pre_close = %.2f\n", data.code, data.price, data.pre_close);
 
 		sprintf(buffer, "%.2f", data.price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
@@ -253,6 +261,11 @@ gboolean hdlr_1s(gpointer *p)
 		float raise = (data.price - data.pre_close) / data.pre_close * 100;
 		sprintf(buffer, "%.2f", raise);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
+
+		float trigger = atof(stock->trigger);
+		float trigger_percent = (data.price - trigger) / data.pre_close;
+		sprintf(buffer, "%.2f", trigger_percent);
+		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
 
 		if(data.price > data.pre_close)
 			gdk_color_parse(COLOR_RISE, &color);
@@ -262,6 +275,9 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
+
+		pr_info("code = %s, price = %.2f, pre_close = %.2f, trigger = %.2f\n",
+				data.code, data.price, data.pre_close, trigger);
 	}
 
 	return TRUE;
@@ -269,10 +285,12 @@ gboolean hdlr_1s(gpointer *p)
 
 int main(int argc, char *argv[])
 {
-	struct sm_desc desc;
+	struct sm_desc desc;	/* deprecated */
+	struct sm_xmlcfg smxc;
 
-	parse_xmlconfig(&desc);
-	main_ui(argc, argv, &desc);
+	parse_xmlconfig(&desc);	/* deprecated */
+	load_xmlconfig(&smxc);
+	main_ui(argc, argv, &desc, &smxc);
 
 	return 0;
 }

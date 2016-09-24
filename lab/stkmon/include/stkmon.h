@@ -12,6 +12,7 @@
 
 #define SM_CODE_SZ	16
 #define SM_STKEX_SZ	8
+#define SM_PRICE_SZ	8
 
 struct sm_cfg {
 	int delay_ms;
@@ -21,11 +22,13 @@ struct sm_stkui {
 	GtkWidget *label_code;
 	GtkWidget *label_price;
 	GtkWidget *label_raise;
+	GtkWidget	*label_trigger;
 };
 
 struct sm_stock {
 	char code[SM_CODE_SZ];
 	char stkex[SM_STKEX_SZ];
+	char		trigger[SM_PRICE_SZ];
 
 	struct sm_stkui ui;
 
