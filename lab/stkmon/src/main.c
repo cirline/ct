@@ -249,11 +249,16 @@ gboolean hdlr_1s(gpointer *p)
 			g_printf("%d: %s\n", __LINE__, strerror(errno));
 			continue;
 		}
+		g_printf("url = %s\n", url);
 		http_get(url, buffer, 4096);
+		g_printf("get done\n");
 		free(url);
+		g_printf("free done\n");
 
 		bp = split_http_response_header(buffer);
+		g_printf("split done\n");
 		sinajs_decode(bp, &data);
+		g_printf("decode done\n");
 
 		sprintf(buffer, "%.2f", data.price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
@@ -262,10 +267,16 @@ gboolean hdlr_1s(gpointer *p)
 		sprintf(buffer, "%.2f", raise);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 
+		float last_minprice = atof(stock->last_minprice);
 		float trigger = atof(stock->trigger);
-		float trigger_percent = (data.price - trigger) / data.pre_close;
+		float trigger_percent = (data.price - last_minprice * trigger) / data.price;
 		sprintf(buffer, "%.2f", trigger_percent);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
+		if(trigger_percent > -0.01)
+			gdk_color_parse(COLOR_RISE, &color);
+		else
+			gdk_color_parse(COLOR_DROP, &color);
+		gtk_widget_modify_fg(stock->ui.label_trigger, GTK_STATE_NORMAL, &color);
 
 		if(data.price > data.pre_close)
 			gdk_color_parse(COLOR_RISE, &color);
@@ -276,8 +287,10 @@ gboolean hdlr_1s(gpointer *p)
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
 
+		/*
 		pr_info("code = %s, price = %.2f, pre_close = %.2f, trigger = %.2f\n",
 				data.code, data.price, data.pre_close, trigger);
+				*/
 	}
 
 	return TRUE;

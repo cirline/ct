@@ -9,17 +9,20 @@
 		<stock>
 			<code>601398</code>
 			<stkex>sh</stkex>
-			<trigger>5.0</trigger>
+			<trigger>1.2</trigger>
+			<last_minprice>4.01</last_minprice>
 		</stock>
 		<stock>
 			<code>601668</code>
 			<stkex>sh</stkex>
-			<trigger>6.0</trigger>
+			<trigger>1.1</trigger>
+			<last_minprice>5.88</last_minprice>
 		</stock>
 		<stock>
 			<code>601766</code>
 			<stkex>sh</stkex>
-			<trigger>8.0</trigger>
+			<trigger>1.1</trigger>
+			<last_minprice>8.95</last_minprice>
 		</stock>
 	</stocks>
 </root>

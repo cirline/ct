@@ -29,6 +29,7 @@ struct sm_stock {
 	char code[SM_CODE_SZ];
 	char stkex[SM_STKEX_SZ];
 	char		trigger[SM_PRICE_SZ];
+	char		last_minprice[SM_PRICE_SZ];
 
 	struct sm_stkui ui;
 
