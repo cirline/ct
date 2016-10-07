@@ -74,6 +74,18 @@ int parse_configure(xmlNodePtr node, void *data)
 	return 0;
 }
 
+int load_configure(xmlNodePtr node, void *data)
+{
+	struct sm_xmlcfg *p = data;
+
+	pr_debug("-- %s: %s\n", node->name, xmlNodeGetContent(node));
+	if(strcmp(node->name, "interval") == 0) {
+		strcpy(p->interval, xmlNodeGetContent(node));
+	}
+
+	return 0;
+}
+
 int do_parse_stock(xmlNodePtr node, void *data)
 {
 	struct sm_stock *p = data;
@@ -84,6 +96,10 @@ int do_parse_stock(xmlNodePtr node, void *data)
 		strcpy(p->code, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "stkex") == 0) {
 		strcpy(p->stkex, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "trigger") == 0) {
+		strcpy(p->trigger, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "last_minprice") == 0) {
+		strcpy(p->last_minprice, xmlNodeGetContent(node));
 	}
 
 	return 0;
@@ -108,12 +124,47 @@ int parse_stocks(xmlNodePtr node, void *data)
 	return 0;
 }
 
+int load_xmlstocks(xmlNodePtr node, void *data)
+{
+	struct sm_xmlcfg *p = data;
+	struct sm_stock *ssp;
+
+	if(strcmp(node->name, "stock") == 0) {
+		ssp = malloc(sizeof(struct sm_stock));
+		if(!ssp) {
+			printf("%s, malloc failed: %s\n", __func__, strerror(errno));
+			return -1;
+		}
+		parse_node(node->children, do_parse_stock, ssp);
+
+		ssp->next = p->stock;
+		p->stock = ssp;
+	}
+	return 0;
+}
+
 void print_configure(struct sm_desc *desc)
 {
 	printf("configure:\n");
 	printf(" %12s: %d\n", "delay_ms", desc->cfg.delay_ms);
 
 	struct sm_stock *p = desc->stock;
+	int i = 0;
+	while(p) {
+		printf("stock(%d):\n", i++);
+		printf(" %12s: %s\n", "code", p->code);
+		printf(" %12s: %s\n", "stkex", p->stkex);
+
+		p = p->next;
+	}
+}
+
+void print_xmlcfg(struct sm_xmlcfg *smxc)
+{
+	printf("configure:\n");
+	printf(" %12s: %s\n", "interval", smxc->interval);
+
+	struct sm_stock *p = smxc->stock;
 	int i = 0;
 	while(p) {
 		printf("stock(%d):\n", i++);
@@ -169,7 +220,7 @@ int do_save_xmlconfig(xmlNodePtr node, void *p)
 {
 	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
 	if(strcmp(node->name, "delay_ms") == 0) {
-		printf("save: delay_ms = %s\n", smxc->delay_ms);
+		printf("save: interval = %s\n", smxc->delay_ms);
 		xmlNodeSetContent(node, smxc->delay_ms);
 	}
 
@@ -196,6 +247,40 @@ int save_xmlconfig(struct sm_xmlcfg *smxc)
 
 	xmlSaveFile(DATAFILE_PATH, docp);
 	xmlFreeDoc(docp);
+
+	return 0;
+}
+
+int load_xmlconfig(struct sm_xmlcfg *smxc)
+{
+	xmlDocPtr docp;
+	xmlXPathObjectPtr object;
+
+	docp = xmlParseFile(DATAFILE_PATH);
+	if(!docp) {
+		printf("%d, parse error %s\n", __LINE__, strerror(errno));
+		return -1;
+	}
+
+	/* parse configure */
+	unsigned char *cfg_path = "/root/configure";
+	object = get_xpath_object(docp, cfg_path);
+	if(object) {
+		parse_xojbect(object, load_configure, smxc);
+		xmlXPathFreeObject(object);
+	}
+
+	smxc->stock = NULL;
+	unsigned char *stocks_path = "/root/stocks";
+	object = get_xpath_object(docp, stocks_path);
+	if(object) {
+		parse_xojbect(object, load_xmlstocks, smxc);
+		xmlXPathFreeObject(object);
+	}
+
+	xmlFreeDoc(docp);
+
+	print_xmlcfg(smxc);
 
 	return 0;
 }
