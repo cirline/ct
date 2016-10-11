@@ -41,7 +41,7 @@ enum __e_debug_level {
 
 #define pr_enter()		pr_debug("enter, %s, %d\n", __func__, __LINE__)
 #define pr_exit()		pr_debug("exit, %s, %d\n", __func__, __LINE__)
-#define pr_here()		pr_debug("current, %s, %d\n", __func__, __LINE__)
+#define pr_here()		pr_info("current, %s, %d\n", __func__, __LINE__)
 
 extern int pr_init(const char *path);
 extern int pr_log(int prio, const char * tag, const char *s, ...);

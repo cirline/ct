@@ -100,9 +100,15 @@ int http_get(const char *url, char *buffer, int buffer_len)
 	*p = 0;
 
 	phost = gethostbyname(local_url);
+	if(!phost) {
+		pr_err("gethostbyname = null\n");
+		return -1;
+	}
 	memset(&saddr, 0, sizeof(struct sockaddr_in));
 	saddr.sin_family = AF_INET;
+	pr_here();
 	saddr.sin_addr.s_addr = *((unsigned long *)phost->h_addr_list[0]);
+	pr_here();
 	saddr.sin_port = htons(80);
 
 	sprintf(buffer, "GET %s HTTP/1.1\r\nHOST: %s\r\nCache-Control: no-cache\r\n\r\n",
@@ -134,7 +140,6 @@ int http_get(const char *url, char *buffer, int buffer_len)
 		close(fd);
 		return rc;
 	}
-
 	pr_debug("recv:\n%s", buffer);
 
 	return rc;

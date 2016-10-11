@@ -6,8 +6,7 @@ libccutils_la_SOURCES = src/log.c \
 			src/xml.c \
 		      src/ustring.c \
 		      src/ufile.c \
-		      src/utable.c \
-		      src/sqlite3.c
+		      src/utable.c
 
 libccutils_la_LIBADD = -ldl
 libccutils_la_LIBADD += $(XML_LIBS)
