@@ -1,8 +1,12 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include "uart.h"
 #include "s5p_regs.h"
+
+#define __raw_write(addr, val)		__s5p_write(addr, val)
+#define __raw_read(addr)		__s5p_read(addr)
+
+#include "uart.h"
 #include "list.h"
 
 #undef NULL
@@ -15,8 +19,6 @@
 #define getchar()					uart_get_char()
 #define getstr(buffer)		uart_getstr(buffer, 1)
 
-#define __raw_write(addr, val)		__s5p_write(addr, val)
-#define __raw_read(addr)			__s5p_read(addr)
 #define sleep(time)					__s5p_sleep(time)
 typedef __s5p_addr_t				addr_t;
 

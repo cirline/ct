@@ -101,3 +101,34 @@ int shell_lcd_test(void)
 	return 0;
 }
 
+
+int timer2_flashleds_isr(void)
+{
+	static int c3 = 0;
+	static int c4 = 0;
+
+	pr_info("%s\n", __func__);
+
+	irq_clear_pending(TIMERINT(2));
+
+	gpio_set_value('c', 0, 3, c3);
+	c3 = !c3;
+
+	return 0;
+}
+
+int shell_flashleds_test(void)
+{
+        struct timer timer;
+        timer_default_cfg(&timer);
+        timer.sn = TIMER2;
+        timer.auto_reload = TIMER_INTERVAL;
+	timer.irq_enable = 1;
+	irq_init(TIMERINT(2), timer2_flashleds_isr);
+
+        timer_init(&timer);
+        timer_toggle(timer.sn, 1);
+
+	return 0;
+}
+

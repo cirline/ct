@@ -30,11 +30,11 @@ objs	+= nf.o
 objs	+= timer.o
 objs	+= rtc.o
 objs	+= i2c.o
-objs	+= lcd.o
 objs	+= keyboard.o
 
 objs	+= shell/shell.o
 objs	+= drivers/display.o
+objs	+= drivers/gpio.o
 
 $(bin_file): $(objs) $(debug_out)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

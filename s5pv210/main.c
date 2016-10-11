@@ -215,9 +215,6 @@ int main(void)
 	nf_init();
 	rtc_init();
 	i2c_init();
-	irq_init(UARTINT(0), uart0_int_func);
-
-//	lcd_init();
 
 	rtc.sec = 0x14;
 	rtc.min = 0x13;
@@ -231,7 +228,6 @@ int main(void)
 	rtc.min = 0x15;
 	rtc_set_alarm(&rtc);
 	
-/*
 	nf_erase(0);
 	nf_read(0, buf);
 	for(val=0; val<32; val++) {
@@ -245,7 +241,7 @@ int main(void)
 		buf[val] = 0;
 	}
 	sleep(0);
-*/
+
 	nf_read(0, buf);
 	for(val=0; val<32; val++) {
 		printf("[%p]\t= %p\n", val, buf[val]);
@@ -254,13 +250,21 @@ int main(void)
 #endif
 
 	uart_init();
-	for(i = 0xff; i > 0; i--) {
-	}
 	pr_info("====== uart support ! ======\n");
+	/**
+	 * timer 2 use flash leds
+	 */
+	shell_flashleds_test();
 
-	register_shell_command_quick("help", do_help, "show this message");
 	//register_shell_command_quick("exit", NULL, "exit");
+	register_shell_command_quick("help", do_help, "show this message");
+	/**
+	 * timer 1 use test buzz
+	 */
 	register_shell_command_quick("buzz", shell_timer_1hz_buzz, "1hz buzz");
+	/**
+	 * timer 4 use to delay
+	 */
 	register_shell_command_quick("sleep_test", shell_sleep_test, "sleep test");
 	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
 	register_shell_command_quick("lcd_test", shell_lcd_test, "lcd test");
@@ -299,47 +303,4 @@ int main(void)
 
 	return 0;
 }
-
-void inline clr_task(unsigned long *taskset, int task)
-{
-    *taskset &= ~(1<<task);
-}
-
-int inline test_task(unsigned long taskset, int task)
-{
-    return taskset & (1<<task);
-}
-
-int test_lcd(unsigned long *taskset)
-{
-    int i;
-    printf("--- test lcd ---\n");
-    lcd_init();
-    vid_toggle(1);
-    for(i=0; i<800; i++) {
-        printf("<><><><><><><><><><><><>\n");
-        sleep(1000);
-        printf("test lcd----- fb[i] = %x------------->\n", fb[i]);
-    }
-    return 0;
-}
-
-void task_loop(unsigned long *taskset)
-{
-	/* test backlight */
-	if(test_task(*taskset, TASK_BACKLIGHT)) {
-		int i;
-		printf("test backlight----------->\n");
-		backlight_init(BL_LEV_MIN);
-		for(i = BL_LEV_MIN; i < BL_LEV_MAX; i++) {
-			printf("backlight level is 0x%p\n", i);
-			backlight_set_level(i);
-			getchar();
-		}
-	}
-	/* test LCD */
-    test_task(*taskset, TASK_LCD) && test_lcd(taskset);
-}
-
-/* task_loop end */
 

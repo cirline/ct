@@ -9,6 +9,10 @@ typedef unsigned long				__s5p_addr_t;
 /** common define **/
 #define OFFSET4B(x)     ((x)<<2)
 #define OFFSET8B(x)     ((x)<<3)
+/**
+ * addr for 0 -> 4 -> 8 -> c -> 10 -> ...
+ */
+#define GAP4B(x)	((x)<<2)
 #define GAP32B(x)        ((x)<<5)
 
 /**  GPIO  **/
@@ -23,6 +27,9 @@ typedef unsigned long				__s5p_addr_t;
 #define GPA_BASE        (RGPIO_BASE)
 #define GPAxCON(x)      (GPA_BASE + GAP32B(x))
 #define GPAxDAT(x)      (GPAxCON(x) + IODAT)
+
+#define GPCxCON(x)		(RGPIO_BASE + 0x060 + GAP32B(x))
+#define GPCxDAT(x)		(GPCxCON(x) + IODAT)
 
 #define GPD_BASE		(RGPIO_BASE + 0x0A0)
 #define GPDxCON(x)		(GPD_BASE + ((x)<<5))
@@ -47,9 +54,16 @@ typedef unsigned long				__s5p_addr_t;
 
 /**  CMU  **/
 #define RCMU_BASE		0xE0100000
-
-#define CLK_SRC4		0x00000210
-#define CLK_DIV4		0x00000310
+#define APLL_LOCK		(RCMU_BASE + 0x4)
+#define MPLL_LOCK		(RCMU_BASE + 0x8)
+#define EPLL_LOCK		(RCMU_BASE + 0xc)
+#define VPLL_LOCK		(RCMU_BASE + 0x20)
+#define APLL_CON(x)		(RCMU_BASE + 0x100 + GAP4B(x))
+#define MPLL_CON		(RCMU_BASE + 0x108)
+#define EPLL_CON(x)		(RCMU_BASE + 0x110 + GAP4B(x))
+#define VPLL_CON		(RCMU_BASE + 0x120)
+#define CLK_SRC(x)		(RCMU_BASE + 0x200 + GAP4B(x))
+#define CLK_DIV(x)		(RCMU_BASE + 0x300 + GAP4B(x))
 
 /**  UART  **/
 #define RUART_BASE		0xE2900000
