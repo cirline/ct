@@ -1,13 +1,6 @@
 #ifndef __LCD_H__
 #define __LCD_H__
 
-enum backlight_level {
-	BL_LEV_MIN = 0,
-	BL_LEV0,
-	BL_LEV1,
-	BL_LEV_MAX,
-};
-
 enum display_vidcon0 {
     ENVID_F     = 0,
     ENVID       = 1,
