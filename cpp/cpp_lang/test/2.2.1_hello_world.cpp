@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "cpplang/cl_vector.h"
+
 using namespace std;
 
 /* reference argument */
@@ -104,6 +106,12 @@ int main()
 			cout << "color = blue" << endl;
 			break;
 	}
+
+	/*
+	 * modularity
+	 */
+	cl_vector clv(9);
+	cout << "clv.size = " << clv.size() << endl;
 
 	/* 2.2.4 test and loops
 	 */
