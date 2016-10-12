@@ -111,8 +111,13 @@ int main()
 	/*
 	 * modularity
 	 */
-	cpplang::vector clv(3);
-	cout << "clv.size = " << clv.size() << endl;
+	cpplang::vector clv2(3);
+	cout << "clv.size = " << clv2.size() << endl;
+
+	/*
+	 * initializer list
+	 */
+	cpplang::vector clv = {1, 2, 3, 4};
 
 	/*
 	 * 2.4.3.1 exception
@@ -129,8 +134,9 @@ int main()
 	 * static assertions
 	 * static_assert(A, S): print S as a compiler error message if A is not true
 	 */
-	static_assert(false, "oh I panic !!!");
+	static_assert(true, "oh I panic !!!");
 
+#ifdef CIN_TEST
 	/* 2.2.4 test and loops
 	 */
 	cout << "input a character: ";
@@ -141,6 +147,7 @@ int main()
 		cout << "in is a number = " << in << "\n";
 	else
 		cout << "is is a char = " << in << "\n";
+#endif
 
 	return 0;
 }
