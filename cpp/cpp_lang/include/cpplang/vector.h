@@ -12,9 +12,13 @@
  *	// function body
  * }
  */
-class cl_vector {
+namespace cpplang {
+	class vector;
+}
+
+class cpplang::vector {
 	public:
-		cl_vector(int n);
+		vector(int n);
 		int size();
 		/* object[n] be referred to elem[n] */
 		double &operator[](int n);

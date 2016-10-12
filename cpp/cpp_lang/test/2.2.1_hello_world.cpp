@@ -1,6 +1,7 @@
 #include <iostream>
+#include <stdexcept>
 
-#include "cpplang/cl_vector.h"
+#include "cpplang/vector.h"
 
 using namespace std;
 
@@ -110,8 +111,25 @@ int main()
 	/*
 	 * modularity
 	 */
-	cl_vector clv(9);
+	cpplang::vector clv(3);
 	cout << "clv.size = " << clv.size() << endl;
+
+	/*
+	 * 2.4.3.1 exception
+	 */
+	for(int i = -1; i <= clv.size(); i++) {
+		try {
+			cout << "clv[" << i << "] = " << clv[i] << endl;
+		} catch(out_of_range) {
+			cout << "out of range: " << i << endl;
+		}
+	}
+
+	/*
+	 * static assertions
+	 * static_assert(A, S): print S as a compiler error message if A is not true
+	 */
+	static_assert(false, "oh I panic !!!");
 
 	/* 2.2.4 test and loops
 	 */
