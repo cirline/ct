@@ -104,15 +104,13 @@ int shell_lcd_test(void)
 
 int timer2_flashleds_isr(void)
 {
-	static int c3 = 0;
-	static int c4 = 0;
+	static int count = 0;
 
-	pr_info("%s\n", __func__);
-
+	//pr_info("%s\n", __func__);
 	irq_clear_pending(TIMERINT(2));
 
-	gpio_set_value('c', 0, 3, c3);
-	c3 = !c3;
+	gpio_set_value('c', 0, 3, count & 1);
+	count++;
 
 	return 0;
 }
@@ -121,6 +119,7 @@ int shell_flashleds_test(void)
 {
         struct timer timer;
         timer_default_cfg(&timer);
+	timer_setcfg_period(&timer, 2000);
         timer.sn = TIMER2;
         timer.auto_reload = TIMER_INTERVAL;
 	timer.irq_enable = 1;
