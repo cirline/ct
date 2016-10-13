@@ -1,6 +1,8 @@
 #ifndef __CPPLANG_VECTOR_H__
 #define __CPPLANG_VECTOR_H__
 
+#include "cpplang/object.h"
+
 using namespace std;
 
 /* 2.4 Modularity
@@ -18,7 +20,7 @@ namespace cpplang {
 	class vector;
 }
 
-class cpplang::vector {
+class cpplang::vector : public cpplang::object {
 	public:
 		vector(int n);
 		vector(initializer_list<double> list);
@@ -26,9 +28,12 @@ class cpplang::vector {
 		int size();
 		/* object[n] be referred to elem[n] */
 		double &operator[](int n);
+
+		char *to_string();
 	private:
 		double *elem;
 		int sz;
+		char *class_info;
 };
 
 #endif

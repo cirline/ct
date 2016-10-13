@@ -131,6 +131,10 @@ int main()
 	}
 
 	/*
+	 */
+	cout << "vector.tostring = " << clv.to_string() << endl;
+
+	/*
 	 * static assertions
 	 * static_assert(A, S): print S as a compiler error message if A is not true
 	 */
