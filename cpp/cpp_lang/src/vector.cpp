@@ -32,8 +32,13 @@ int vector::size()
 	return sz;
 }
 
+#if 1
 char *vector::to_string()
 {
 	return class_info;
 }
+#endif
 
+void vector::pure_vfunc(void)
+{
+}

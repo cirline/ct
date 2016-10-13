@@ -7,6 +7,7 @@ namespace cpplang {
 
 class cpplang::object {
 	public:
+		virtual void pure_vfunc(void) = 0;
 		virtual char *to_string();
 	private:
 		char *class_info;

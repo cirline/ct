@@ -30,6 +30,7 @@ class cpplang::vector : public cpplang::object {
 		double &operator[](int n);
 
 		char *to_string();
+		void pure_vfunc(void);
 	private:
 		double *elem;
 		int sz;
