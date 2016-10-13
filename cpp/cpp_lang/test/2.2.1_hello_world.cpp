@@ -44,6 +44,11 @@ class Vector {
  */
 enum class Color {red, green, blue};
 
+void pobj_info(cpplang::object &object)
+{
+	cout << "object info: " << object.to_string() << endl;
+}
+
 int main()
 {
 	cout << "hello world\n";
@@ -133,6 +138,7 @@ int main()
 	/*
 	 */
 	cout << "vector.tostring = " << clv.to_string() << endl;
+	pobj_info(clv);
 
 	/*
 	 * static assertions
