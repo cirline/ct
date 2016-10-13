@@ -1,8 +1,9 @@
 CFLAGS	+= $(shell pkg-config --libs --cflags gtk+-2.0)
+f	?= gtk_version
 
 fout	:= a.out
 
-objs	:= gtk_version.o
+objs	:= $(f).o
 
 $(fout):$(objs)
 	$(CC) -o $@ $^ $(CFLAGS)

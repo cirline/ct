@@ -46,7 +46,8 @@ enum class Color {red, green, blue};
 
 void pobj_info(cpplang::object &object)
 {
-	cout << "object info: " << object.to_string() << endl;
+	cout << "object to string: " << object.to_string() << endl;
+	cout << "object tostring: " << object.tostring() << endl;
 }
 
 int main()
@@ -138,6 +139,21 @@ int main()
 	/*
 	 */
 	cout << "vector.tostring = " << clv.to_string() << endl;
+	pobj_info(clv);
+
+	/*
+	 * 3.3.1 copying object
+	 * if not define operator=, operator= mean pointer assign
+	 */
+	cpplang::vector clv3 = clv;
+	pobj_info(clv3);
+
+	clv[0] = 99;
+	cout << "clv3" << endl;
+	pobj_info(clv3);
+
+	clv3[1] = 88;
+	cout << "clv" << endl;
 	pobj_info(clv);
 
 	/*

@@ -1,6 +1,7 @@
 #ifndef __CPPLANG_VECTOR_H__
 #define __CPPLANG_VECTOR_H__
 
+#include <string>
 #include "cpplang/object.h"
 
 using namespace std;
@@ -30,6 +31,7 @@ class cpplang::vector : public cpplang::object {
 		double &operator[](int n);
 
 		char *to_string() const;
+		string tostring() const;
 		void pure_vfunc(void);
 	private:
 		double *elem;

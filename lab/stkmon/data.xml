@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <root>
 	<configure>
-		<delay_ms>30000</delay_ms>
+		<delay_ms>20000</delay_ms>
 		<interval>30000</interval>	<!-- update interval ms -->
 	</configure>
 
