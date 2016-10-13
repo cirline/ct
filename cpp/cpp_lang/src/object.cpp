@@ -5,8 +5,8 @@
 using namespace std;
 using namespace cpplang;
 
-char *object::to_string()
+char *object::to_string() const
 {
-	cout << "object " << __func__ << endl;
+	cout << "object to_string" << endl;
 	return class_info;
 }

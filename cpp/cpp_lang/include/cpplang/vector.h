@@ -29,12 +29,11 @@ class cpplang::vector : public cpplang::object {
 		/* object[n] be referred to elem[n] */
 		double &operator[](int n);
 
-		char *to_string();
+		char *to_string() const;
 		void pure_vfunc(void);
 	private:
 		double *elem;
 		int sz;
-		char *class_info;
 };
 
 #endif

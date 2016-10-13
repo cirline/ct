@@ -8,8 +8,12 @@ namespace cpplang {
 class cpplang::object {
 	public:
 		virtual void pure_vfunc(void) = 0;
-		virtual char *to_string();
-	private:
+
+		/*
+		 * const indicate this function don't modify the object
+		 */
+		virtual char *to_string() const;
+	protected:
 		char *class_info;
 
 };

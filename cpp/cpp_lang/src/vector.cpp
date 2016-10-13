@@ -32,12 +32,10 @@ int vector::size()
 	return sz;
 }
 
-#if 1
-char *vector::to_string()
+char *vector::to_string() const
 {
-	return class_info;
+	return object::to_string();
 }
-#endif
 
 void vector::pure_vfunc(void)
 {
