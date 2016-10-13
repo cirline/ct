@@ -64,7 +64,7 @@ enum mask_defined {
 
 struct shell_command {
 	char *cmd;
-	int (*process)(void *p);
+	int (*process)(int argc, char *argv[]);
 	char *help_msg;
 	struct list_head list;
 };

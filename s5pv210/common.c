@@ -153,9 +153,9 @@ int dump_stack_frame(void)
 			"mov %0, fp \n\t"
 			: "=r"(fp)
 			: );
-	parent_lr = *(fp - 1);
-	parent_sp = *(fp - 2);
-	parent_fp = *(fp - 3);
+	parent_lr = (unsigned long *)(*(fp - 1));
+	parent_sp = (unsigned long *)(*(fp - 2));
+	parent_fp = (unsigned long *)(*(fp - 3));
 
 	pr_info("%s here: %x\n", __func__, parent_lr - 1);
 	pr_info("stack frame [%x ~ %x]\n", parent_sp, parent_fp);
@@ -172,7 +172,6 @@ int dump_stack_frame(void)
 int dump_registers(void)
 {
 	union arm_regs *pr;
-	unsigned long r0, r1;
 	int i;
 
 	__asm__ __volatile__ (

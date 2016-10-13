@@ -36,7 +36,7 @@ int register_shell_command(struct shell_command *sc)
 	return 0;
 }
 
-int register_shell_command_quick(char *cmd, int (*func)(void *), char *msg)
+int register_shell_command_quick(char *cmd, int (*func)(int, char *argv[]), char *msg)
 {
 	struct shell_command *sc = sc_malloc();
 
@@ -148,7 +148,7 @@ int uart0_int_func(void)
 	return 0;
 }
 
-int do_help(void * p)
+int do_help(int argc, char *argv[])
 {
 	struct shell_command *sc;
 	struct list_head *l;
@@ -170,6 +170,8 @@ int shell_query(void)
 	int rc;
 	struct shell_command *sc;
 	struct list_head *l;
+	int argc;
+	char *argv[SHELL_MAX_ARGUMENTS];
 
 	getstr(buffer);
 
@@ -177,12 +179,13 @@ int shell_query(void)
 		/* nothing to be done */
 		rc = 0;
 	} else {
+		argc = shell_parse_arguments(buffer, argv);
 		rc = -1;
 		for(l = gcmds_head.next; l != &gcmds_head; l = l->next) {
 			sc = container_of(l, struct shell_command, list);
-			if(! strcmp(buffer, sc->cmd)) {
+			if(! strcmp(argv[0], sc->cmd)) {
 				/* process command */
-				rc = sc->process ? sc->process(NULL) : 0;
+				rc = sc->process ? sc->process(argc, argv) : 0;
 			}
 		}
 		if(rc < 0)
@@ -194,13 +197,13 @@ int shell_query(void)
 
 int main(void)
 {
+	int rc;
+#if 0
 	int val=0;
 	unsigned char buf[2048];
 	rtc_t rtc;
 	int i;
-	int rc;
 
-#if 0
 	__raw_write(VICxADDRESS(0), 0);
 	__raw_write(VICxADDRESS(1), 0);
 	irq_init(EINT(0), key0_func);
@@ -254,7 +257,7 @@ int main(void)
 	/**
 	 * timer 2 use flash leds
 	 */
-	shell_flashleds_test();
+	shell_flashleds_test(0, NULL);
 
 	//register_shell_command_quick("exit", NULL, "exit");
 	register_shell_command_quick("help", do_help, "show this message");
@@ -268,6 +271,14 @@ int main(void)
 	register_shell_command_quick("sleep_test", shell_sleep_test, "sleep test");
 	register_shell_command_quick("dumpr", shell_dump_registers, "dump registers");
 	register_shell_command_quick("lcd_test", shell_lcd_test, "lcd test");
+	/*
+	 * dump special function registers
+	 */
+	register_shell_command_quick("dsfrs", shell_dump_sfrs, "dump special function registers");
+	/*
+	 * read/write device memory
+	 */
+//	register_shell_command_quick("devmem", shell_devmem, "read/write device memory");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");

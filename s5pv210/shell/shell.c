@@ -2,12 +2,15 @@
  * shell function type: int (*)(void *)
  */
 
-#include <common.h>
+#include "utils.h"
 #include <timer.h>
 #include <irq.h>
 #include <display.h>
+#include "clock.h"
+#include "list.h"
+#include "shell.h"
 
-int shell_dump_registers(void *p)
+int shell_dump_registers(int argc, char *argv[])
 {
 	pr_info("%s\n", __func__);
 
@@ -24,7 +27,7 @@ int shell_dump_registers(void *p)
 	return 0;
 }
 
-int timer_1hz_buzz_isr(void)
+int timer_1hz_buzz_isr(int argc, char *argv[])
 {
 	pr_info("%s\n", __func__);
 
@@ -33,7 +36,7 @@ int timer_1hz_buzz_isr(void)
 	return 0;
 }
 
-int shell_timer_1hz_buzz(void *p)
+int shell_timer_1hz_buzz(int argc, char *argv[])
 {
         struct timer timer;
         timer_default_cfg(&timer);
@@ -48,7 +51,7 @@ int shell_timer_1hz_buzz(void *p)
 	return 0;
 }
 
-int shell_sleep_test(void *p)
+int shell_sleep_test(int argc, char *argv[])
 {
 	int i = 0;
 
@@ -64,7 +67,7 @@ int shell_sleep_test(void *p)
 	return 0;
 }
 
-int shell_lcd_test(void)
+int shell_lcd_test(int argc, char *argv[])
 {
 #if 0
 	struct hv_config at070tn92_lcd = {
@@ -102,7 +105,7 @@ int shell_lcd_test(void)
 }
 
 
-int timer2_flashleds_isr(void)
+int timer2_flashleds_isr(int argc, char *argv[])
 {
 	static int count = 0;
 
@@ -115,11 +118,11 @@ int timer2_flashleds_isr(void)
 	return 0;
 }
 
-int shell_flashleds_test(void)
+int shell_flashleds_test(int argc, char *argv[])
 {
         struct timer timer;
         timer_default_cfg(&timer);
-	timer_setcfg_period(&timer, 2000);
+	timer_setcfg_period(&timer, 200);
         timer.sn = TIMER2;
         timer.auto_reload = TIMER_INTERVAL;
 	timer.irq_enable = 1;
@@ -129,5 +132,47 @@ int shell_flashleds_test(void)
         timer_toggle(timer.sn, 1);
 
 	return 0;
+}
+
+int shell_dump_sfrs(int argc, char *argv[])
+{
+	unsigned long regs[] = {
+		CLK_SRC(0),
+		CLK_DIV(0),
+	};
+	int i;
+	unsigned long regval;
+
+	for(i = 0; i < ARRAY_SIZE(regs); i++) {
+		regval = __raw_read(regs[i]);
+
+		pr_info("%x - %x\n", regs[i], regval);
+	}
+
+	clock_reset();
+
+	return 0;
+}
+
+int shell_parse_arguments(char *str, char *argv[SHELL_MAX_ARGUMENTS])
+{
+	int i, j;
+
+	for(i = 0; *str; i++) {
+		argv[i] = str;
+		while(*str != ' ' && *str != '\t' && *str != 0)
+			str++;
+		if(*str) {
+			*str = 0;
+			str++;
+		}
+	}
+
+	pr_info("argc = %x\n", i);
+	for(j = 0; j < i; j++) {
+		pr_info("argv[%x] = %s\n", j, argv[j]);
+	}
+
+	return i;
 }
 
