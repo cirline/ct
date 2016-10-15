@@ -154,6 +154,38 @@ int shell_dump_sfrs(int argc, char *argv[])
 	return 0;
 }
 
+int shell_devmem(int argc, char *argv[])
+{
+	unsigned long regaddr, regval;
+
+	if(argc < 2) {
+		pr_err("eg: devmem reg_addr [reg_value]\n");
+		return -1;
+	}
+	regaddr = str2hl(argv[1]);
+	if(regaddr == -1) {
+		pr_err("error register address: %s\n", argv[1]);
+		return -1;
+	}
+	if(argc == 2) {
+		/* read register */
+		regval = __raw_read(regaddr);
+		printf("r %x \t= %x\n", regaddr, regval);
+		return 0;
+	}
+
+	regval = str2hl(argv[2]);
+	if(regval == -1) {
+		pr_err("error register value: %s\n", argv[2]);
+		return -1;
+	}
+	/* write register */
+	__raw_write(regaddr, regval);
+	printf("w %x \t= %x\n", regaddr, regval);
+
+	return 0;
+}
+
 int shell_parse_arguments(char *str, char *argv[SHELL_MAX_ARGUMENTS])
 {
 	int i, j;

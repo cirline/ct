@@ -24,7 +24,6 @@ dis_file	:= $(debug_out)/main.dis
 objs	:= start.o
 objs	+= main.o
 objs	+= uart.o
-objs	+= common.o
 objs	+= irq.o
 objs	+= nf.o
 objs	+= rtc.o
@@ -32,9 +31,11 @@ objs	+= i2c.o
 objs	+= keyboard.o
 
 objs	+= shell/shell.o
+objs	+= os/utils.o
 objs	+= drivers/display.o
 objs	+= drivers/gpio.o
 objs	+= drivers/timer.o
+objs	+= drivers/clock.o
 
 $(bin_file): $(objs) $(debug_out)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)

@@ -180,7 +180,7 @@ int shell_query(void)
 		rc = 0;
 	} else {
 		argc = shell_parse_arguments(buffer, argv);
-		rc = -1;
+		rc = -100;
 		for(l = gcmds_head.next; l != &gcmds_head; l = l->next) {
 			sc = container_of(l, struct shell_command, list);
 			if(! strcmp(argv[0], sc->cmd)) {
@@ -188,7 +188,7 @@ int shell_query(void)
 				rc = sc->process ? sc->process(argc, argv) : 0;
 			}
 		}
-		if(rc < 0)
+		if(rc == -100)
 			printf(" '%s' not found, 'help' for more information\n", buffer);
 	}
 
@@ -278,7 +278,7 @@ int main(void)
 	/*
 	 * read/write device memory
 	 */
-//	register_shell_command_quick("devmem", shell_devmem, "read/write device memory");
+	register_shell_command_quick("devmem", shell_devmem, "read/write device memory");
 
 	for(rc = 0; rc <= 0; ) {
 		printf("$ ");

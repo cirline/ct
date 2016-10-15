@@ -9,6 +9,7 @@ extern int shell_sleep_test(int argc, char *argv[]);
 extern int shell_lcd_test(int argc, char *argv[]);
 extern int shell_flashleds_test(int argc, char *argv[]);
 extern int shell_dump_sfrs(int argc, char *argv[]);
+extern int shell_devmem(int argc, char *argv[]);
 
 extern int shell_parse_arguments(char *str, char *argv[SHELL_MAX_ARGUMENTS]);
 
