@@ -56,9 +56,8 @@ reset:
 	ldr r0, =0x40008000
 	mcr p15, 0, r0, c12, c0, 0
 
-led_test:
-	mov r0, #20
-	bl led_flash
+	mov r0, #4
+	bl start_test
 
 # close mmu and data cache
 #	L1 I/D
@@ -130,7 +129,15 @@ stop:
  * led_flash	- led flash function
  * @r0:		: flash count
  */
-led_flash:
+start_test:
+	@ set buzz pin
+	ldr r1, = 0xe02000a0
+	ldr r2, = (1<<4)
+	str r2, [r1]
+	@ set buzz
+	ldr r3, = 0xe02000a4
+	mov r2, #2
+	str r2, [r3]
 # set GPA0CON output
 	ldr r1, =0xE0200060
 	ldr r2, =(0x11<<16)
@@ -153,6 +160,9 @@ led_delay_loop:
 
 	subs r0, r0, #1
 	bne led_main_loop
+	@ set buzz off
+	mov r2, #0
+	str r2, [r3]
 	mov pc, lr
 
 clock_init:
