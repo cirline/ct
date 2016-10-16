@@ -1,7 +1,7 @@
 #include "../common.c"
 
-#undef pr_fmt(fmt)
-#define pr_fmt(fmt)	"[utils] " fmt
+//#undef pr_fmt(fmt)
+//#define pr_fmt(fmt)	"[utils] " fmt
 
 /**
  * str2hl	- string to hex long
@@ -25,5 +25,14 @@ long str2hl(const char *ss)
 	}
 
 	return number;
+}
+
+void inline s5p_memset(void *p, char c, unsigned long size)
+{
+	int i;
+	char *cp = p;
+
+	for(i = 0; i < size; i++, cp++)
+		*cp = c;
 }
 

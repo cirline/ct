@@ -36,6 +36,7 @@ objs	+= drivers/display.o
 objs	+= drivers/gpio.o
 objs	+= drivers/timer.o
 objs	+= drivers/clock.o
+objs	+= drivers/uart.o
 
 $(bin_file): $(objs) $(debug_out)
 	$(LD) -T$(link_base) $(objs) -o $(elf_file)
@@ -51,6 +52,8 @@ test:
 
 clean:
 	rm -rf *.o *.elf *.bin *.asm *.out *.i test *.dis $(debug_out)
+	find . -name *.o | xargs rm
+
 
 install:
 	cp $(bin_file) $(tftp_root)/units.bin

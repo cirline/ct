@@ -20,3 +20,17 @@ void gpio_set_value(char group, int index, int pin, int value)
 	region_write(addrdat, MASK_BITS_1, pin, !!value);
 }
 
+void gpio_set_config(char group, int index, int pin, int value)
+{
+	unsigned long addrcon;
+
+	switch(group) {
+		case 'a':
+		case 'A':
+			addrcon = GPAxCON(index);
+			break;
+	}
+
+	region_write(addrcon, MASK_BITS_4, GAP4B(pin), value);
+}
+
