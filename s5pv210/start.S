@@ -57,8 +57,8 @@ reset:
 	mcr p15, 0, r0, c12, c0, 0
 
 led_test:
-    mov r0, #0
-    bl led_debug
+	mov r0, #20
+	bl led_flash
 
 # close mmu and data cache
 #	L1 I/D
@@ -74,7 +74,7 @@ led_test:
 	mcr	p15, 0, r0, c1, c0, 0
 
 # clock management unit
-	bl clock_init
+	@bl clock_init
 
 /********************
  * memory map       *
@@ -127,41 +127,33 @@ stop:
 	b stop
 
 /**
- * if r0 == 0, light on the led
- * else, program will stay here to flash the led
+ * led_flash	- led flash function
+ * @r0:		: flash count
  */
-led_debug:
+led_flash:
 # set GPA0CON output
 	ldr r1, =0xE0200060
-	ldr r2, =(0x11<<12)
+	ldr r2, =(0x11<<16)
 	str r2, [r1]
 # GPA0DAT register
 	ldr r1, =0xE0200064
-led_death_loop:
-# delay
-	ldr r2, =0x8fffff
-ld_loop2:
+
+led_main_loop:
+	@ delay number
+	ldr r2, =0x80000
+led_delay_loop:
 	sub r2, r2, #1
 	cmp r2, #0
-	bgt ld_loop2
-# light on
-	mov r2, #0x8
+	bgt led_delay_loop
+
+	ands r2, r0, #1
+	@ r2 == 1 ? light on : light off
+	movne r2, #0x10
 	str r2, [r1]
 
-// if r0 == 0, return
-    cmp r0, #0
-    moveq pc, lr
-
-	ldr r2, =0x8fffff
-ld_loop3:
-	sub r2, r2, #1
-	cmp r2, #0
-	bgt ld_loop3
-
-# light off
-	mov r2, #0
-	str r2, [r1]
-	b led_death_loop
+	subs r0, r0, #1
+	bne led_main_loop
+	mov pc, lr
 
 clock_init:
 #	reset clock src mux	
