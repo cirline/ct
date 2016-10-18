@@ -137,6 +137,7 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		}
 		parse_node(node->children, do_parse_stock, ssp);
 
+		ssp->pull_data = NULL;
 		ssp->next = p->stock;
 		p->stock = ssp;
 	}

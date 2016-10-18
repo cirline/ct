@@ -32,6 +32,7 @@ struct sm_stock {
 	char		last_minprice[SM_PRICE_SZ];
 
 	struct sm_stkui ui;
+	void		*pull_data;	/* data pull from web */
 
 	struct sm_stock *next;
 };
