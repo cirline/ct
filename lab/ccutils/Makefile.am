@@ -1,6 +1,5 @@
 lib_LTLIBRARIES = libccutils.la
 libccutils_la_SOURCES = src/log.c \
-			src/db.c \
 			src/io.c \
 			src/net.c \
 			src/xml.c \

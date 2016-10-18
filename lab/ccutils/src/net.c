@@ -106,9 +106,7 @@ int http_get(const char *url, char *buffer, int buffer_len)
 	}
 	memset(&saddr, 0, sizeof(struct sockaddr_in));
 	saddr.sin_family = AF_INET;
-	pr_here();
 	saddr.sin_addr.s_addr = *((unsigned long *)phost->h_addr_list[0]);
-	pr_here();
 	saddr.sin_port = htons(80);
 
 	sprintf(buffer, "GET %s HTTP/1.1\r\nHOST: %s\r\nCache-Control: no-cache\r\n\r\n",
