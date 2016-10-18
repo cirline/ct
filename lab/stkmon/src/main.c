@@ -15,7 +15,6 @@
 static int gx = 99;
 
 gboolean hdlr_1s(gpointer *);
-int parse_xmlconfig(struct sm_desc *);
 void configure_main(GtkWidget *widget, gpointer p);
 
 GtkWidget *create_menubar(GtkWidget *win)
@@ -78,11 +77,12 @@ void create_popupmenu(GtkWidget *ebox)
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
 
-int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc)
+int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 {
 	int i;
 	int px, py;
 	struct sm_stock *stock;
+	int interval;
 
 	gtk_init(&argc, &argv);
 
@@ -135,7 +135,10 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc
 		stock->ui.label_trigger = label;
 	}
 
-	g_timeout_add(desc->cfg.delay_ms, (GSourceFunc)hdlr_1s, (gpointer)smxc);
+	interval = atoi(smxc->interval);
+	if(interval <= 0)
+		interval = 5000;
+	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	gtk_widget_show_all(win);
@@ -169,23 +172,30 @@ gboolean hdlr_1s(gpointer *p)
 		if(!sdp)
 			continue;
 
-		pr_info("stock = %s\n", sdp->code);
-
+		/* set price */
 		sprintf(buffer, "%.2f", sdp->price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
+
+		/* set price raise */
 		float raise = (sdp->price - sdp->pre_close) / sdp->pre_close * 100;
 		sprintf(buffer, "%.2f", raise);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 
+		/* set min price relative rasie */
 		float last_minprice = atof(stock->last_minprice);
-		float trigger = atof(stock->trigger);
-		float trigger_percent = (sdp->price - last_minprice * trigger) / sdp->price;
-		sprintf(buffer, "%.2f", trigger_percent);
+		float stop_profit = atof(stock->stop_profit);
+		float stop_loss = atof(stock->stop_loss);
+		float min_raise = (sdp->price - last_minprice) / last_minprice;
+		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
-		if(trigger_percent > -0.01)
-			gdk_color_parse(COLOR_RISE, &color);
+
+		pr_info("mr = %f, sp = %f, sl = %f\n", min_raise, stop_profit, stop_loss);
+		if(min_raise >= stop_profit - 1)
+			gdk_color_parse(COLOR_STOPP, &color);
+		else if(min_raise <= stop_loss - 1)
+			gdk_color_parse(COLOR_STOPL, &color);
 		else
-			gdk_color_parse(COLOR_DROP, &color);
+			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_trigger, GTK_STATE_NORMAL, &color);
 
 		if(sdp->price > sdp->pre_close)
@@ -207,12 +217,10 @@ gboolean hdlr_1s(gpointer *p)
 
 int main(int argc, char *argv[])
 {
-	struct sm_desc desc;	/* deprecated */
 	struct sm_xmlcfg smxc;
 
-	parse_xmlconfig(&desc);	/* deprecated */
 	load_xmlconfig(&smxc);
-	main_ui(argc, argv, &desc, &smxc);
+	main_ui(argc, argv, &smxc);
 
 	return 0;
 }
