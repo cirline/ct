@@ -8,8 +8,6 @@ using namespace cpplang;
 
 vector::vector(int n) : elem{new double[n]}, sz{n} {
 	/* nothing */
-	char *p = "vector info";
-	class_info = p;
 	descriptor = "vector descriptor";
 }
 
@@ -18,9 +16,24 @@ vector::vector(initializer_list<double> list) :
 	sz{(int)list.size()}
 {
 	copy(list.begin(), list.end(), elem);
-	char *p = "vector info";
-	class_info = p;
 	descriptor = "vector descriptor";
+}
+
+/**
+ * copy object
+ * request define operator=
+ */
+vector::vector(const vector &v)/* : elem{new double[v.size()]}, sz{v.size()} */
+{
+	vector(v.size());
+	for(int i = 0; i < v.size(); i++) {
+		elem[i] = v.elem[i];
+	}
+}
+
+vector::~vector()
+{
+	delete elem;
 }
 
 double &vector::operator[](int n) {
@@ -30,7 +43,7 @@ double &vector::operator[](int n) {
 	return elem[n];
 }
 
-int vector::size()
+int vector::size() const
 {
 	return sz;
 }

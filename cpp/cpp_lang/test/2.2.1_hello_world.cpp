@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdexcept>
+#include <typeinfo>
 
 #include "cpplang/vector.h"
 
@@ -46,8 +47,8 @@ enum class Color {red, green, blue};
 
 void pobj_info(cpplang::object &object)
 {
-	cout << "object to string: " << object.to_string() << endl;
-	cout << "object tostring: " << object.tostring() << endl;
+	//cout << "object to string: " << object.to_string() << endl;
+	cout << typeid(object).name() << " tostring: " << object.tostring() << endl;
 }
 
 int main()
@@ -146,14 +147,15 @@ int main()
 	 * if not define operator=, operator= mean pointer assign
 	 */
 	cpplang::vector clv3 = clv;
+	cout << "copy clv3 frome clv, here print clv3 -- ";
 	pobj_info(clv3);
 
 	clv[0] = 99;
-	cout << "clv3" << endl;
+	cout << "set clv0-0 = 99, here print clv3 -- ";
 	pobj_info(clv3);
 
 	clv3[1] = 88;
-	cout << "clv" << endl;
+	cout << "set clv3-1 = 88, here print clv --";
 	pobj_info(clv);
 
 	/*

@@ -7,8 +7,11 @@ using namespace cpplang;
 
 char *object::to_string() const
 {
-	cout << "object to_string" << endl;
-	return class_info;
+	static char ch = 'c';
+
+	cout << "this is object " << __func__ << endl;
+	//return class_info;
+	return &ch;
 }
 
 string object::tostring() const

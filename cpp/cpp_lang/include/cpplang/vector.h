@@ -25,10 +25,18 @@ class cpplang::vector : public cpplang::object {
 	public:
 		vector(int n);
 		vector(initializer_list<double> list);
+		/*
+		 * copy constructor
+		 */
+		vector(const vector &v);
 
-		int size();
+		~vector();
+
+		int size() const;
 		/* object[n] be referred to elem[n] */
 		double &operator[](int n);
+		/* copy container operator, also need copy constructor */
+		vector &operator=(const vector &v);
 
 		char *to_string() const;
 		string tostring() const;
