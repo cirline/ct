@@ -146,7 +146,8 @@ int main()
 	 * 3.3.1 copying object
 	 * if not define operator=, operator= mean pointer assign
 	 */
-	cpplang::vector clv3 = clv;
+	cpplang::vector clv3 = clv;	// here mean construct clv3 by clv, will use vector constructor copy
+	clv3 = clv;			// here mean copy clv3 from clv, will invoke vector operator=
 	cout << "copy clv3 frome clv, here print clv3 -- ";
 	pobj_info(clv3);
 

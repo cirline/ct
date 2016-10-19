@@ -36,7 +36,7 @@ class cpplang::vector : public cpplang::object {
 		/* object[n] be referred to elem[n] */
 		double &operator[](int n);
 		/* copy container operator, also need copy constructor */
-		vector &operator=(const vector &v);
+		vector &operator=(vector &v);
 
 		char *to_string() const;
 		string tostring() const;
