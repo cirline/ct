@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 
 #define COLOR_RISE	"red"
-#define COLOR_DROP	"blue"
+#define COLOR_DROP	"gray"
 #define COLOR_EQ	"black"
 #define COLOR_STOPP	"red"
 #define COLOR_STOPL	"green"

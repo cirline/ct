@@ -25,6 +25,16 @@ struct sinajs {
 	char reserve[16];
 };
 
+struct sinajs_index {
+	char	code	[SJS_CODE_SIZE];
+	char	name	[SJS_NAME_SIZE];
+	float	index;
+	float	range;
+	float	rate;
+	long	volume;
+	long	amount;
+};
+
 extern int sinajs_pull_data(struct sm_stock *ss);
 extern void sinajs_print(struct sinajs *sj);
 extern int sinajs_decode(char *buffer, struct sinajs *sj);

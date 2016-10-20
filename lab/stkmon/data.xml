@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <root>
 	<configure>
-		<delay_ms>20000</delay_ms>
-		<interval>30000</interval>	<!-- update interval ms -->
+		<interval>5000</interval>	<!-- update interval ms -->
 	</configure>
 
 	<stocks>
@@ -17,7 +16,7 @@
 			<code>601668</code>
 			<stkex>sh</stkex>
 			<last_minprice>6.12</last_minprice>
-			<stop_profit>1.1</stop_profit>
+			<stop_profit>1.5</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
 		<stock>

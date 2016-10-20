@@ -165,6 +165,11 @@ int main()
 	 */
 	static_assert(true, "oh I panic !!!");
 
+	/*
+	 * moving
+	 * && - rvalue reference: a reference that can't assign to
+	 */
+
 #ifdef CIN_TEST
 	/* 2.2.4 test and loops
 	 */
