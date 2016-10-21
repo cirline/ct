@@ -4,8 +4,10 @@
 #include <gtk/gtk.h>
 
 #define COLOR_RISE	"red"
-#define COLOR_DROP	"blue"
+#define COLOR_DROP	"gray"
 #define COLOR_EQ	"black"
+#define COLOR_STOPP	"red"
+#define COLOR_STOPL	"green"
 
 #define SM_DEFAULT_DELAY_MS	5
 #define SM_DEFAULT_INTERVAL	5000
@@ -30,8 +32,11 @@ struct sm_stock {
 	char stkex[SM_STKEX_SZ];
 	char		trigger[SM_PRICE_SZ];
 	char		last_minprice[SM_PRICE_SZ];
+	char		stop_profit	[SM_PRICE_SZ];
+	char		stop_loss	[SM_PRICE_SZ];
 
 	struct sm_stkui ui;
+	void		*pull_data;	/* data pull from web */
 
 	struct sm_stock *next;
 };
@@ -42,7 +47,6 @@ struct sm_desc {
 };
 
 struct sm_xmlcfg {
-	char *delay_ms;
 	char		interval[16];
 
 	struct sm_stock	*stock;

@@ -15,7 +15,6 @@
 static int gx = 99;
 
 gboolean hdlr_1s(gpointer *);
-int parse_xmlconfig(struct sm_desc *);
 void configure_main(GtkWidget *widget, gpointer p);
 
 GtkWidget *create_menubar(GtkWidget *win)
@@ -78,11 +77,12 @@ void create_popupmenu(GtkWidget *ebox)
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
 
-int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc)
+int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 {
 	int i;
 	int px, py;
 	struct sm_stock *stock;
+	int interval;
 
 	gtk_init(&argc, &argv);
 
@@ -104,7 +104,7 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc
 
 	create_popupmenu(ebox);
 
-	for(stock = desc->stock; stock; stock = stock->next) {
+	for(stock = smxc->stock; stock; stock = stock->next) {
 		GtkWidget *align;
 		GtkWidget *label;
 
@@ -135,158 +135,77 @@ int main_ui(int argc, char *argv[], struct sm_desc *desc, struct sm_xmlcfg *smxc
 		stock->ui.label_trigger = label;
 	}
 
-	g_timeout_add(desc->cfg.delay_ms, (GSourceFunc)hdlr_1s, (gpointer)desc);
+	interval = atoi(smxc->interval);
+	if(interval <= 0)
+		interval = 5000;
+	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
 	gtk_widget_show_all(win);
-	hdlr_1s((gpointer)desc);
+	hdlr_1s((gpointer)smxc);
 
 	gtk_main();
 
 	return 0;
 }
 
-void psinajs(struct sinajs *sj)
-{
-	int i;
-
-	printf("code: %s\n", sj->code);
-	printf("open: %f\n", sj->open);
-	printf("pre_close: %f\n", sj->pre_close);
-	printf("price: %f\n", sj->price);
-	printf("high: %f\n", sj->high);
-	printf("low: %f\n", sj->low);
-	printf("bid: %f\n", sj->bid);
-	printf("ask: %f\n", sj->ask);
-	printf("volume: %ld\n", sj->volume);
-	printf("amount: %ld\n", sj->amount);
-	for(i = 0; i < 5; i++) {
-		printf("bv%d: %d\n", i, sj->bv[i]);
-		printf("bp%d: %f\n", i, sj->bp[i]);
-		printf("av%d: %d\n", i, sj->av[i]);
-		printf("ap%d: %f\n", i, sj->ap[i]);
-	}
-	printf("date: %s\n", sj->date);
-	printf("time: %s\n", sj->time);
-}
-
-void sinajs_decode(char *buffer, struct sinajs *sj)
-{
-	char *sptr1, *sptr2;
-	char *token;
-	char *p;
-	int i;
-
-	if(!buffer)
-		return;
-
-	token = strtok_r(buffer, "\"", &sptr1);
-	for(p = token; *p && *p != '='; p++)
-		;
-	*p = 0;
-	sscanf(token, "var hq_str_%s", sj->code);
-
-	token = strtok_r(NULL, "\"", &sptr1);
-
-	token = strtok_r(token, ",", &sptr2);
-	strcpy(sj->name, token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->open = atof(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->pre_close = atof(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->price = atof(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->high = atof(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->low = atof(token);
-
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->bid = atof(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->ask = atof(token);
-
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->volume = atol(token);
-	token = strtok_r(NULL, ",", &sptr2);
-	sj->amount = atol(token);
-
-	for(i = 0; i < 5; i++) {
-		token = strtok_r(NULL, ",", &sptr2);
-		sj->bv[i] = atoi(token);
-		token = strtok_r(NULL, ",", &sptr2);
-		sj->bp[i] = atof(token);
-	}
-
-	for(i = 0; i < 5; i++) {
-		token = strtok_r(NULL, ",", &sptr2);
-		sj->av[i] = atoi(token);
-		token = strtok_r(NULL, ",", &sptr2);
-		sj->ap[i] = atof(token);
-	}
-
-	token = strtok_r(NULL, ",", &sptr2);
-	strcpy(sj->date, token);
-	token = strtok_r(NULL, ",", &sptr2);
-	strcpy(sj->time, token);
-}
-
 gboolean hdlr_1s(gpointer *p)
 {
 	char buffer[4096];
 	char *bp;
-	struct sinajs data;
+	struct sinajs *sdp;
 	int i;
-	struct sm_desc *desc = (struct sm_desc *)p;
+	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
 	struct sm_stock *stock;
 	int rc;
 	GdkColor color;
 
-	for(stock = desc->stock; stock; stock = stock->next) {
-		char *url;
-		rc = asprintf(&url, "hq.sinajs.cn/list=%s%s", stock->stkex, stock->code);
-		if(rc < 0) {
-			g_printf("%d: %s\n", __LINE__, strerror(errno));
+	rc = sinajs_pull_data(smxc->stock);
+	if(rc < 0) {
+		pr_err("sinajs_pull_data failed\n");
+		return TRUE;
+	}
+
+	for(stock = smxc->stock; stock; stock = stock->next) {
+
+		sdp = stock->pull_data;
+		if(!sdp)
 			continue;
-		}
-		g_printf("url = %s\n", url);
-		http_get(url, buffer, 4096);
-		g_printf("get done\n");
-		free(url);
-		g_printf("free done\n");
 
-		bp = split_http_response_header(buffer);
-		g_printf("split done\n");
-		sinajs_decode(bp, &data);
-		g_printf("decode done\n");
-
-		sprintf(buffer, "%.2f", data.price);
+		/* set price */
+		sprintf(buffer, "%.2f", sdp->price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
 
-		float raise = (data.price - data.pre_close) / data.pre_close * 100;
+		/* set price raise */
+		float raise = (sdp->price - sdp->pre_close) / sdp->pre_close * 100;
 		sprintf(buffer, "%.2f", raise);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 
+		/* set min price relative rasie */
 		float last_minprice = atof(stock->last_minprice);
-		float trigger = atof(stock->trigger);
-		float trigger_percent = (data.price - last_minprice * trigger) / data.price;
-		sprintf(buffer, "%.2f", trigger_percent);
+		float stop_profit = atof(stock->stop_profit);
+		float stop_loss = atof(stock->stop_loss);
+		float min_raise = (sdp->price - last_minprice) / last_minprice;
+		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
-		if(trigger_percent > -0.01)
-			gdk_color_parse(COLOR_RISE, &color);
+
+		pr_info("mr = %f, sp = %f, sl = %f\n", min_raise, stop_profit, stop_loss);
+		if(min_raise >= stop_profit - 1)
+			gdk_color_parse(COLOR_STOPP, &color);
+		else if(min_raise <= stop_loss - 1)
+			gdk_color_parse(COLOR_STOPL, &color);
 		else
-			gdk_color_parse(COLOR_DROP, &color);
+			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_trigger, GTK_STATE_NORMAL, &color);
 
-		if(data.price > data.pre_close)
+		if(sdp->price > sdp->pre_close)
 			gdk_color_parse(COLOR_RISE, &color);
-		else if(data.price < data.pre_close)
+		else if(sdp->price < sdp->pre_close)
 			gdk_color_parse(COLOR_DROP, &color);
 		else
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
-
 		/*
 		pr_info("code = %s, price = %.2f, pre_close = %.2f, trigger = %.2f\n",
 				data.code, data.price, data.pre_close, trigger);
@@ -298,12 +217,10 @@ gboolean hdlr_1s(gpointer *p)
 
 int main(int argc, char *argv[])
 {
-	struct sm_desc desc;	/* deprecated */
 	struct sm_xmlcfg smxc;
 
-	parse_xmlconfig(&desc);	/* deprecated */
 	load_xmlconfig(&smxc);
-	main_ui(argc, argv, &desc, &smxc);
+	main_ui(argc, argv, &smxc);
 
 	return 0;
 }

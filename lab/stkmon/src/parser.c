@@ -96,10 +96,12 @@ int do_parse_stock(xmlNodePtr node, void *data)
 		strcpy(p->code, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "stkex") == 0) {
 		strcpy(p->stkex, xmlNodeGetContent(node));
-	} else if(strcmp(node->name, "trigger") == 0) {
-		strcpy(p->trigger, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "last_minprice") == 0) {
 		strcpy(p->last_minprice, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "stop_profit") == 0) {
+		strcpy(p->stop_profit, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "stop_loss") == 0) {
+		strcpy(p->stop_loss, xmlNodeGetContent(node));
 	}
 
 	return 0;
@@ -137,6 +139,7 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		}
 		parse_node(node->children, do_parse_stock, ssp);
 
+		ssp->pull_data = NULL;
 		ssp->next = p->stock;
 		p->stock = ssp;
 	}
@@ -219,9 +222,8 @@ int parse_xmlconfig(struct sm_desc *desc)
 int do_save_xmlconfig(xmlNodePtr node, void *p)
 {
 	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
-	if(strcmp(node->name, "delay_ms") == 0) {
-		printf("save: interval = %s\n", smxc->delay_ms);
-		xmlNodeSetContent(node, smxc->delay_ms);
+	if(strcmp(node->name, "interval") == 0) {
+		//xmlNodeSetContent(node, smxc->delay_ms);
 	}
 
 	return 0;

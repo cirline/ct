@@ -100,6 +100,10 @@ int http_get(const char *url, char *buffer, int buffer_len)
 	*p = 0;
 
 	phost = gethostbyname(local_url);
+	if(!phost) {
+		pr_err("gethostbyname = null\n");
+		return -1;
+	}
 	memset(&saddr, 0, sizeof(struct sockaddr_in));
 	saddr.sin_family = AF_INET;
 	saddr.sin_addr.s_addr = *((unsigned long *)phost->h_addr_list[0]);
@@ -134,7 +138,6 @@ int http_get(const char *url, char *buffer, int buffer_len)
 		close(fd);
 		return rc;
 	}
-
 	pr_debug("recv:\n%s", buffer);
 
 	return rc;
