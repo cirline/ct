@@ -166,8 +166,16 @@ int main()
 	static_assert(true, "oh I panic !!!");
 
 	/*
-	 * moving
+	 * moving ???
 	 * && - rvalue reference: a reference that can't assign to
+	 */
+
+	/*
+	 * resource manager ???
+	 */
+
+	/*
+	 * suppressing operations ???
 	 */
 
 #ifdef CIN_TEST
