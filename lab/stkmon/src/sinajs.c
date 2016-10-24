@@ -133,7 +133,6 @@ int sinajs_pull_data(struct sm_stock *ss)
 	struct sm_stock *stock;
 	char slist[1024] = "hq.sinajs.cn/list=";
 	char buffer[4096];
-	char *body;
 	char *sptr1, *token;
 	int rc;
 
@@ -145,22 +144,14 @@ int sinajs_pull_data(struct sm_stock *ss)
 	}
 
 	//pr_info("slist url = %s\n", slist);
-	rc = http_get(slist, buffer, 4096);
+	rc = http_get(slist, buffer);
 	if(rc < 0) {
 		pr_err("http get failed.\n");
 		return -1;
 	}
+	buffer[rc] = 0;
 
-	//for(rc = 0; rc < strlen(buffer); rc++)
-		//pr_info("%x, %c\n", buffer[rc], buffer[rc]);
-	//pr_info("%d, context: %s\n", strlen(buffer), buffer);
-	body = split_http_response_header(buffer);	// split of 0x0a
-	//pr_info("%d, body:\n%s\n", strlen(body), body);
-	rc = strlen(body);
-	rc = rc >= 3 ? rc - 3 : 0;
-	body[rc] = 0;
-
-	token = strtok_r(body, "\n", &sptr1);
+	token = strtok_r(buffer, "\n", &sptr1);
 	for(rc = 0; token; rc++) {
 		struct sinajs sdata;
 

@@ -15,14 +15,21 @@
 		<stock>
 			<code>601668</code>
 			<stkex>sh</stkex>
-			<last_minprice>6.12</last_minprice>
-			<stop_profit>1.5</stop_profit>
+			<last_minprice>8.13</last_minprice>
+			<stop_profit>1.1</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
 		<stock>
 			<code>601766</code>
 			<stkex>sh</stkex>
 			<last_minprice>8.95</last_minprice>
+			<stop_profit>1.1</stop_profit>
+			<stop_loss>0.9</stop_loss>
+		</stock>
+		<stock>
+			<code>000001</code>
+			<stkex>sz</stkex>
+			<last_minprice>10</last_minprice>
 			<stop_profit>1.1</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
