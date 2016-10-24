@@ -9,6 +9,8 @@ AC_CONFIG_MACRO_DIR([m4])
 
 PKG_CHECK_MODULES(XML, libxml-2.0 >= 2)
 
+LIBCURL_CHECK_CONFIG()
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_AWK
@@ -21,8 +23,6 @@ AM_PROG_AR
 
 LT_INIT
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-lccutils':
-AC_CHECK_LIB([ccutils], [main])
 # FIXME: Replace `main' with a function in `-ldl':
 AC_CHECK_LIB([dl], [main])
 # FIXME: Replace `main' with a function in `-lpthread':

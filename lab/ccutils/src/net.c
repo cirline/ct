@@ -8,6 +8,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <curl/curl.h>
+
 #include "header.h"
 
 int new_server_socket(int port, int backlog)
@@ -81,6 +83,45 @@ int new_client_socket(char *ip, int port)
 	return fd;
 }
 
+static size_t cc_http_get_buffer(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+	size_t length;
+
+	length = size * nmemb;
+	memcpy(stream, ptr, length);
+	return length;
+}
+
+int http_get(const char *url, char *buffer)
+{
+	CURL *curl_handle;
+	double dsize = 0;
+	CURLcode res;
+
+	if(!url) {
+		pr_err("%s, url = null\n");
+		return -1;
+	}
+
+	curl_handle = curl_easy_init();
+	if(curl_handle) {
+		curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, cc_http_get_buffer);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, buffer);
+		res = curl_easy_perform(curl_handle);
+
+		res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD, &dsize);
+		if(res != CURLE_OK) {
+			pr_err("get dsize failed: %s\n", curl_easy_strerror(res));
+		}
+
+		curl_easy_cleanup(curl_handle);
+	}
+
+	return dsize;
+}
+
+#if 0
 int http_get(const char *url, char *buffer, int buffer_len)
 {
 	char local_url[1024];
@@ -142,6 +183,7 @@ int http_get(const char *url, char *buffer, int buffer_len)
 
 	return rc;
 }
+#endif
 
 char *split_http_response_header(char *buffer)
 {
