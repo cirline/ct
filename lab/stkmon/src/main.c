@@ -11,6 +11,7 @@
 #include "sinajs.h"
 #include "stkmon.h"
 #include "stkxml.h"
+#include "config.h"
 
 static int gx = 99;
 
@@ -218,6 +219,8 @@ gboolean hdlr_1s(gpointer *p)
 int main(int argc, char *argv[])
 {
 	struct sm_xmlcfg smxc;
+
+	pr_pkg();
 
 	load_xmlconfig(&smxc);
 	main_ui(argc, argv, &smxc);

@@ -25,9 +25,11 @@ struct sm_stkui {
 	GtkWidget *label_price;
 	GtkWidget *label_raise;
 	GtkWidget	*label_trigger;
+	GtkWidget	*toggle_visible;
 };
 
 struct sm_stock {
+	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];
 	char stkex[SM_STKEX_SZ];
 	char		trigger[SM_PRICE_SZ];
@@ -50,6 +52,7 @@ struct sm_xmlcfg {
 	char		interval[16];
 
 	struct sm_stock	*stock;
+	int		stocks_count;
 };
 
 #endif

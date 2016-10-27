@@ -5,28 +5,28 @@
 	</configure>
 
 	<stocks>
-		<stock>
+		<stock visible="false">
 			<code>601398</code>
 			<stkex>sh</stkex>
 			<last_minprice>4.01</last_minprice>
 			<stop_profit>1.15</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
-		<stock>
+		<stock visible="true">
 			<code>601668</code>
 			<stkex>sh</stkex>
 			<last_minprice>8.13</last_minprice>
 			<stop_profit>1.1</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
-		<stock>
+		<stock visible="true">
 			<code>601766</code>
 			<stkex>sh</stkex>
 			<last_minprice>8.95</last_minprice>
 			<stop_profit>1.1</stop_profit>
 			<stop_loss>0.9</stop_loss>
 		</stock>
-		<stock>
+		<stock visible="true">
 			<code>000001</code>
 			<stkex>sz</stkex>
 			<last_minprice>10</last_minprice>
