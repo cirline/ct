@@ -50,20 +50,13 @@ GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
 		stock->ui.label_price = label;
 
 		align = gtk_alignment_new(1, 0, 0, 0);
-		label = gtk_label_new(stock->avg_price.f > 0 ? stock->avg_price.c : "-");
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 2, 0, 2, 2);
-		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_table_attach_defaults(GTK_TABLE(table), align, 1, 2, tbl_cur_line, tbl_cur_line + 1);
-		stock->ui.label_avg_price = label;
-
-		tbl_cur_line++;
-
-		align = gtk_alignment_new(1, 0, 0, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 2, 2, 2);
 		label = gtk_label_new("0.00");
 		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, tbl_cur_line, tbl_cur_line + 1);
+		gtk_table_attach_defaults(GTK_TABLE(table), align, 1, 2, tbl_cur_line, tbl_cur_line + 1);
 		stock->ui.label_raise = label;
+
+		tbl_cur_line++;
 
 		align = gtk_alignment_new(1, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 2, 2, 2);

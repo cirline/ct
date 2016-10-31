@@ -28,7 +28,7 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 	int count;
 	int i;
 	int tbl_cur_line;
-	char *tbl_title[] = {"visible", "stkex", "code"};
+	char *tbl_title[] = {"visible", "stkex", "code", "avg_p"};
 	struct sm_stock *stock;
 
 	count = smxc->stocks_count;
@@ -60,6 +60,10 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 
 		col++;
 		widget = gtk_label_new(stock->code);
+		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
+
+		col++;
+		widget = gtk_label_new(stock->avg_price.c);
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 	}
 

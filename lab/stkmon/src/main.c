@@ -182,15 +182,6 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
-
-		/* set avg_price color */
-		if(stock->avg_price.f < sdp->price)
-			gdk_color_parse(COLOR_RISE, &color);
-		else if(stock->avg_price.f > sdp->price)
-			gdk_color_parse(COLOR_DROP, &color);
-		else
-			gdk_color_parse(COLOR_EQ, &color);
-		gtk_widget_modify_fg(stock->ui.label_avg_price, GTK_STATE_NORMAL, &color);
 	}
 
 	return TRUE;
