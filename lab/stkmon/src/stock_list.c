@@ -4,7 +4,6 @@
 
 #include "stkmon.h"
 
-int parse_xmlconfig(struct sm_desc *);
 int save_xmlconfig(struct sm_xmlcfg *);
 
 struct {
@@ -98,7 +97,6 @@ void configure_main(GtkWidget *widget, gpointer p)
 	GtkWidget *table;
 	GtkWidget *hbox;
 	GtkWidget *align;
-	struct sm_desc desc;
 	char buffer[1024];
 	struct sm_xmlcfg smxc;
 	int curcol;

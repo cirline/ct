@@ -12,7 +12,7 @@
 
 #include "stkmon/ui.h"
 #include "sinajs.h"
-#include "stkmon.h"
+#include "stkmon/stkmon.h"
 #include "stkxml.h"
 #include "config.h"
 
@@ -111,7 +111,9 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	GtkWidget *infopanel = ui_monitor_create_info_panel(smxc);
 	gtk_box_pack_start(GTK_BOX(mbox), infopanel, FALSE, FALSE, 0);
 
-	interval = atoi(smxc->interval) > 0 ? : 5000;
+	interval = atoi(smxc->interval);
+	if(interval <= 0)
+		interval = 5000;
 	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -180,10 +182,15 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
-		/*
-		pr_info("code = %s, price = %.2f, pre_close = %.2f, trigger = %.2f\n",
-				data.code, data.price, data.pre_close, trigger);
-				*/
+
+		/* set avg_price color */
+		if(stock->avg_price.f < sdp->price)
+			gdk_color_parse(COLOR_RISE, &color);
+		else if(stock->avg_price.f > sdp->price)
+			gdk_color_parse(COLOR_DROP, &color);
+		else
+			gdk_color_parse(COLOR_EQ, &color);
+		gtk_widget_modify_fg(stock->ui.label_avg_price, GTK_STATE_NORMAL, &color);
 	}
 
 	return TRUE;
@@ -195,7 +202,10 @@ int main(int argc, char *argv[])
 
 	pr_pkg();
 
+	pr_info("load configure.\n");
 	load_xmlconfig(&smxc);
+
+	pr_info("start main ui.\n");
 	main_ui(argc, argv, &smxc);
 
 	return 0;

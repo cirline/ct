@@ -9,7 +9,7 @@
 #include <libxml/xpath.h>
 #include <ccutils/log.h>
 
-#include <stkmon.h>
+#include "stkmon/stkmon.h"
 
 #define DATAFILE_PATH	"data.xml"
 
@@ -62,18 +62,6 @@ int parse_xojbect(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *), voi
 	return i;
 }
 
-int parse_configure(xmlNodePtr node, void *data)
-{
-	struct sm_desc *p = data;
-
-	pr_debug("-- %s: %s\n", node->name, xmlNodeGetContent(node));
-	if(strcmp(node->name, "delay_ms") == 0) {
-		p->cfg.delay_ms = atoi(xmlNodeGetContent(node));
-	}
-
-	return 0;
-}
-
 int load_configure(xmlNodePtr node, void *data)
 {
 	struct sm_xmlcfg *p = data;
@@ -107,25 +95,6 @@ int do_parse_stock(xmlNodePtr node, void *data)
 	return 0;
 }
 
-int parse_stocks(xmlNodePtr node, void *data)
-{
-	struct sm_desc *p = data;
-	struct sm_stock *ssp;
-
-	if(strcmp(node->name, "stock") == 0) {
-		ssp = malloc(sizeof(struct sm_stock));
-		if(!ssp) {
-			printf("%s, malloc failed: %s\n", __func__, strerror(errno));
-			return -1;
-		}
-		parse_node(node->children, do_parse_stock, ssp);
-
-		ssp->next = p->stock;
-		p->stock = ssp;
-	}
-	return 0;
-}
-
 int load_xmlstocks(xmlNodePtr node, void *data)
 {
 	struct sm_xmlcfg *p = data;
@@ -148,6 +117,14 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		} else
 			ssp->visible = 0;
 
+		prop = xmlGetProp(node, "avg_price");
+		if(prop) {
+			strcpy(ssp->avg_price.c, prop);
+			ssp->avg_price.f = atof(prop);
+			xmlFree(prop);
+		} else
+			ssp->avg_price.f = 0;
+
 		ssp->pull_data = NULL;
 		ssp->next = p->stock;
 		p->stock = ssp;
@@ -165,19 +142,12 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 	int i = 0;
 
 	pr_info("stock count: %d\n", smxc->stocks_count);
-	pr_info("%4s %8s %8s %8s\n", "n", "visible", "code", "stkex");
+	pr_info("%4s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg");
 	while(p) {
-
-		pr_info("%4d %8d %8s %8s\n", i++, p->visible, p->code, p->stkex);
-
+		pr_info("%4d %8d %8s %8s %8.2f\n", i++, p->visible, p->code, p->stkex,
+				p->avg_price.f);
 		p = p->next;
 	}
-}
-
-void check_configure(struct sm_desc *desc)
-{
-	if(desc->cfg.delay_ms <= 0)
-		desc->cfg.delay_ms = SM_DEFAULT_DELAY_MS;
 }
 
 int do_save_xmlconfig(xmlNodePtr node, void *p)

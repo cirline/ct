@@ -16,8 +16,9 @@
 #define SM_STKEX_SZ	8
 #define SM_PRICE_SZ	8
 
-struct sm_cfg {
-	int delay_ms;
+struct sm_price {
+	char	c	[SM_PRICE_SZ];
+	float	f;
 };
 
 struct sm_stkui {
@@ -26,6 +27,7 @@ struct sm_stkui {
 	GtkWidget *label_raise;
 	GtkWidget	*label_trigger;
 	GtkWidget	*toggle_visible;
+	GtkWidget	*label_avg_price;
 };
 
 struct sm_stock {
@@ -37,15 +39,12 @@ struct sm_stock {
 	char		stop_profit	[SM_PRICE_SZ];
 	char		stop_loss	[SM_PRICE_SZ];
 
+	struct sm_price	avg_price;
+
 	struct sm_stkui ui;
 	void		*pull_data;	/* data pull from web */
 
 	struct sm_stock *next;
-};
-
-struct sm_desc {
-	struct sm_cfg cfg;
-	struct sm_stock *stock;
 };
 
 struct sm_xmlcfg {

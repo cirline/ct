@@ -137,7 +137,7 @@ int sinajs_pull_data(struct sm_stock *ss)
 	int rc;
 
 	for(stock = ss; stock; stock = stock->next) {
-		//pr_info("stock: %s%s\n", stock->stkex, stock->code);
+//		pr_info("stock: %s%s\n", stock->stkex, stock->code);
 		if(stock->visible) {
 			strcat(slist, stock->stkex);
 			strcat(slist, stock->code);
@@ -145,7 +145,7 @@ int sinajs_pull_data(struct sm_stock *ss)
 		}
 	}
 
-	//pr_info("slist url = %s\n", slist);
+//	pr_info("slist url = %s\n", slist);
 	rc = http_get(slist, buffer);
 	if(rc < 0) {
 		pr_err("http get failed.\n");
