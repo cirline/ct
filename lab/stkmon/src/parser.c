@@ -1,4 +1,4 @@
-#define pr_fmt(fmt)	"parser  # " fmt
+#define pr_fmt(fmt)	"parser  ] " fmt
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -165,11 +165,10 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 	int i = 0;
 
 	pr_info("stock count: %d\n", smxc->stocks_count);
+	pr_info("%4s %8s %8s %8s\n", "n", "visible", "code", "stkex");
 	while(p) {
-		printf("stock[%d]:\n", i++);
-		printf(" %12s: %d\n", "visable", p->visible);
-		printf(" %12s: %s\n", "code", p->code);
-		printf(" %12s: %s\n", "stkex", p->stkex);
+
+		pr_info("%4d %8d %8s %8s\n", i++, p->visible, p->code, p->stkex);
 
 		p = p->next;
 	}

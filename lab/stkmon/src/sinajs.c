@@ -138,9 +138,11 @@ int sinajs_pull_data(struct sm_stock *ss)
 
 	for(stock = ss; stock; stock = stock->next) {
 		//pr_info("stock: %s%s\n", stock->stkex, stock->code);
-		strcat(slist, stock->stkex);
-		strcat(slist, stock->code);
-		strcat(slist, ",");
+		if(stock->visible) {
+			strcat(slist, stock->stkex);
+			strcat(slist, stock->code);
+			strcat(slist, ",");
+		}
 	}
 
 	//pr_info("slist url = %s\n", slist);

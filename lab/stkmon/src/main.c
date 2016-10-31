@@ -1,3 +1,5 @@
+#define pr_fmt(fmt)	"stkmon  ] " fmt
+
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -8,6 +10,7 @@
 #include <ccutils/net.h>
 #include <ccutils/log.h>
 
+#include "stkmon/ui.h"
 #include "sinajs.h"
 #include "stkmon.h"
 #include "stkxml.h"
@@ -105,40 +108,10 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 
 	create_popupmenu(ebox);
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
-		GtkWidget *align;
-		GtkWidget *label;
+	GtkWidget *infopanel = ui_monitor_create_info_panel(smxc);
+	gtk_box_pack_start(GTK_BOX(mbox), infopanel, FALSE, FALSE, 0);
 
-		GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
-		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
-
-		align = gtk_alignment_new(1, 0, 0.6, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
-		label = gtk_label_new("0");
-		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_container_add(GTK_CONTAINER(hbox), align);
-		stock->ui.label_price = label;
-
-		align = gtk_alignment_new(1, 0, 0.4, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
-		label = gtk_label_new("0.00");
-		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_container_add(GTK_CONTAINER(hbox), align);
-		stock->ui.label_raise = label;
-
-		hbox = gtk_hbox_new(FALSE, 1);
-		gtk_box_pack_start(GTK_BOX(mbox), hbox, FALSE, FALSE, 0);
-		align = gtk_alignment_new(1, 0, 0, 0);
-		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 0, 2, 2);
-		label = gtk_label_new("0.00");
-		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_container_add(GTK_CONTAINER(hbox), align);
-		stock->ui.label_trigger = label;
-	}
-
-	interval = atoi(smxc->interval);
-	if(interval <= 0)
-		interval = 5000;
+	interval = atoi(smxc->interval) > 0 ? : 5000;
 	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 

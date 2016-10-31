@@ -5,7 +5,7 @@
 	</configure>
 
 	<stocks>
-		<stock visible="false">
+		<stock visible="true">
 			<code>601398</code>
 			<stkex>sh</stkex>
 			<last_minprice>4.01</last_minprice>
