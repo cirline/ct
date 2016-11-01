@@ -178,6 +178,12 @@ int main()
 	 * suppressing operations ???
 	 */
 
+	/*
+	 * 3.4.1 templates and range-for
+	 */
+	for(auto x : clv)
+		cout << "range-for clv = " << x << endl;
+
 #ifdef CIN_TEST
 	/* 2.2.4 test and loops
 	 */

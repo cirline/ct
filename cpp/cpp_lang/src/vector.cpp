@@ -96,3 +96,15 @@ string vector::tostring() const
 void vector::pure_vfunc(void)
 {
 }
+
+/* implement begin and end */
+double *vector::begin(void)
+{
+	return elem;
+}
+
+double *vector::end(void)
+{
+	return begin() + size();
+}
+

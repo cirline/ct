@@ -41,6 +41,10 @@ class cpplang::vector : public cpplang::object {
 		char *to_string() const;
 		string tostring() const;
 		void pure_vfunc(void);
+
+		/* to support range-for loop, we must define suitable begin and end */
+		double *begin();
+		double *end();
 	private:
 		double *elem;
 		int sz;
