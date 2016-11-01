@@ -6,6 +6,6 @@ check_PROGRAMS	= 221_out
 # if cannot open shared object file, run sudo ldconfig
 221_out_LDADD	= -lcpplang
 
-#bin_PROGRAMS	+= 222_out
-#222_out_SOURCES	= 2.2.1_hello_world.cpp
+check_PROGRAMS	+= 340_out
+340_out_SOURCES	= 3.4_template.cpp
 

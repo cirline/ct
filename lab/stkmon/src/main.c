@@ -135,6 +135,7 @@ gboolean hdlr_1s(gpointer *p)
 	struct sm_stock *stock;
 	int rc;
 	GdkColor color;
+	static int count = 0;
 
 	rc = sinajs_pull_data(smxc->stock);
 	if(rc < 0) {
@@ -165,7 +166,6 @@ gboolean hdlr_1s(gpointer *p)
 		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
 
-		pr_info("mr = %f, sp = %f, sl = %f\n", min_raise, stop_profit, stop_loss);
 		if(min_raise >= stop_profit - 1)
 			gdk_color_parse(COLOR_STOPP, &color);
 		else if(min_raise <= stop_loss - 1)
@@ -182,6 +182,14 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
+
+		if(count == 0) {
+			pr_info("\n");
+			pr_info("%8s %8s %12s\n", "code", "raise", "lm_raise");
+		}
+		pr_info("%8s %8.3f %12.3f\n", stock->code, raise, min_raise);
+
+		count = count > 10 ?  0 : count + 1;
 	}
 
 	return TRUE;
