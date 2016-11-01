@@ -181,7 +181,7 @@ int main()
 	/*
 	 * 3.4.1 templates and range-for
 	 */
-	for(auto x : clv)
+	for(auto &x : clv)
 		cout << "range-for clv = " << x << endl;
 
 #ifdef CIN_TEST

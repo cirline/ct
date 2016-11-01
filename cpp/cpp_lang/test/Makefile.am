@@ -8,4 +8,5 @@ check_PROGRAMS	= 221_out
 
 check_PROGRAMS	+= 340_out
 340_out_SOURCES	= 3.4_template.cpp
+340_out_LDADD	= -lcpplang
 

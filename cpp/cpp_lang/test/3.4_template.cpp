@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "cpplang/vector.h"
+
 using namespace std;
 
 namespace tplns {
@@ -25,6 +27,10 @@ class tplns::tplbase {
 		int a;
 };
 
+/*
+ * to use 2 or more templates, type as:
+ * template<typename T1, typename T2, ...>
+ */
 template<typename T>
 class tplns::tplcls : public tplns::tplbase {
 	public:
@@ -37,7 +43,33 @@ class tplns::tplcls : public tplns::tplbase {
 		T x;
 };
 
+namespace cpplang {
+	template<typename T>
+	class lt_functor;
+};
+
+template<typename T>
+class cpplang::lt_functor {
+	private:
+		const T val;
+	public:
+		lt_functor(const T &v) : val{v} {}
+
+		/*
+		 * function object also called functor
+		 * typename operator()(const vector &v), that object() is a functor
+		 *
+		 * while a function return bool, it can be said a predicate
+		 * predicate: something that we can invoke to return bool
+		 */
+		bool operator()(const T &v) const {
+			return v < val;
+		}
+
+};
+
 using namespace tplns;
+
 template<typename T>
 tplcls<T>::tplcls(int n)
 {
@@ -57,6 +89,19 @@ T tplcls<T>::get_value()
 	return x;
 }
 
+/*
+ * a functor can be used as argument
+ */
+template<typename object, typename predicate>
+int count(object &obj, predicate pred) {
+	int count = 0;
+	for(auto &x : obj)
+		if(pred(x))
+			count++;
+
+	return count;
+}
+
 int main(void)
 {
 	cout << "hello world" << endl;
@@ -69,6 +114,11 @@ int main(void)
 	tplcls<float> t2(10);
 	t2.set_value(9.9);
 	t2.get_value();
+
+	cpplang::vector v = {1, 2, 3, 4, 5};
+
+	/* transfer a less then 4 functor to count */
+	cout << "count(v < 4) = " << count(v, cpplang::lt_functor<double>(4)) << endl;
 
 	return 0;
 }
