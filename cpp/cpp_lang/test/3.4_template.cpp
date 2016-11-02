@@ -102,6 +102,27 @@ int count(object &obj, predicate pred) {
 	return count;
 }
 
+void va_tpl() {
+	cout << "va_tpl end" << endl;
+}
+
+template<typename T, typename... Ttail>
+void va_tpl(T head, Ttail... tail) {
+	cout << head << endl;
+	va_tpl(tail...);
+}
+
+template<typename Tkey, typename Tvalue>
+class kv_map {
+};
+
+template<typename Tvalue>
+using string_map = kv_map<string, Tvalue>
+
+/* so
+ * string_map<int> m; m is a kv_map<string, int>
+ */
+
 int main(void)
 {
 	cout << "hello world" << endl;
@@ -119,6 +140,25 @@ int main(void)
 
 	/* transfer a less then 4 functor to count */
 	cout << "count(v < 4) = " << count(v, cpplang::lt_functor<double>(4)) << endl;
+
+	/* lambda expression, it generates a function object, (functor)
+	 * [&]: all local names used by reference
+	 * [=]: all local names used value/object copy
+	 * []: captrue nothing
+	 * [&x]: captrue x as reference
+	 * [=x]: captrue x as value/object copy
+	 *
+	 * [&](const int &a){ return a < x; }
+	 * this expression same as lt_functor<int>(x), same as invoke object(a)
+	 */
+	cout << "count(v < 3) = " << count(v, [](double &a){ return a < 3; }) << endl;	// this lambda captrue nothing
+
+	double xx = 2;
+	cout << "count(v < 2) = " << count(v, [&](double &a){ return a < xx; }) << endl;	// xx is a reference
+
+	/* variadic templates
+	 */
+	va_tpl(1.2, 'k', 4, 5, "hello world");
 
 	return 0;
 }
