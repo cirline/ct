@@ -10,3 +10,7 @@ check_PROGRAMS	+= 340_out
 340_out_SOURCES	= 3.4_template.cpp
 340_out_LDADD	= -lcpplang
 
+check_PROGRAMS	+= 410_out
+410_out_SOURCES	= 4.1_std_libs.cpp
+410_out_LDADD	= -lcpplang
+

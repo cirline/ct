@@ -112,8 +112,12 @@ void va_tpl(T head, Ttail... tail) {
 	va_tpl(tail...);
 }
 
+#if 0
 template<typename Tkey, typename Tvalue>
 class kv_map {
+	private:
+		Tkey key;
+		Tvalue value;
 };
 
 template<typename Tvalue>
@@ -122,6 +126,7 @@ using string_map = kv_map<string, Tvalue>
 /* so
  * string_map<int> m; m is a kv_map<string, int>
  */
+#endif
 
 int main(void)
 {
