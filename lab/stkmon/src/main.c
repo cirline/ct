@@ -62,6 +62,20 @@ int show_popup(GtkWidget *widget, GdkEvent *event)
 	return FALSE;
 }
 
+static int main_event(GtkWidget *widget, GdkEvent *event)
+{
+	switch(event->type) {
+	case GDK_ENTER_NOTIFY:
+		gtk_window_set_opacity(GTK_WINDOW(widget), 1);
+		break;
+	case GDK_LEAVE_NOTIFY:
+		gtk_window_set_opacity(GTK_WINDOW(widget), 0.3);
+		break;
+	}
+
+	return FALSE;
+}
+
 void create_popupmenu(GtkWidget *ebox)
 {
 	GtkWidget *item;
@@ -73,7 +87,7 @@ void create_popupmenu(GtkWidget *ebox)
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item_config);
 	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
 
-	item = gtk_menu_item_new_with_label("list detail");
+	item = gtk_menu_item_new_with_label("stocks list");
 	gtk_widget_show(item);
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item);
 	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(configure_main), &gx);
@@ -85,6 +99,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 {
 	int i;
 	int px, py;
+	int width, height;
 	struct sm_stock *stock;
 	int interval;
 
@@ -116,9 +131,15 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 		interval = 5000;
 	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+	g_signal_connect(win, "event", G_CALLBACK(main_event), NULL);
 
 	gtk_widget_show_all(win);
 	hdlr_1s((gpointer)smxc);
+
+	gtk_window_set_opacity(GTK_WINDOW(win), 0.3);
+	gtk_window_get_size(GTK_WINDOW(win), &width, &height);
+	pr_info("%d, %d, %d, %d\n", px, py, width, height);
+	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 30, py * 2 - height - 80);
 
 	gtk_main();
 

@@ -21,8 +21,7 @@ int ui_show_dialog_info(GtkWidget *widget, GtkWidget *win, char *msg)
 /*
  * monitor info panel
  * ---------------------
- *  cur_price     avg_price
- *  day_raise     last_action_raise
+ *  cur_price     avg_price     last_action_raise
  * ---------------------
  */
 GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
@@ -33,7 +32,7 @@ GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
 
 	GtkWidget *table = gtk_table_new(0, 0, FALSE);
 	//gtk_table_set_row_spacings(GTK_TABLE(table), 5);
-	//gtk_table_set_col_spacings(GTK_TABLE(table), 5);
+	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
 
 	for(stock = smxc->stock; stock; stock = stock->next) {
 		GtkWidget *align;
@@ -56,13 +55,11 @@ GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), align, 1, 2, tbl_cur_line, tbl_cur_line + 1);
 		stock->ui.label_raise = label;
 
-		tbl_cur_line++;
-
 		align = gtk_alignment_new(1, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 0, 2, 2, 2);
 		label = gtk_label_new("0.00");
 		gtk_container_add(GTK_CONTAINER(align), label);
-		gtk_table_attach_defaults(GTK_TABLE(table), align, 1, 2, tbl_cur_line, tbl_cur_line + 1);
+		gtk_table_attach_defaults(GTK_TABLE(table), align, 2, 3, tbl_cur_line, tbl_cur_line + 1);
 		stock->ui.label_trigger = label;
 
 		tbl_cur_line++;
