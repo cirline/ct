@@ -16,6 +16,8 @@
 #include "stkxml.h"
 #include "config.h"
 
+#define WIN_OPACITY	0.6
+
 static int gx = 99;
 
 gboolean hdlr_1s(gpointer *);
@@ -64,14 +66,25 @@ int show_popup(GtkWidget *widget, GdkEvent *event)
 
 static int main_event(GtkWidget *widget, GdkEvent *event)
 {
+	gboolean focus;
+
 	switch(event->type) {
 	case GDK_ENTER_NOTIFY:
 		gtk_window_set_opacity(GTK_WINDOW(widget), 1);
 		break;
 	case GDK_LEAVE_NOTIFY:
-		gtk_window_set_opacity(GTK_WINDOW(widget), 0.3);
+		gtk_window_set_opacity(GTK_WINDOW(widget), WIN_OPACITY);
 		break;
+	case GDK_FOCUS_CHANGE:
+		if(gtk_window_is_active(GTK_WINDOW(widget)))
+			gtk_window_set_opacity(GTK_WINDOW(widget), WIN_OPACITY);
+		else
+			gtk_window_set_opacity(GTK_WINDOW(widget), 1);
+		break;
+	default:
+		pr_info("unimpl event type = %d\n", event->type);
 	}
+
 
 	return FALSE;
 }
@@ -136,7 +149,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_widget_show_all(win);
 	hdlr_1s((gpointer)smxc);
 
-	gtk_window_set_opacity(GTK_WINDOW(win), 0.3);
+	gtk_window_set_opacity(GTK_WINDOW(win), WIN_OPACITY);
 	gtk_window_get_size(GTK_WINDOW(win), &width, &height);
 	pr_info("%d, %d, %d, %d\n", px, py, width, height);
 	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 30, py * 2 - height - 80);
