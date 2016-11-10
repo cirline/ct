@@ -108,6 +108,19 @@ void create_popupmenu(GtkWidget *ebox)
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
 
+GdkPixbuf *create_logo(const char *filename)
+{
+	GdkPixbuf *pb;
+	GError *error = NULL;
+
+	pb = gdk_pixbuf_new_from_file(filename, &error);
+	if(!pb) {
+		pr_err("create logo failed: %s\n", error->message);
+		g_error_free(error);
+	}
+	return pb;
+}
+
 int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 {
 	int i;
@@ -125,6 +138,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_window_get_position(GTK_WINDOW(win), &px, &py);
 	gtk_window_move(GTK_WINDOW(win), px * 2, py);
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
+	gtk_window_set_icon(GTK_WINDOW(win), create_logo("logo.png"));
 
 	GtkWidget *ebox = gtk_event_box_new();
 	GtkWidget *mbox = gtk_vbox_new(FALSE, 1);
@@ -225,6 +239,7 @@ gboolean hdlr_1s(gpointer *p)
 
 		count = count > 10 ?  0 : count + 1;
 	}
+	pr_info("- - - - - - - - - - - - -\n");
 
 	return TRUE;
 }
