@@ -1,4 +1,4 @@
-#define pr_fmt(fmt)	"parser  - "
+#define pr_fmt(fmt)	"parser  ] " fmt
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -9,7 +9,7 @@
 #include <libxml/xpath.h>
 #include <ccutils/log.h>
 
-#include <stkmon.h>
+#include "stkmon/stkmon.h"
 
 #define DATAFILE_PATH	"data.xml"
 
@@ -62,18 +62,6 @@ int parse_xojbect(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *), voi
 	return i;
 }
 
-int parse_configure(xmlNodePtr node, void *data)
-{
-	struct sm_desc *p = data;
-
-	pr_debug("-- %s: %s\n", node->name, xmlNodeGetContent(node));
-	if(strcmp(node->name, "delay_ms") == 0) {
-		p->cfg.delay_ms = atoi(xmlNodeGetContent(node));
-	}
-
-	return 0;
-}
-
 int load_configure(xmlNodePtr node, void *data)
 {
 	struct sm_xmlcfg *p = data;
@@ -107,29 +95,11 @@ int do_parse_stock(xmlNodePtr node, void *data)
 	return 0;
 }
 
-int parse_stocks(xmlNodePtr node, void *data)
-{
-	struct sm_desc *p = data;
-	struct sm_stock *ssp;
-
-	if(strcmp(node->name, "stock") == 0) {
-		ssp = malloc(sizeof(struct sm_stock));
-		if(!ssp) {
-			printf("%s, malloc failed: %s\n", __func__, strerror(errno));
-			return -1;
-		}
-		parse_node(node->children, do_parse_stock, ssp);
-
-		ssp->next = p->stock;
-		p->stock = ssp;
-	}
-	return 0;
-}
-
 int load_xmlstocks(xmlNodePtr node, void *data)
 {
 	struct sm_xmlcfg *p = data;
 	struct sm_stock *ssp;
+	char	*prop;
 
 	if(strcmp(node->name, "stock") == 0) {
 		ssp = malloc(sizeof(struct sm_stock));
@@ -139,27 +109,28 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		}
 		parse_node(node->children, do_parse_stock, ssp);
 
+		/* read prop */
+		prop = xmlGetProp(node, "visible");
+		if(prop && (strcmp(prop, "true") == 0)) {
+			ssp->visible = 1;
+			xmlFree(prop);
+		} else
+			ssp->visible = 0;
+
+		prop = xmlGetProp(node, "avg_price");
+		if(prop) {
+			strcpy(ssp->avg_price.c, prop);
+			ssp->avg_price.f = atof(prop);
+			xmlFree(prop);
+		} else
+			ssp->avg_price.f = 0;
+
 		ssp->pull_data = NULL;
 		ssp->next = p->stock;
 		p->stock = ssp;
+		p->stocks_count++;
 	}
 	return 0;
-}
-
-void print_configure(struct sm_desc *desc)
-{
-	printf("configure:\n");
-	printf(" %12s: %d\n", "delay_ms", desc->cfg.delay_ms);
-
-	struct sm_stock *p = desc->stock;
-	int i = 0;
-	while(p) {
-		printf("stock(%d):\n", i++);
-		printf(" %12s: %s\n", "code", p->code);
-		printf(" %12s: %s\n", "stkex", p->stkex);
-
-		p = p->next;
-	}
 }
 
 void print_xmlcfg(struct sm_xmlcfg *smxc)
@@ -169,54 +140,14 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 
 	struct sm_stock *p = smxc->stock;
 	int i = 0;
-	while(p) {
-		printf("stock(%d):\n", i++);
-		printf(" %12s: %s\n", "code", p->code);
-		printf(" %12s: %s\n", "stkex", p->stkex);
 
+	pr_info("stock count: %d\n", smxc->stocks_count);
+	pr_info("%4s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg");
+	while(p) {
+		pr_info("%4d %8d %8s %8s %8.2f\n", i++, p->visible, p->code, p->stkex,
+				p->avg_price.f);
 		p = p->next;
 	}
-}
-
-void check_configure(struct sm_desc *desc)
-{
-	if(desc->cfg.delay_ms <= 0)
-		desc->cfg.delay_ms = SM_DEFAULT_DELAY_MS;
-}
-
-int parse_xmlconfig(struct sm_desc *desc)
-{
-	xmlDocPtr docp;
-	xmlXPathObjectPtr object;
-
-	docp = xmlParseFile(DATAFILE_PATH);
-	if(!docp) {
-		printf("%d, parse error %s\n", __LINE__, strerror(errno));
-		return -1;
-	}
-
-	/* parse configure */
-	unsigned char *cfg_path = "/root/configure";
-	object = get_xpath_object(docp, cfg_path);
-	if(object) {
-		parse_xojbect(object, parse_configure, desc);
-		xmlXPathFreeObject(object);
-	}
-
-	desc->stock = NULL;
-	unsigned char *stocks_path = "/root/stocks";
-	object = get_xpath_object(docp, stocks_path);
-	if(object) {
-		parse_xojbect(object, parse_stocks, desc);
-		xmlXPathFreeObject(object);
-	}
-
-	xmlFreeDoc(docp);
-
-	check_configure(desc);
-	print_configure(desc);
-
-	return 0;
 }
 
 int do_save_xmlconfig(xmlNodePtr node, void *p)
@@ -273,6 +204,7 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 	}
 
 	smxc->stock = NULL;
+	smxc->stocks_count = 0;
 	unsigned char *stocks_path = "/root/stocks";
 	object = get_xpath_object(docp, stocks_path);
 	if(object) {

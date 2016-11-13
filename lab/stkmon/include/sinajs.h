@@ -1,7 +1,7 @@
 #ifndef __SINAJS_H__
 #define __SINAJS_H__
 
-#include "stkmon.h"
+#include "stkmon/stkmon.h"
 
 #define SJS_CODE_SIZE	16
 #define SJS_NAME_SIZE	20
