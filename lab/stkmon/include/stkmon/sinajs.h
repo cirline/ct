@@ -9,6 +9,7 @@
 #define SJS_TIME_SIZE	16
 
 struct sinajs {
+	struct stk_stkdat	common;
 	char code[SJS_CODE_SIZE];
 	char name[SJS_NAME_SIZE];
 	float open, pre_close;
@@ -38,5 +39,6 @@ struct sinajs_index {
 extern int sinajs_pull_data(struct sm_stock *ss);
 extern void sinajs_print(struct sinajs *sj);
 extern int sinajs_decode(char *buffer, struct sinajs *sj);
+int sinajs_apply_data(struct stk_xmlcfg *sxc);
 
 #endif

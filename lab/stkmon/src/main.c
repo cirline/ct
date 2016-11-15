@@ -11,9 +11,10 @@
 #include <ccutils/log.h>
 
 #include "stkmon/ui.h"
-#include "sinajs.h"
+#include "stkmon/sinajs.h"
 #include "stkmon/stkmon.h"
-#include "stkxml.h"
+#include "stkmon/stkxml.h"
+#include "stkmon/calc.h"
 #include "config.h"
 
 #define WIN_OPACITY	0.6
@@ -166,7 +167,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_window_set_opacity(GTK_WINDOW(win), WIN_OPACITY);
 	gtk_window_get_size(GTK_WINDOW(win), &width, &height);
 	pr_info("%d, %d, %d, %d\n", px, py, width, height);
-	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 30, py * 2 - height - 80);
+	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 50, py * 2 - height - 80);
 
 	gtk_main();
 
@@ -177,13 +178,13 @@ gboolean hdlr_1s(gpointer *p)
 {
 	char buffer[4096];
 	char *bp;
-	struct sinajs *sdp;
 	int i;
 	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
 	struct sm_stock *stock;
 	int rc;
 	GdkColor color;
 	static int count = 0;
+	struct stk_stkdat *dat;
 
 	rc = sinajs_pull_data(smxc->stock);
 	if(rc < 0) {
@@ -191,26 +192,27 @@ gboolean hdlr_1s(gpointer *p)
 		return TRUE;
 	}
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	sinajs_apply_data(smxc);
+	calc_realtime_info(smxc);
+	calc_pr_info(smxc);
 
-		sdp = stock->pull_data;
-		if(!sdp)
+	for(stock = smxc->stock; stock; stock = stock->next) {
+		if(!stock->pull_data)
 			continue;
 
+		dat = STK_GET_STKDAT(stock->pull_data);
 		/* set price */
-		sprintf(buffer, "%.2f", sdp->price);
+		sprintf(buffer, "%.2f", dat->price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
 
 		/* set price raise */
-		float raise = (sdp->price - sdp->pre_close) / sdp->pre_close * 100;
-		sprintf(buffer, "%.2f", raise);
+		sprintf(buffer, "%.2f", stock->chg_rate * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 
 		/* set min price relative rasie */
-		float last_minprice = atof(stock->last_minprice);
 		float stop_profit = atof(stock->stop_profit);
 		float stop_loss = atof(stock->stop_loss);
-		float min_raise = (sdp->price - last_minprice) / last_minprice;
+		float min_raise = stock->chg_rate_min;
 		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
 
@@ -222,24 +224,15 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_trigger, GTK_STATE_NORMAL, &color);
 
-		if(sdp->price > sdp->pre_close)
+		if(dat->price > dat->pre_close)
 			gdk_color_parse(COLOR_RISE, &color);
-		else if(sdp->price < sdp->pre_close)
+		else if(dat->price < dat->pre_close)
 			gdk_color_parse(COLOR_DROP, &color);
 		else
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
-
-		if(count == 0) {
-			pr_info("\n");
-			pr_info("%8s %8s %12s\n", "code", "raise", "lm_raise");
-		}
-		pr_info("%8s %8.3f %12.3f\n", stock->code, raise, min_raise);
-
-		count = count > 10 ?  0 : count + 1;
 	}
-	pr_info("- - - - - - - - - - - - -\n");
 
 	return TRUE;
 }

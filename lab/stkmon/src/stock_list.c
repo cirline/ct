@@ -2,7 +2,7 @@
 
 #include <ccutils/log.h>
 
-#include "stkmon.h"
+#include "stkmon/stkmon.h"
 
 int save_xmlconfig(struct sm_xmlcfg *);
 

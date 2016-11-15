@@ -5,8 +5,8 @@
 #include <ccutils/log.h>
 #include <ccutils/net.h>
 
-#include "stkmon.h"
-#include "sinajs.h"
+#include "stkmon/stkmon.h"
+#include "stkmon/sinajs.h"
 
 #define sinajs_decode_debug(format, ...)//	pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
 int sinajs_decode(char *buffer, struct sinajs *sj)
@@ -161,7 +161,8 @@ int sinajs_pull_data(struct sm_stock *ss)
 		do {
 			if(rc < 0) {
 				pr_warn("decode failed\n");
-				break;
+				return -1;
+				//break;
 			}
 
 			for(stock = ss; stock; stock = stock->next) {
@@ -190,3 +191,21 @@ int sinajs_pull_data(struct sm_stock *ss)
 
 	return 0;
 }
+
+int sinajs_apply_data(struct stk_xmlcfg *sxc)
+{
+	struct stk_stock *stock;
+	struct sinajs *js;
+
+	for(stock = sxc->stock; stock; stock = stock->next) {
+		if(!stock->pull_data)
+			continue;
+
+		js = stock->pull_data;
+		js->common.price = js->price;
+		js->common.pre_close = js->pre_close;
+	}
+
+	return 0;
+}
+

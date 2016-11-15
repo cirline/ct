@@ -1,3 +1,4 @@
+#define DEBUG
 #define pr_fmt(fmt)	"parser  ] " fmt
 #include <stdio.h>
 #include <errno.h>
@@ -42,6 +43,7 @@ xmlXPathObjectPtr get_xpath_object(xmlDocPtr docp, unsigned char *path)
 
 int parse_node(xmlNodePtr node, int (*func)(xmlNodePtr, void *), void *data)
 {
+	pr_debug("%s\n", __func__);
 	while(node) {
 		func(node, data);
 		node = node->next;
@@ -62,13 +64,53 @@ int parse_xojbect(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *), voi
 	return i;
 }
 
+void load_alert_lv(xmlNodePtr node, char *pname, struct stk_float *data)
+{
+	char *prop;
+
+	prop = xmlGetProp(node, pname);
+	if(prop) {
+		strcpy(data->c, prop);
+		data->f = atof(prop);
+		xmlFree(prop);
+	} else {
+		*data->c = 0;
+		data->f = 0;
+	}
+}
+
+int load_alert(xmlNodePtr node, void *data)
+{
+	struct sm_xmlcfg	*p = data;
+	struct stk_alert_level	*sal;
+	char *prop;
+
+	pr_debug("%s - name: %s\n", __func__, node->name);
+	if(strcmp(node->name, "short_term") == 0) {
+		sal = &p->alert.short_term;
+	} else if(strcmp(node->name, "medium_term") == 0){
+		sal = &p->alert.medium_term;
+	} else if(strcmp(node->name, "long_term") == 0) {
+		sal = &p->alert.long_term;
+	} else {
+		return 0;
+	}
+	load_alert_lv(node, "lv1", &sal->lv1);
+	load_alert_lv(node, "lv2", &sal->lv2);
+	load_alert_lv(node, "lv3", &sal->lv3);
+
+	return 0;
+}
+
 int load_configure(xmlNodePtr node, void *data)
 {
 	struct sm_xmlcfg *p = data;
 
-	pr_debug("-- %s: %s\n", node->name, xmlNodeGetContent(node));
+	pr_debug("%s - %s: %s\n", __func__, node->name, xmlNodeGetContent(node));
 	if(strcmp(node->name, "interval") == 0) {
 		strcpy(p->interval, xmlNodeGetContent(node));
+	} else if(strcmp(node->name, "alert") == 0) {
+		parse_node(node->children, load_alert, p);
 	}
 
 	return 0;
@@ -86,6 +128,8 @@ int do_parse_stock(xmlNodePtr node, void *data)
 		strcpy(p->stkex, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "last_minprice") == 0) {
 		strcpy(p->last_minprice, xmlNodeGetContent(node));
+		strcpy(p->cfg.min_price.c, xmlNodeGetContent(node));
+		p->cfg.min_price.f = atof(p->cfg.min_price.c);
 	} else if(strcmp(node->name, "stop_profit") == 0) {
 		strcpy(p->stop_profit, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "stop_loss") == 0) {
@@ -135,8 +179,20 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 
 void print_xmlcfg(struct sm_xmlcfg *smxc)
 {
+	struct stk_alert_level *sal;
+
 	printf("configure:\n");
 	printf(" %12s: %s\n", "interval", smxc->interval);
+
+	sal = &smxc->alert.short_term;
+	pr_info("short alert:\n");
+	pr_info("%8.2f, %8.2f, %8.2f\n", sal->lv1.f, sal->lv2.f, sal->lv3.f);
+	sal = &smxc->alert.medium_term;
+	pr_info("medium alert:\n");
+	pr_info("%8.2f, %8.2f, %8.2f\n", sal->lv1.f, sal->lv2.f, sal->lv3.f);
+	sal = &smxc->alert.long_term;
+	pr_info("long alert:\n");
+	pr_info("%8.2f, %8.2f, %8.2f\n", sal->lv1.f, sal->lv2.f, sal->lv3.f);
 
 	struct sm_stock *p = smxc->stock;
 	int i = 0;
