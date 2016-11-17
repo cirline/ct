@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<root>
+	<stock enable="true" visible="true" exchange="sz" code="000001"
+		avg_price="1" aim_price="2" min_price="3" stop_profit="4" stop_loss="5" />
+</root>

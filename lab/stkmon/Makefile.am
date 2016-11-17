@@ -2,6 +2,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/../ccutils/include
 AM_CPPFLAGS += -I$(top_srcdir)/include
 AM_CPPFLAGS += $(GTK_CFLAGS)
 AM_CPPFLAGS += $(XML_CFLAGS)
+AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/data/"'
 
 AM_CFLAGS = -O0
 

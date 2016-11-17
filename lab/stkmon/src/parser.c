@@ -1,6 +1,7 @@
-#define DEBUG
+//#define DEBUG
 #define pr_fmt(fmt)	"parser  ] " fmt
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 
@@ -9,6 +10,7 @@
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
 #include <ccutils/log.h>
+#include <ccutils/xml.h>
 
 #include "stkmon/stkmon.h"
 
@@ -62,6 +64,16 @@ int parse_xojbect(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *), voi
 	}
 
 	return i;
+}
+
+int parse_xobjects(xmlXPathObjectPtr object, int (*f)(xmlNodePtr, void *), void *param)
+{
+	int i;
+
+	for(i < 0; i < object->nodesetval->nodeNr; i++) {
+		xmlNodePtr node = object->nodesetval->nodeTab[i];
+		parse_node(node, f, param);
+	}
 }
 
 void load_alert_lv(xmlNodePtr node, char *pname, struct stk_float *data)
@@ -177,6 +189,51 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 	return 0;
 }
 
+int load_xmlstock(xmlNodePtr node, void *data)
+{
+	struct stk_xmlcfg *p = data;
+	struct stk_stock *stock;
+	char	*prop;
+
+	if(strcmp(node->name, "stock") != 0)
+		return;
+
+	stock = malloc(sizeof(*stock));
+	if(!stock) {
+		pr_err("%s malloc failed %s\n", __func__, strerror(errno));
+		return -1;
+	}
+	prop = cxml_get_prop_string(node, "code", NULL, stock->code);
+	if(!prop)
+		goto out;
+	prop = cxml_get_prop_string(node, "exchange", NULL, stock->exchange);
+	if(!prop)
+		goto out;
+
+	stock->visible = cxml_get_prop_bool(node, "visible", 0);
+	cxml_get_prop_string(node, "avg_price", "0", stock->cfg.avg_price.c);
+	stock->cfg.avg_price.f = atof(stock->cfg.avg_price.c);
+	cxml_get_prop_string(node, "min_price", "0", stock->cfg.min_price.c);
+	stock->cfg.min_price.f = atof(stock->cfg.min_price.c);
+	cxml_get_prop_string(node, "aim_price", "0", stock->cfg.aim_price.c);
+	stock->cfg.aim_price.f = atof(stock->cfg.aim_price.c);
+
+	cxml_get_prop_string(node, "stop_profit", "0", stock->cfg.stop_profit.c);
+	stock->cfg.stop_profit.f = atof(stock->cfg.stop_profit.c);
+	cxml_get_prop_string(node, "stop_loss", "0", stock->cfg.stop_loss.c);
+	stock->cfg.stop_loss.f = atof(stock->cfg.stop_loss.c);
+
+	stock->pull_data = NULL;
+	stock->next = p->stock_list;
+	p->stock_list = stock;
+	p->stock_count++;
+
+	return 0;
+out:
+	free(stock);
+	return -1;
+}
+
 void print_xmlcfg(struct sm_xmlcfg *smxc)
 {
 	struct stk_alert_level *sal;
@@ -196,12 +253,21 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 
 	struct sm_stock *p = smxc->stock;
 	int i = 0;
-
 	pr_info("stock count: %d\n", smxc->stocks_count);
 	pr_info("%4s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg");
 	while(p) {
 		pr_info("%4d %8d %8s %8s %8.2f\n", i++, p->visible, p->code, p->stkex,
 				p->avg_price.f);
+		p = p->next;
+	}
+
+	p = smxc->stock_list;
+	i = 0;
+	pr_info("stock_count: %d\n", smxc->stock_count);
+	pr_info("%4s %8s %8s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg", "p_min", "p_aim");
+	while(p) {
+		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n", i++, p->visible, p->code, p->exchange,
+				p->cfg.avg_price.f, p->cfg.min_price.f, p->cfg.aim_price.f);
 		p = p->next;
 	}
 }
@@ -244,6 +310,7 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 {
 	xmlDocPtr docp;
 	xmlXPathObjectPtr object;
+	unsigned char *xpath_stock = "/root/stock";
 
 	docp = xmlParseFile(DATAFILE_PATH);
 	if(!docp) {
@@ -269,6 +336,22 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 	}
 
 	xmlFreeDoc(docp);
+
+	pr_info("----- 1\n");
+	docp = xmlParseFile(top_datadir "/stocks.xml");
+	if(!docp) {
+		pr_err("open " top_datadir "/stocks.xml failed: %s\n", strerror(errno));
+		return -1;
+	}
+	smxc->stock_list = NULL;
+	smxc->stock_count = 0;
+	object = get_xpath_object(docp, xpath_stock);
+	if(object) {
+		parse_xobjects(object, load_xmlstock, smxc);
+		xmlXPathFreeObject(object);
+	}
+	xmlFreeDoc(docp);
+	pr_info("----- 2\n");
 
 	print_xmlcfg(smxc);
 

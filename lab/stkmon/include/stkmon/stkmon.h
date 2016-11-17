@@ -25,6 +25,12 @@
 #define STK_EX_SZ	8
 #define STK_CODE_SZ	8
 
+#ifdef DATADIR
+#define top_datadir	DATADIR"/"
+#else
+#define top_datadir	"./"
+#endif
+
 struct sm_price {
 	char	c	[SM_PRICE_SZ];
 	float	f;
@@ -87,12 +93,17 @@ struct sm_stkui {
 
 struct stk_stkcfg {
 	struct stk_float	min_price;
+	struct stk_float	aim_price;
+	struct stk_float	avg_price;
+	struct stk_float	stop_profit;
+	struct stk_float	stop_loss;
 };
 
 struct sm_stock {
 	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];
 	char stkex[SM_STKEX_SZ];
+	char	exchange[STK_EX_SZ];
 	char		trigger[SM_PRICE_SZ];
 	char		last_minprice[SM_PRICE_SZ];
 	char		stop_profit	[SM_PRICE_SZ];
@@ -129,6 +140,9 @@ struct sm_xmlcfg {
 
 	struct sm_stock	*stock;
 	int		stocks_count;
+
+	struct stk_stock	*stock_list;
+	int			stock_count;
 };
 #define stk_xmlcfg	sm_xmlcfg
 
