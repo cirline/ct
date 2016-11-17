@@ -133,9 +133,6 @@ struct sm_xmlcfg {
 
 	struct sm_stock	*stock;
 	int		stocks_count;
-
-	struct stk_stock	*stock_list;
-	int			stock_count;
 };
 #define stk_xmlcfg	sm_xmlcfg
 

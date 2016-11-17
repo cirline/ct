@@ -220,9 +220,9 @@ int load_xmlstock(xmlNodePtr node, void *data)
 	stock->cfg.stop_loss.f = atof(stock->cfg.stop_loss.c);
 
 	stock->pull_data = NULL;
-	stock->next = p->stock_list;
-	p->stock_list = stock;
-	p->stock_count++;
+	stock->next = p->stock;
+	p->stock = stock;
+	p->stocks_count++;
 
 	return 0;
 out:
@@ -328,8 +328,6 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 		pr_err("open " top_datadir "/stocks.xml failed: %s\n", strerror(errno));
 		return -1;
 	}
-	smxc->stock_list = NULL;
-	smxc->stock_count = 0;
 	object = get_xpath_object(docp, xpath_stock);
 	if(object) {
 		parse_xobjects(object, load_xmlstock, smxc);
