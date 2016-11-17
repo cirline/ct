@@ -139,7 +139,7 @@ int sinajs_pull_data(struct sm_stock *ss)
 	for(stock = ss; stock; stock = stock->next) {
 //		pr_info("stock: %s%s\n", stock->stkex, stock->code);
 		if(stock->visible) {
-			strcat(slist, stock->stkex);
+			strcat(slist, stock->exchange);
 			strcat(slist, stock->code);
 			strcat(slist, ",");
 		}
@@ -168,7 +168,7 @@ int sinajs_pull_data(struct sm_stock *ss)
 			for(stock = ss; stock; stock = stock->next) {
 				char local[20];
 
-				sprintf(local, "%s%s", stock->stkex, stock->code);
+				sprintf(local, "%s%s", stock->exchange, stock->code);
 				if(strcmp(local, sdata.code) == 0) {
 					break;
 				}

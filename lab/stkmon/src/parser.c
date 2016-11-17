@@ -137,15 +137,16 @@ int do_parse_stock(xmlNodePtr node, void *data)
 	if(strcmp(node->name, "code") == 0) {
 		strcpy(p->code, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "stkex") == 0) {
-		strcpy(p->stkex, xmlNodeGetContent(node));
+		strcpy(p->exchange, xmlNodeGetContent(node));
 	} else if(strcmp(node->name, "last_minprice") == 0) {
-		strcpy(p->last_minprice, xmlNodeGetContent(node));
 		strcpy(p->cfg.min_price.c, xmlNodeGetContent(node));
 		p->cfg.min_price.f = atof(p->cfg.min_price.c);
 	} else if(strcmp(node->name, "stop_profit") == 0) {
-		strcpy(p->stop_profit, xmlNodeGetContent(node));
+		strcpy(p->cfg.stop_profit.c, xmlNodeGetContent(node));
+		p->cfg.stop_profit.f = atof(p->cfg.stop_profit.c);
 	} else if(strcmp(node->name, "stop_loss") == 0) {
-		strcpy(p->stop_loss, xmlNodeGetContent(node));
+		strcpy(p->cfg.stop_loss.c, xmlNodeGetContent(node));
+		p->cfg.stop_loss.f = atof(p->cfg.stop_loss.c);
 	}
 
 	return 0;
@@ -173,13 +174,8 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		} else
 			ssp->visible = 0;
 
-		prop = xmlGetProp(node, "avg_price");
-		if(prop) {
-			strcpy(ssp->avg_price.c, prop);
-			ssp->avg_price.f = atof(prop);
-			xmlFree(prop);
-		} else
-			ssp->avg_price.f = 0;
+		cxml_get_prop_string(node, "avg_price", "0", ssp->cfg.avg_price.c);
+		ssp->cfg.avg_price.f = atof(ssp->cfg.avg_price.c);
 
 		ssp->pull_data = NULL;
 		ssp->next = p->stock;
@@ -253,17 +249,7 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 
 	struct sm_stock *p = smxc->stock;
 	int i = 0;
-	pr_info("stock count: %d\n", smxc->stocks_count);
-	pr_info("%4s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg");
-	while(p) {
-		pr_info("%4d %8d %8s %8s %8.2f\n", i++, p->visible, p->code, p->stkex,
-				p->avg_price.f);
-		p = p->next;
-	}
-
-	p = smxc->stock_list;
-	i = 0;
-	pr_info("stock_count: %d\n", smxc->stock_count);
+	pr_info("stock_count: %d\n", smxc->stocks_count);
 	pr_info("%4s %8s %8s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg", "p_min", "p_aim");
 	while(p) {
 		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n", i++, p->visible, p->code, p->exchange,
@@ -337,7 +323,6 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 
 	xmlFreeDoc(docp);
 
-	pr_info("----- 1\n");
 	docp = xmlParseFile(top_datadir "/stocks.xml");
 	if(!docp) {
 		pr_err("open " top_datadir "/stocks.xml failed: %s\n", strerror(errno));
@@ -351,7 +336,6 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 		xmlXPathFreeObject(object);
 	}
 	xmlFreeDoc(docp);
-	pr_info("----- 2\n");
 
 	print_xmlcfg(smxc);
 

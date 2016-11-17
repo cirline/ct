@@ -210,8 +210,8 @@ gboolean hdlr_1s(gpointer *p)
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
 
 		/* set min price relative rasie */
-		float stop_profit = atof(stock->stop_profit);
-		float stop_loss = atof(stock->stop_loss);
+		float stop_profit = stock->cfg.stop_profit.f;
+		float stop_loss = stock->cfg.stop_loss.f;
 		float min_raise = stock->chg_rate_min;
 		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);

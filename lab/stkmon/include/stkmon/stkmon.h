@@ -102,16 +102,9 @@ struct stk_stkcfg {
 struct sm_stock {
 	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];
-	char stkex[SM_STKEX_SZ];
 	char	exchange[STK_EX_SZ];
-	char		trigger[SM_PRICE_SZ];
-	char		last_minprice[SM_PRICE_SZ];
-	char		stop_profit	[SM_PRICE_SZ];
-	char		stop_loss	[SM_PRICE_SZ];
 
 	struct stk_stkcfg	cfg;
-
-	struct sm_price	avg_price;
 
 	struct sm_stkui ui;
 	void		*pull_data;	/* data pull from web */

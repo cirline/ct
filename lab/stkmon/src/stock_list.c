@@ -55,7 +55,7 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
-		widget = gtk_label_new(stock->stkex);
+		widget = gtk_label_new(stock->exchange);
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
@@ -63,7 +63,7 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
-		widget = gtk_label_new(stock->avg_price.c);
+		widget = gtk_label_new(stock->cfg.avg_price.c);
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 	}
 
