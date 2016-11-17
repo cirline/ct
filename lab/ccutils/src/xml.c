@@ -1,3 +1,4 @@
+#include <string.h>
 #include <libxml/xpath.h>
 
 #include "ccutils/log.h"
@@ -42,5 +43,48 @@ int parse_xpath_object(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *)
 	}
 
 	return i;
+}
+
+int cxml_get_prop_bool(xmlNodePtr node, const char *name, int default_value)
+{
+	char *prop;
+
+	prop = xmlGetProp(node, name);
+	if(prop) {
+		default_value = (strcmp(prop, "true") == 0);
+		xmlFree(prop);
+	}
+
+	return default_value;
+}
+
+float cxml_get_prop_float(xmlNodePtr node, const char *name, float default_value)
+{
+	char *prop;
+
+	prop = xmlGetProp(node, name);
+	if(prop) {
+		default_value = atof(prop);
+		xmlFree(prop);
+	}
+
+	return default_value;
+}
+
+char *cxml_get_prop_string(xmlNodePtr node, const char *name, char *default_value, char *dest)
+{
+	char *prop;
+
+	prop = xmlGetProp(node, name);
+	if(prop) {
+		strcpy(dest, prop);
+		xmlFree(prop);
+	} else if(default_value) {
+		strcpy(dest, default_value);
+	} else {
+		*dest = 0;
+	}
+
+	return dest;
 }
 
