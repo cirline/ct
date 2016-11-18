@@ -186,7 +186,7 @@ gboolean hdlr_1s(gpointer *p)
 	static int count = 0;
 	struct stk_stkdat *dat;
 
-	rc = sinajs_pull_data(smxc->stock);
+	rc = sinajs_pull_data(smxc);
 	if(rc < 0) {
 		pr_err("sinajs_pull_data failed\n");
 		return TRUE;
@@ -196,7 +196,9 @@ gboolean hdlr_1s(gpointer *p)
 	calc_realtime_info(smxc);
 	calc_pr_info(smxc);
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	//for(stock = smxc->stock; stock; stock = stock->next) {
+	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
+			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)
 			continue;
 

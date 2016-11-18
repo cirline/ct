@@ -2,6 +2,7 @@
 #include <string.h>
 #include <errno.h>
 
+#include <sys/queue.h>
 #include <ccutils/log.h>
 #include <ccutils/net.h>
 
@@ -128,7 +129,7 @@ void sinajs_print(struct sinajs *sj)
 }
 
 
-int sinajs_pull_data(struct sm_stock *ss)
+int sinajs_pull_data(struct stk_xmlcfg *sxc)
 {
 	struct sm_stock *stock;
 	char slist[1024] = "hq.sinajs.cn/list=";
@@ -136,7 +137,9 @@ int sinajs_pull_data(struct sm_stock *ss)
 	char *sptr1, *token;
 	int rc;
 
-	for(stock = ss; stock; stock = stock->next) {
+	//for(stock = ss; stock; stock = stock->next) {
+	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
+			stock = stock->list.cqe_next) {
 //		pr_info("stock: %s%s\n", stock->stkex, stock->code);
 		if(stock->visible) {
 			strcat(slist, stock->exchange);
@@ -145,7 +148,7 @@ int sinajs_pull_data(struct sm_stock *ss)
 		}
 	}
 
-//	pr_info("slist url = %s\n", slist);
+	pr_info("slist url = %s\n", slist);
 	rc = http_get(slist, buffer);
 	if(rc < 0) {
 		pr_err("http get failed.\n");
@@ -165,7 +168,8 @@ int sinajs_pull_data(struct sm_stock *ss)
 				//break;
 			}
 
-			for(stock = ss; stock; stock = stock->next) {
+			for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
+					stock = stock->list.cqe_next) {
 				char local[20];
 
 				sprintf(local, "%s%s", stock->exchange, stock->code);
@@ -197,7 +201,8 @@ int sinajs_apply_data(struct stk_xmlcfg *sxc)
 	struct stk_stock *stock;
 	struct sinajs *js;
 
-	for(stock = sxc->stock; stock; stock = stock->next) {
+	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
+			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)
 			continue;
 

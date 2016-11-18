@@ -4,6 +4,7 @@
 #ifndef __STKMON_H__
 #define __STKMON_H__
 
+#include <sys/queue.h>
 #include <gtk/gtk.h>
 
 #define COLOR_RISE	"red"
@@ -99,7 +100,7 @@ struct stk_stkcfg {
 	struct stk_float	stop_loss;
 };
 
-struct sm_stock {
+struct stk_stock {
 	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];
 	char	exchange[STK_EX_SZ];
@@ -111,9 +112,9 @@ struct sm_stock {
 	float	chg_rate;
 	float	chg_rate_min;
 
-	struct sm_stock *next;
+	CIRCLEQ_ENTRY(stk_stock)	list;
 };
-#define stk_stock	sm_stock
+#define sm_stock	stk_stock
 
 struct stk_alert_level {
 	struct stk_float	lv1;
@@ -127,13 +128,14 @@ struct stk_alert {
 	struct stk_alert_level	long_term;
 };
 
+
+#define stk_xmlcfg	sm_xmlcfg
 struct sm_xmlcfg {
 	char		interval[16];
 	struct stk_alert	alert;
 
-	struct sm_stock	*stock;
+	CIRCLEQ_HEAD(, stk_stock)	stock_list;
 	int		stocks_count;
 };
-#define stk_xmlcfg	sm_xmlcfg
 
 #endif

@@ -9,7 +9,9 @@ int calc_pr_info(struct stk_xmlcfg *sxc)
 	struct stk_stkdat *dat;
 
 	pr_info("%8s %8s %12s\n", "code", "chg", "chg_min");
-	for(stock = sxc->stock; stock; stock = stock->next) {
+	//for(stock = sxc->stock; stock; stock = stock->next) {
+	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
+			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)
 			continue;
 
@@ -26,7 +28,9 @@ int calc_realtime_info(struct stk_xmlcfg *sxc)
 	struct stk_stock *stock;
 	struct stk_stkdat *dat;
 
-	for(stock = sxc->stock; stock; stock = stock->next) {
+	//for(stock = sxc->stock; stock; stock = stock->next) {
+	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
+			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)
 			continue;
 

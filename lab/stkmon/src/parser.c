@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <sys/queue.h>
 #include <config.h>
 
 #include <libxml/parser.h>
@@ -70,9 +71,10 @@ int parse_xobjects(xmlXPathObjectPtr object, int (*f)(xmlNodePtr, void *), void 
 {
 	int i;
 
+	pr_info("object number = %d\n", object->nodesetval->nodeNr);
 	for(i < 0; i < object->nodesetval->nodeNr; i++) {
 		xmlNodePtr node = object->nodesetval->nodeTab[i];
-		parse_node(node, f, param);
+		f(node, param);
 	}
 }
 
@@ -178,8 +180,7 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 		ssp->cfg.avg_price.f = atof(ssp->cfg.avg_price.c);
 
 		ssp->pull_data = NULL;
-		ssp->next = p->stock;
-		p->stock = ssp;
+		CIRCLEQ_INSERT_TAIL(&p->stock_list, ssp, list);
 		p->stocks_count++;
 	}
 	return 0;
@@ -192,7 +193,7 @@ int load_xmlstock(xmlNodePtr node, void *data)
 	char	*prop;
 
 	if(strcmp(node->name, "stock") != 0)
-		return;
+		return -1;
 
 	stock = malloc(sizeof(*stock));
 	if(!stock) {
@@ -220,8 +221,7 @@ int load_xmlstock(xmlNodePtr node, void *data)
 	stock->cfg.stop_loss.f = atof(stock->cfg.stop_loss.c);
 
 	stock->pull_data = NULL;
-	stock->next = p->stock;
-	p->stock = stock;
+	CIRCLEQ_INSERT_TAIL(&p->stock_list, stock, list);
 	p->stocks_count++;
 
 	return 0;
@@ -233,6 +233,7 @@ out:
 void print_xmlcfg(struct sm_xmlcfg *smxc)
 {
 	struct stk_alert_level *sal;
+	struct stk_stock *p;
 
 	printf("configure:\n");
 	printf(" %12s: %s\n", "interval", smxc->interval);
@@ -247,14 +248,13 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 	pr_info("long alert:\n");
 	pr_info("%8.2f, %8.2f, %8.2f\n", sal->lv1.f, sal->lv2.f, sal->lv3.f);
 
-	struct sm_stock *p = smxc->stock;
 	int i = 0;
 	pr_info("stock_count: %d\n", smxc->stocks_count);
 	pr_info("%4s %8s %8s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg", "p_min", "p_aim");
-	while(p) {
+	for(p = smxc->stock_list.cqh_first; p != (void *)&smxc->stock_list;
+			p = p->list.cqe_next) {
 		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n", i++, p->visible, p->code, p->exchange,
 				p->cfg.avg_price.f, p->cfg.min_price.f, p->cfg.aim_price.f);
-		p = p->next;
 	}
 }
 
@@ -312,8 +312,8 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 		xmlXPathFreeObject(object);
 	}
 
-	smxc->stock = NULL;
 	smxc->stocks_count = 0;
+	CIRCLEQ_INIT(&smxc->stock_list);
 	unsigned char *stocks_path = "/root/stocks";
 	object = get_xpath_object(docp, stocks_path);
 	if(object) {

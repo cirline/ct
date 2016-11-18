@@ -34,7 +34,9 @@ GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
 	//gtk_table_set_row_spacings(GTK_TABLE(table), 5);
 	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	//for(stock = smxc->stock; stock; stock = stock->next) {
+	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
+			stock = stock->list.cqe_next) {
 		GtkWidget *align;
 		GtkWidget *label;
 

@@ -36,7 +36,7 @@ struct sinajs_index {
 	long	amount;
 };
 
-extern int sinajs_pull_data(struct sm_stock *ss);
+extern int sinajs_pull_data(struct stk_xmlcfg *sxc);
 extern void sinajs_print(struct sinajs *sj);
 extern int sinajs_decode(char *buffer, struct sinajs *sj);
 int sinajs_apply_data(struct stk_xmlcfg *sxc);

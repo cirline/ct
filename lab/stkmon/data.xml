@@ -10,13 +10,6 @@
 	</configure>
 
 	<stocks>
-		<stock visible="true" avg_price="4.32">
-			<code>601398</code>
-			<stkex>sh</stkex>
-			<last_minprice>4.01</last_minprice>
-			<stop_profit>1.15</stop_profit>
-			<stop_loss>0.9</stop_loss>
-		</stock>
 		<stock visible="true" avg_price="7.37">
 			<code>601668</code>
 			<stkex>sh</stkex>

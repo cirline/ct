@@ -45,7 +45,8 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), label, i, i + 1, tbl_cur_line, tbl_cur_line + 1);
 	}
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
+			stock = stock->list.cqe_next) {
 		int col;
 		GtkWidget *widget;
 
