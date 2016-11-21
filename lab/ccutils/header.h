@@ -2,7 +2,7 @@
 #define __UTILS_HEADER_H__
 
 #include "ccutils/log.h"
-#include "ccutils/ustring.h"
+#include "ccutils/string.h"
 #include "ccutils/net.h"
 #include "ccutils/ufile.h"
 #include "ccutils/utable.h"
