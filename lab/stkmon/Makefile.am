@@ -14,7 +14,7 @@ stkmon_out_SOURCES = src/main.c \
 		     src/stock_list.c \
 		     src/sinajs.c
 
-stkmon_out_LDADD = -lccutils -lpthread -ldl
+stkmon_out_LDADD = -lccutils -lpthread -ldl -liconv
 stkmon_out_LDADD += $(GTK_LIBS)
 stkmon_out_LDADD += $(XML_LIBS)
 

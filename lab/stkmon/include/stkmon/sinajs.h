@@ -11,7 +11,6 @@
 struct sinajs {
 	struct stk_stkdat	common;
 	char code[SJS_CODE_SIZE];
-	char name[SJS_NAME_SIZE];
 	float open, pre_close;
 	float price, high, low;
 	float bid, ask;

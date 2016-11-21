@@ -9,6 +9,10 @@
 #include "stkmon/stkmon.h"
 #include "stkmon/sinajs.h"
 
+/*
+ * var hq_str_sh601668="prop1,prop2,...";
+ */
+
 #define sinajs_decode_debug(format, ...)//	pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
 int sinajs_decode(char *buffer, struct sinajs *sj)
 {
@@ -17,15 +21,19 @@ int sinajs_decode(char *buffer, struct sinajs *sj)
 	char *p;
 	int i;
 	int rc;
+	int inb_len;
+	int outb_len;
 
 	if(!buffer)
 		return -1;
 	sinajs_decode_debug("buffer = %s\n", buffer);
 
-	token = strtok_r(buffer, "\"", &sptr1);
+	memset(sj, 0, sizeof(*sj));
+	/* decode variable */
+	token = strtok_r(buffer, "\"", &sptr1);		/* split variable and value */
 	for(p = token; *p && *p != '='; p++)
 		;
-	*p = 0;
+	*p = 0;						/* variable '=' --> 0 */
 	sinajs_decode_debug("1, token = %s\n", token);
 	rc = sscanf(token, "var hq_str_%s", sj->code);
 	if(rc <= 0) {
@@ -34,11 +42,15 @@ int sinajs_decode(char *buffer, struct sinajs *sj)
 	}
 	sinajs_decode_debug("sj->code = %s\n", sj->code);
 
-	token = strtok_r(NULL, "\"", &sptr1);
+	/* decode value */
+	token = strtok_r(NULL, "\"", &sptr1);		/* split end '"' and newline symbol */
 
+	/* prop is split by ',' */
 	token = strtok_r(token, ",", &sptr2);
 	sinajs_decode_debug("3, token = %s\n", token);
-	strcpy(sj->name, token);
+	inb_len = strlen(token);
+	outb_len = STK_NAME_SZ;
+	convert_charset("UTF-8", "GB18030", sj->common.name, outb_len, token, inb_len);
 	token = strtok_r(NULL, ",", &sptr2);
 	sinajs_decode_debug("4, token = %s\n", token);
 	sj->open = atof(token);
@@ -137,7 +149,6 @@ int sinajs_pull_data(struct stk_xmlcfg *sxc)
 	char *sptr1, *token;
 	int rc;
 
-	//for(stock = ss; stock; stock = stock->next) {
 	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
 			stock = stock->list.cqe_next) {
 //		pr_info("stock: %s%s\n", stock->stkex, stock->code);

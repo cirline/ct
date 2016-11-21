@@ -25,17 +25,13 @@
 #define STK_TIME_SZ	16
 #define STK_EX_SZ	8
 #define STK_CODE_SZ	8
+#define STK_NAME_SZ	32
 
 #ifdef DATADIR
 #define top_datadir	DATADIR"/"
 #else
 #define top_datadir	"./"
 #endif
-
-struct sm_price {
-	char	c	[SM_PRICE_SZ];
-	float	f;
-};
 
 struct stk_float {
 	char	c	[STK_FLOAT_SZ];
@@ -50,6 +46,7 @@ struct stk_long {
 struct stk_stkdat {
 	char	exchange[STK_EX_SZ];
 	char	code[STK_CODE_SZ];
+	char	name[STK_NAME_SZ];
 	float	open;
 	float	pre_close;
 	float	price;
@@ -108,7 +105,7 @@ struct stk_stock {
 	struct stk_stkcfg	cfg;
 
 	struct sm_stkui ui;
-	void		*pull_data;	/* data pull from web */
+	void		*pull_data;	/* data pull from web, link to stk_stkdat_container */
 	float	chg_rate;
 	float	chg_rate_min;
 

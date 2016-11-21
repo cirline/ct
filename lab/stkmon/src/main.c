@@ -196,20 +196,22 @@ gboolean hdlr_1s(gpointer *p)
 	calc_realtime_info(smxc);
 	calc_pr_info(smxc);
 
-	//for(stock = smxc->stock; stock; stock = stock->next) {
 	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
 			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)
 			continue;
 
 		dat = STK_GET_STKDAT(stock->pull_data);
+
 		/* set price */
 		sprintf(buffer, "%.2f", dat->price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
+		gtk_widget_set_tooltip_text(stock->ui.label_price, dat->name);
 
 		/* set price raise */
 		sprintf(buffer, "%.2f", stock->chg_rate * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
+		gtk_widget_set_tooltip_text(stock->ui.label_raise, dat->name);
 
 		/* set min price relative rasie */
 		float stop_profit = stock->cfg.stop_profit.f;
