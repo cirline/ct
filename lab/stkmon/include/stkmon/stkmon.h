@@ -87,6 +87,7 @@ struct sm_stkui {
 	GtkWidget	*label_trigger;
 	GtkWidget	*toggle_visible;
 	GtkWidget	*label_avg_price;
+	GtkWidget	*label_name;
 };
 
 struct stk_stkcfg {
@@ -125,14 +126,28 @@ struct stk_alert {
 	struct stk_alert_level	long_term;
 };
 
+struct stk_mainui {
+	int	xpos;
+	int	ypos;
+	int	width;
+	int	height;
 
-#define stk_xmlcfg	sm_xmlcfg
-struct sm_xmlcfg {
+	GtkWidget	*menu;
+	struct {
+		GtkWidget	*fixed;
+		GtkWidget	*dynamic;
+	} monitor;
+};
+
+struct stk_xmlcfg {
 	char		interval[16];
 	struct stk_alert	alert;
+
+	struct stk_mainui	ui;
 
 	CIRCLEQ_HEAD(, stk_stock)	stock_list;
 	int		stocks_count;
 };
+#define sm_xmlcfg	stk_xmlcfg
 
 #endif
