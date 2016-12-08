@@ -7,7 +7,7 @@ libccutils_la_SOURCES = src/log.c \
 		      src/ufile.c \
 		      src/utable.c
 
-libccutils_la_LIBADD = -ldl
+libccutils_la_LIBADD = -ldl -liconv
 libccutils_la_LIBADD += $(XML_LIBS)
 libccutils_la_LIBADD	+= $(LIBCURL)
 

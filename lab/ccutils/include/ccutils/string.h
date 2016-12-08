@@ -1,6 +1,8 @@
 #ifndef __STRING_UTF8_H__
 #define __STRING_UTF8_H__
 
+#define CS_GREEN(string)	"\033[32m" string "\033[0m"
+
 enum utf8_char {
 	UTF8_C1,
 	UTF8_C2,
