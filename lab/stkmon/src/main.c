@@ -1,3 +1,4 @@
+#define DEBUG
 #define pr_fmt(fmt)	"stkmon  ] " fmt
 
 #include <string.h>
@@ -11,9 +12,10 @@
 #include <ccutils/log.h>
 
 #include "stkmon/ui.h"
-#include "sinajs.h"
+#include "stkmon/sinajs.h"
 #include "stkmon/stkmon.h"
-#include "stkxml.h"
+#include "stkmon/stkxml.h"
+#include "stkmon/calc.h"
 #include "config.h"
 
 #define WIN_OPACITY	0.6
@@ -64,16 +66,25 @@ int show_popup(GtkWidget *widget, GdkEvent *event)
 	return FALSE;
 }
 
-static int main_event(GtkWidget *widget, GdkEvent *event)
+static int main_event(GtkWidget *widget, GdkEvent *event, gpointer pointer)
 {
 	gboolean focus;
+	int xpos, ypos;
+	int width, height;
+	struct stk_xmlcfg *sxc = pointer;
 
 	switch(event->type) {
 	case GDK_ENTER_NOTIFY:
+		gtk_widget_set_visible(sxc->ui.monitor.dynamic, TRUE);
 		gtk_window_set_opacity(GTK_WINDOW(widget), 1);
+		//gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos - 100, sxc->ui.ypos);
+		//gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width + 100, sxc->ui.height);
 		break;
 	case GDK_LEAVE_NOTIFY:
+		gtk_widget_set_visible(sxc->ui.monitor.dynamic, FALSE);
 		gtk_window_set_opacity(GTK_WINDOW(widget), WIN_OPACITY);
+		gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos, sxc->ui.ypos);
+		gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width, sxc->ui.height);
 		break;
 	case GDK_FOCUS_CHANGE:
 		if(gtk_window_is_active(GTK_WINDOW(widget)))
@@ -82,7 +93,7 @@ static int main_event(GtkWidget *widget, GdkEvent *event)
 			gtk_window_set_opacity(GTK_WINDOW(widget), 1);
 		break;
 	default:
-		pr_info("unimpl event type = %d\n", event->type);
+		pr_debug("unimpl event type = %d\n", event->type);
 	}
 
 
@@ -121,6 +132,24 @@ GdkPixbuf *create_logo(const char *filename)
 	return pb;
 }
 
+/**
+ *  _____ win __________________________
+ * / ____ ebox _________________________
+ * |/ ___ mbox ________________________
+ * ||/  _ menu ________
+ * ||| /               \
+ * ||| \_______________/
+ * |||  __ monitor ____________________
+ * ||| / _ fixed ___    _ dynamic ___  \
+ * ||| |/           \  /             \ |
+ * ||| ||           |  |             | |
+ * ||| |\___________/  \_____________/ |
+ * ||| \_______________________________/
+ * |||
+ * ||`---------------------------------
+ * |`----------------------------------
+ * `-----------------------------------
+ */
 int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 {
 	int i;
@@ -150,23 +179,38 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 
 	create_popupmenu(ebox);
 
+	GtkWidget *infobox = gtk_hbox_new(FALSE, 1);
+	gtk_box_pack_start(GTK_BOX(mbox), infobox, FALSE, FALSE, 0);
+
 	GtkWidget *infopanel = ui_monitor_create_info_panel(smxc);
-	gtk_box_pack_start(GTK_BOX(mbox), infopanel, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(infobox), infopanel, FALSE, FALSE, 0);
+	smxc->ui.monitor.fixed = infopanel;
+
+	GtkWidget *monitor_dynamic = ui_monitor_create_dynamic_table(smxc);
+	gtk_box_pack_start(GTK_BOX(infobox), monitor_dynamic, FALSE, FALSE, 0);
+	smxc->ui.monitor.dynamic = monitor_dynamic;
+	/* ui end */
 
 	interval = atoi(smxc->interval);
 	if(interval <= 0)
 		interval = 5000;
 	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-	g_signal_connect(win, "event", G_CALLBACK(main_event), NULL);
+	g_signal_connect(win, "event", G_CALLBACK(main_event), smxc);
 
 	gtk_widget_show_all(win);
+	gtk_widget_set_visible(GTK_WIDGET(monitor_dynamic), FALSE);
+
 	hdlr_1s((gpointer)smxc);
 
 	gtk_window_set_opacity(GTK_WINDOW(win), WIN_OPACITY);
 	gtk_window_get_size(GTK_WINDOW(win), &width, &height);
 	pr_info("%d, %d, %d, %d\n", px, py, width, height);
-	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 30, py * 2 - height - 80);
+	smxc->ui.xpos = px * 2 - width - 50;
+	smxc->ui.ypos = py * 2 - height - 80;
+	smxc->ui.width = width;
+	smxc->ui.height = height;
+	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 50, py * 2 - height - 80);
 
 	gtk_main();
 
@@ -177,40 +221,45 @@ gboolean hdlr_1s(gpointer *p)
 {
 	char buffer[4096];
 	char *bp;
-	struct sinajs *sdp;
 	int i;
 	struct sm_xmlcfg *smxc = (struct sm_xmlcfg *)p;
 	struct sm_stock *stock;
 	int rc;
 	GdkColor color;
 	static int count = 0;
+	struct stk_stkdat *dat;
 
-	rc = sinajs_pull_data(smxc->stock);
+	rc = sinajs_pull_data(smxc);
 	if(rc < 0) {
 		pr_err("sinajs_pull_data failed\n");
 		return TRUE;
 	}
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	sinajs_apply_data(smxc);
+	calc_realtime_info(smxc);
+	calc_pr_info(smxc);
 
-		sdp = stock->pull_data;
-		if(!sdp)
+	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
+			stock = stock->list.cqe_next) {
+		if(!stock->pull_data)
 			continue;
 
+		dat = STK_GET_STKDAT(stock->pull_data);
+
 		/* set price */
-		sprintf(buffer, "%.2f", sdp->price);
+		sprintf(buffer, "%.2f", dat->price);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_price), buffer);
+		//gtk_widget_set_tooltip_text(stock->ui.label_price, dat->name);
 
 		/* set price raise */
-		float raise = (sdp->price - sdp->pre_close) / sdp->pre_close * 100;
-		sprintf(buffer, "%.2f", raise);
+		sprintf(buffer, "%.2f", stock->chg_rate * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_raise), buffer);
+		//gtk_widget_set_tooltip_text(stock->ui.label_raise, dat->name);
 
 		/* set min price relative rasie */
-		float last_minprice = atof(stock->last_minprice);
-		float stop_profit = atof(stock->stop_profit);
-		float stop_loss = atof(stock->stop_loss);
-		float min_raise = (sdp->price - last_minprice) / last_minprice;
+		float stop_profit = stock->cfg.stop_profit.f;
+		float stop_loss = stock->cfg.stop_loss.f;
+		float min_raise = stock->chg_rate_min;
 		sprintf(buffer, "%.1f", min_raise * 100);
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_trigger), buffer);
 
@@ -222,24 +271,20 @@ gboolean hdlr_1s(gpointer *p)
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_trigger, GTK_STATE_NORMAL, &color);
 
-		if(sdp->price > sdp->pre_close)
+		if(dat->price > dat->pre_close)
 			gdk_color_parse(COLOR_RISE, &color);
-		else if(sdp->price < sdp->pre_close)
+		else if(dat->price < dat->pre_close)
 			gdk_color_parse(COLOR_DROP, &color);
 		else
 			gdk_color_parse(COLOR_EQ, &color);
 		gtk_widget_modify_fg(stock->ui.label_price, GTK_STATE_NORMAL, &color);
 		gtk_widget_modify_fg(stock->ui.label_raise, GTK_STATE_NORMAL, &color);
 
-		if(count == 0) {
-			pr_info("\n");
-			pr_info("%8s %8s %12s\n", "code", "raise", "lm_raise");
-		}
-		pr_info("%8s %8.3f %12.3f\n", stock->code, raise, min_raise);
-
-		count = count > 10 ?  0 : count + 1;
+		/*
+		 * set dynamic table
+		 */
+		gtk_label_set_text(GTK_LABEL(stock->ui.label_name), dat->name);
 	}
-	pr_info("- - - - - - - - - - - - -\n");
 
 	return TRUE;
 }

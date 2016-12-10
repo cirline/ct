@@ -1,8 +1,46 @@
-#define pr_fmt(fmt)	"string_utf8 " fmt
+#define pr_fmt(fmt)	"cstring ] " fmt
 
 #include <string.h>
+#include <errno.h>
+#include <iconv.h>
+
 #include "ccutils/log.h"
-#include "ccutils/ustring.h"
+#include "ccutils/string.h"
+
+/**
+ * convert_charset
+ *
+ */
+size_t convert_charset(
+		const char *out_charset,
+		const char *in_charset,
+		char *outb,
+		size_t outb_size,
+		char *inb,
+		size_t inb_size)
+{
+	iconv_t	rc_conv;
+	size_t size;
+	size_t converted;
+
+	rc_conv = iconv_open(out_charset, in_charset);
+	if(rc_conv == (iconv_t)(-1)) {
+		pr_err("iconv_open failed %s\n", strerror(errno));
+		return 0;
+	}
+
+	converted = outb_size;
+	size = iconv(rc_conv, &inb, &inb_size, &outb, &outb_size);
+	if(size == (size_t)(-1)) {
+		pr_err("iconv faile %s\n", strerror(errno));
+		iconv_close(rc_conv);
+		return 0;
+	}
+	converted -= outb_size;
+	iconv_close(rc_conv);
+
+	return converted;
+}
 
 enum utf8_char utf8_char_check(char c)
 {

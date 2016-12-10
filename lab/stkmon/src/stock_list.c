@@ -2,7 +2,7 @@
 
 #include <ccutils/log.h>
 
-#include "stkmon.h"
+#include "stkmon/stkmon.h"
 
 int save_xmlconfig(struct sm_xmlcfg *);
 
@@ -45,7 +45,8 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), label, i, i + 1, tbl_cur_line, tbl_cur_line + 1);
 	}
 
-	for(stock = smxc->stock; stock; stock = stock->next) {
+	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
+			stock = stock->list.cqe_next) {
 		int col;
 		GtkWidget *widget;
 
@@ -55,7 +56,7 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
-		widget = gtk_label_new(stock->stkex);
+		widget = gtk_label_new(stock->exchange);
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
@@ -63,7 +64,7 @@ GtkWidget *creat_stocks_list(struct sm_xmlcfg *smxc)
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 
 		col++;
-		widget = gtk_label_new(stock->avg_price.c);
+		widget = gtk_label_new(stock->cfg.avg_price.c);
 		gtk_table_attach_defaults(GTK_TABLE(table), widget, col, col + 1, tbl_cur_line, tbl_cur_line + 1);
 	}
 
