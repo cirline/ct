@@ -25,7 +25,7 @@ else
 
 # obj-m += bitops/
 obj-m += chrdev/
-obj-m += timer/
+#obj-m += timer/
 obj-m += tasklet/
 obj-m += workqueue/
 obj-m += memory/
