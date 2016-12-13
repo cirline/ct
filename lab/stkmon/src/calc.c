@@ -40,3 +40,34 @@ int calc_realtime_info(struct stk_xmlcfg *sxc)
 
 	return 0;
 }
+
+static float calc_alert(struct stk_alert_level *alert_lv, int chg_rate)
+{
+	if(chg_rate > alert_lv->lv3.f)
+		return -1;
+	else if(chg_rate > alert_lv->lv2.f)
+		return alert_lv->lv2.f;
+	else if(chg_rate > alert_lv->lv1.f)
+		return alert_lv->lv1.f;
+	else
+		return 0;
+}
+
+float calc_daily_alert(struct stk_xmlcfg *sxc, struct stk_stock *stock)
+{
+	struct stk_alert *alert = &sxc->alert;
+	int rate;
+
+	if(stock->chg_rate_alert < 0)
+		return 0;
+
+	if(stock->chg_rate <= stock->chg_rate_alert)
+		return 0;
+
+	rate = calc_alert(&alert->short_term, stock->chg_rate);
+	if(rate)
+		stock->chg_rate_alert = rate;
+
+	return rate;
+}
+

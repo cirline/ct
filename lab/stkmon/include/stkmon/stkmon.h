@@ -7,6 +7,8 @@
 #include <sys/queue.h>
 #include <gtk/gtk.h>
 
+#define COLOR_RISE_1	"#FF5555"
+
 #define COLOR_RISE	"red"
 #define COLOR_DROP	"gray"
 #define COLOR_EQ	"black"
@@ -110,6 +112,8 @@ struct stk_stock {
 	float	chg_rate;
 	float	chg_rate_min;
 
+	int	chg_rate_alert;
+
 	CIRCLEQ_ENTRY(stk_stock)	list;
 };
 #define sm_stock	stk_stock
@@ -132,6 +136,7 @@ struct stk_mainui {
 	int	width;
 	int	height;
 
+	GtkWidget	*win;
 	GtkWidget	*menu;
 	struct {
 		GtkWidget	*fixed;

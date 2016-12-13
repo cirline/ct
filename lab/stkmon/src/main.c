@@ -1,4 +1,4 @@
-#define DEBUG
+//#define DEBUG
 #define pr_fmt(fmt)	"stkmon  ] " fmt
 
 #include <string.h>
@@ -18,7 +18,7 @@
 #include "stkmon/calc.h"
 #include "config.h"
 
-#define WIN_OPACITY	0.6
+#define WIN_OPACITY	0.4
 
 static int gx = 99;
 
@@ -191,9 +191,9 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	smxc->ui.monitor.dynamic = monitor_dynamic;
 	/* ui end */
 
-	interval = atoi(smxc->interval);
-	if(interval <= 0)
-		interval = 5000;
+	//interval = atoi(smxc->interval);
+	//if(interval <= 0)
+		interval = 10000;
 	g_timeout_add(interval, (GSourceFunc)hdlr_1s, (gpointer)smxc);
 	g_signal_connect(win, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	g_signal_connect(win, "event", G_CALLBACK(main_event), smxc);
@@ -284,6 +284,14 @@ gboolean hdlr_1s(gpointer *p)
 		 * set dynamic table
 		 */
 		gtk_label_set_text(GTK_LABEL(stock->ui.label_name), dat->name);
+#if 0
+		int alert = calc_daily_alert(smxc, stock);
+		if(alert) {
+			char buffer[1024];
+			sprintf(buffer, "%s alert !!! rate to %.2f%%", dat->name, stock->chg_rate * 100);
+			ui_show_dialog_info(smxc->ui.win, buffer);
+		}
+#endif
 	}
 
 	return TRUE;

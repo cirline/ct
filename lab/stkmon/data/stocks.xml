@@ -3,6 +3,6 @@
 	<stock enable="true" visible="true" exchange="sh" code="601398"
 		avg_price="4.32" aim_price="4.4" min_price="4.01" stop_profit="1.15" stop_loss="0.9" />
 
-	<stock enable="true" visible="true" exchange="sz" code="000651"
+	<stock enable="true" visible="false" exchange="sz" code="000651"
 		avg_price="0" aim_price="0" min_price="21.5" stop_profit="1.15" stop_loss="0.9" />
 </root>

@@ -2,7 +2,7 @@
 
 #include "stkmon/stkmon.h"
 
-int ui_show_dialog_info(GtkWidget *widget, GtkWidget *win, char *msg)
+int ui_show_dialog_info(GtkWidget *win, char *msg)
 {
 	GtkWidget *dialog;
 
