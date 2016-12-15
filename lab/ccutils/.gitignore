@@ -55,7 +55,6 @@ install-sh
 missing
 ar-lib
 libtool
-m4
 ltmain.sh
 
 Makefile

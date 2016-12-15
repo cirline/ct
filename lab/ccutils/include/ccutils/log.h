@@ -50,5 +50,6 @@ enum __e_debug_level {
 extern int pr_init(const char *path);
 extern int pr_log(int prio, const char * tag, const char *s, ...);
 int pr_s2hex(const char *s, ...);
+int pr_level(int level, char symbol, const char *format, ...);
 
 #endif

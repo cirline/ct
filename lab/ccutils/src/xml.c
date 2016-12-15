@@ -88,3 +88,14 @@ char *cxml_get_prop_string(xmlNodePtr node, const char *name, char *default_valu
 	return dest;
 }
 
+int cxml_foreach_node(xmlNodePtr node, int (*f)(xmlNodePtr, void *), void *p)
+{
+	int i;
+
+	for(i = 0; node; node = node->next) {
+		if(f && !f(node, p))
+			i++;
+	}
+	return i;
+}
+
