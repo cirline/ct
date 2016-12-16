@@ -1,5 +1,6 @@
 #include <display.h>
 #include <common.h>
+#include "timer.h"
 
 #define SIG_LOW		"|    ""  "
 #define SIG_HIGH	"|||||""  "
@@ -51,7 +52,6 @@ void generate_hv_clk(struct hv_signal *sigp)
 int generate_hv_signal(struct hv_config *hvc)
 {
 	struct hv_signal sig;
-	struct hv_config d;
 
 	while(1) {
 		int vspw = hvc->vspw;
@@ -78,13 +78,15 @@ int generate_hv_signal(struct hv_config *hvc)
 				vflag = 0;
 				vfpd--;
 			}
+
+			// vs signal
+			if(vspw > 0) {
+				sig.vs = HVS_LOW;
+				vspw--;
+			} else
+				sig.vs = HVS_HIGH;
+
 			for(; linehoz > 0; linehoz--) {
-				// vs signal
-				if(vspw > 0) {
-					sig.vs = HVS_LOW;
-					vspw--;
-				} else
-					sig.vs = HVS_HIGH;
 
 				// hs signal
 				if(hspw > 0) {
@@ -92,7 +94,6 @@ int generate_hv_signal(struct hv_config *hvc)
 					hspw--;
 				} else
 					sig.hs = HVS_HIGH;
-
 
 				// de signal
 				if(vflag) {
@@ -114,6 +115,53 @@ int generate_hv_signal(struct hv_config *hvc)
 		}
 	}
 
+	return 0;
+}
+
+int display_power_on(void)
+{
+	/* dvdd always on */
+	/* vgl always on */
+	/* avdd always on */
+	/* vgh always on */
+	return 0;
+}
+
+int display_power_off(void)
+{
+	return 0;
+}
+
+int display_init_backlight(int bl)
+{
+	struct timer timer;
+
+	if(bl < 0)
+		bl = 0;
+	if(bl > D_BACKLIGHT_MAX)
+		bl = D_BACKLIGHT_MAX;
+
+	timer_default_cfg(&timer);
+	timer.sn = TIMER0;
+	timer.count_buffer = D_BACKLIGHT_MAX;
+	timer.cmp_buffer = bl;
+	timer.auto_reload = TIMER_INTERVAL;
+	timer_init(&timer);
+	timer_toggle(timer.sn, 1);
+	return 0;
+}
+
+int display_set_backlight_level(int bl)
+{
+	if(bl < 0)
+		bl = 0;
+	if(bl > D_BACKLIGHT_MAX)
+		bl = D_BACKLIGHT_MAX;
+
+	timer_set_period(TIMER0, 0, bl);
+	timer_toggle(TIMER0, 0);
+	timer_update(TIMER0);
+	timer_toggle(TIMER0, 1);
 	return 0;
 }
 

@@ -25,4 +25,11 @@ struct hv_signal {
 	unsigned char r, g, b;
 };
 
+#define D_BACKLIGHT_MAX		255
+
+extern int generate_hv_signal(struct hv_config *hvc);
+
+extern int display_init_backlight(int bl);
+extern int display_set_backlight_level(int bl);
+
 #endif

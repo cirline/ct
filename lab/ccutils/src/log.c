@@ -58,3 +58,24 @@ int pr_s2hex(const char *s, ...)
 	return 0;
 }
 
+int pr_level(int level, char symbol, const char *format, ...)
+{
+	int i;
+	va_list args;
+	int rc;
+
+	for(i = 0; i < level; i++)
+		pr_log(0, NULL, "%c", symbol);
+
+	fd_check();
+	va_start(args, format);
+#ifndef ANDROID
+	rc = vfprintf(logfp, format, args);
+#else
+	rc = __android_log_vprint(0, NULL, format, args);
+#endif
+	va_end(args);
+
+	return rc;
+}
+

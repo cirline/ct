@@ -2,22 +2,31 @@
 #define __UART_H__
 
 #include "irq.h"
+#include "common.h"
 
-#define ULCON_WL5	0
-#define ULCON_WL6	1
-#define ULCON_WL7	2
-#define ULCON_WL8	3
-#define ULCON_SB1	0
-#define ULCON_SB2	1
-#define ULCON_PM_NONE	0
-#define ULCON_PM_ODD	4
-#define ULCON_PM_EVEN	5
-#define ULCON_PM_PF1	6
-#define ULCON_PM_PF0	7
+#define UART_LCON_WL5	0
+#define UART_LCON_WL6	1
+#define UART_LCON_WL7	2
+#define UART_LCON_WL8	3
+#define UART_LCON_SB1	0
+#define UART_LCON_SB2	1
+#define UART_LCON_PM_NONE	0
+#define UART_LCON_PM_ODD	4
+#define UART_LCON_PM_EVEN	5
+#define UART_LCON_PM_PF1	6
+#define UART_LCON_PM_PF0	7
+
+#define B115200		115200
+
+struct uart_brtable {
+	int baudrate;
+	int brdiv;
+	int divslot;
+};
 
 struct uart_cfg {
 	int uart;
-	int word_length:2;
+	int word_length:3;
 	int n_stopbit:1;
 	int parity:3;
 
@@ -43,6 +52,7 @@ struct uart_cfg {
 
 	int brdiv:16;
 	int divslot:16;
+	int baudrate;
 };
 
 struct uart_stat {
@@ -73,4 +83,5 @@ extern int uart_irq_init(irq_func_t func);
 extern void uart_clear_int_pend(int n);
 extern unsigned char uart_get_char(void);
 extern char * uart_getstr(char *buffer, int echo);
+
 #endif

@@ -58,5 +58,7 @@ extern int inline timer_irq_status(enum timer_sn t_sn);
 extern void inline timer_irq_clear(enum timer_sn t_sn);
 extern int timer_spin_delay(enum timer_sn t_sn, int ms);
 
+extern void inline timer_setcfg_period(struct timer *timer, int ms);
+
 #endif
 

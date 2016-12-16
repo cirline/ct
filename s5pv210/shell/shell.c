@@ -2,12 +2,15 @@
  * shell function type: int (*)(void *)
  */
 
-#include <common.h>
+#include "utils.h"
 #include <timer.h>
 #include <irq.h>
 #include <display.h>
+#include "clock.h"
+#include "list.h"
+#include "shell.h"
 
-int shell_dump_registers(void *p)
+int shell_dump_registers(int argc, char *argv[])
 {
 	pr_info("%s\n", __func__);
 
@@ -24,7 +27,7 @@ int shell_dump_registers(void *p)
 	return 0;
 }
 
-int timer_1hz_buzz_isr(void)
+int timer_1hz_buzz_isr(int argc, char *argv[])
 {
 	pr_info("%s\n", __func__);
 
@@ -33,7 +36,7 @@ int timer_1hz_buzz_isr(void)
 	return 0;
 }
 
-int shell_timer_1hz_buzz(void *p)
+int shell_timer_1hz_buzz(int argc, char *argv[])
 {
         struct timer timer;
         timer_default_cfg(&timer);
@@ -48,7 +51,7 @@ int shell_timer_1hz_buzz(void *p)
 	return 0;
 }
 
-int shell_sleep_test(void *p)
+int shell_sleep_test(int argc, char *argv[])
 {
 	int i = 0;
 
@@ -64,7 +67,7 @@ int shell_sleep_test(void *p)
 	return 0;
 }
 
-int shell_lcd_test(void)
+int shell_lcd_test(int argc, char *argv[])
 {
 #if 0
 	struct hv_config at070tn92_lcd = {
@@ -99,5 +102,109 @@ int shell_lcd_test(void)
 	generate_hv_signal(&at070tn92_lcd);
 
 	return 0;
+}
+
+
+int timer2_flashleds_isr(int argc, char *argv[])
+{
+	static int count = 0;
+
+	//pr_info("%s\n", __func__);
+	irq_clear_pending(TIMERINT(2));
+
+	gpio_set_value('c', 0, 3, count & 1);
+	count++;
+
+	return 0;
+}
+
+int shell_flashleds_test(int argc, char *argv[])
+{
+        struct timer timer;
+        timer_default_cfg(&timer);
+	timer_setcfg_period(&timer, 200);
+        timer.sn = TIMER2;
+        timer.auto_reload = TIMER_INTERVAL;
+	timer.irq_enable = 1;
+	irq_init(TIMERINT(2), timer2_flashleds_isr);
+
+        timer_init(&timer);
+        timer_toggle(timer.sn, 1);
+
+	return 0;
+}
+
+int shell_dump_sfrs(int argc, char *argv[])
+{
+	unsigned long regs[] = {
+		CLK_SRC(0),
+		CLK_DIV(0),
+	};
+	int i;
+	unsigned long regval;
+
+	for(i = 0; i < ARRAY_SIZE(regs); i++) {
+		regval = __raw_read(regs[i]);
+
+		pr_info("%x - %x\n", regs[i], regval);
+	}
+
+	clock_reset();
+
+	return 0;
+}
+
+int shell_devmem(int argc, char *argv[])
+{
+	unsigned long regaddr, regval;
+
+	if(argc < 2) {
+		pr_err("eg: devmem reg_addr [reg_value]\n");
+		return -1;
+	}
+	regaddr = str2hl(argv[1]);
+	if(regaddr == -1) {
+		pr_err("error register address: %s\n", argv[1]);
+		return -1;
+	}
+	if(argc == 2) {
+		/* read register */
+		regval = __raw_read(regaddr);
+		printf("r %x \t= %x\n", regaddr, regval);
+		return 0;
+	}
+
+	regval = str2hl(argv[2]);
+	if(regval == -1) {
+		pr_err("error register value: %s\n", argv[2]);
+		return -1;
+	}
+	/* write register */
+	__raw_write(regaddr, regval);
+	printf("w %x \t= %x\n", regaddr, regval);
+
+	return 0;
+}
+
+int shell_parse_arguments(char *str, char *argv[SHELL_MAX_ARGUMENTS])
+{
+	int i, j;
+
+	for(i = 0; *str; i++) {
+		argv[i] = str;
+		while(*str != ' ' && *str != '\t' && *str != 0)
+			str++;
+		if(*str) {
+			*str = 0;
+			str++;
+		}
+	}
+
+	pr_info("argc = %x\n", i);
+	for(j = 0; j < i; j++) {
+		pr_info("argv[%x] = %s\n", j, argv[j]);
+	}
+
+	return i;
 }
 

@@ -23,8 +23,12 @@ AM_PROG_AR
 
 LT_INIT
 # Checks for libraries.
+# FIXME: Replace `main' with a function in `-lccutils':
+AC_CHECK_LIB([ccutils], [main])
 # FIXME: Replace `main' with a function in `-ldl':
 AC_CHECK_LIB([dl], [main])
+# FIXME: Replace `main' with a function in `-liconv':
+AC_CHECK_LIB([iconv], [main])
 # FIXME: Replace `main' with a function in `-lpthread':
 AC_CHECK_LIB([pthread], [main])
 

@@ -7,30 +7,6 @@
 /* pre Px include 4byte */
 char fb[800 * 480 * 4];
 
-int backlight_init(enum backlight_level bl_lev)
-{
-	struct timer timer;
-
-	timer_default_cfg(&timer);
-	timer.sn = TIMER0;
-	timer.count_buffer = BL_LEV_MAX;
-	timer.cmp_buffer = bl_lev;
-    timer.auto_reload = TIMER_INTERVAL;
-	timer_init(&timer);
-	timer_toggle(timer.sn, 1);
-	return 0;
-}
-
-
-int backlight_set_level(enum backlight_level lev)
-{
-	timer_set_period(TIMER0, 0, lev);
-	timer_toggle(TIMER0, 0);
-	timer_update(TIMER0);
-	timer_toggle(TIMER0, 1);
-	return 0;
-}
-
 void inline vid_toggle(int enable)
 {
     region_write(VIDCONx(0), MASK_BITS_2, ENVID_F, enable ? 3 : 0);
