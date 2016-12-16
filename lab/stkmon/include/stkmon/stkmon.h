@@ -70,6 +70,11 @@ struct stk_stkdat_container {
 #define STK_GET_STKDAT(pull_data) \
 	(&((struct stk_stkdat_container *)(pull_data))->common)
 
+/**
+ * stock index common data
+ * a customized stk_idxdat_xxx should contain it first by named 'common'
+ * a customized stk_idxdat_xxx can get the common data by macro STK_GET_IDXDAT()
+ */
 struct stk_idxdat {
 	char	exchange[STK_EX_SZ];
 	char	code[STK_CODE_SZ];
@@ -77,10 +82,11 @@ struct stk_idxdat {
 	float	volume;
 	float	amount;
 };
-
 struct stk_idxdat_container {
 	struct stk_idxdat	common;
 };
+#define STK_GET_IDXDAT(pull_data) \
+	(&((struct stk_idxdat_container *)(pull_data))->common)
 
 struct sm_stkui {
 	GtkWidget *label_code;
