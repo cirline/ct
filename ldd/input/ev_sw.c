@@ -1,9 +1,64 @@
 #include <linux/module.h>
 #include <linux/platform_device.h>
+#include <linux/slab.h>
+#include <linux/input.h>
+#include <linux/delay.h>
+#include <linux/kthread.h>
 
 struct s_swev {
 	struct input_dev *input;
+
+	int running;
 };
+
+static int swev_threadfn(void *data)
+{
+	struct s_swev *ddata = input_get_drvdata(data);
+	int i;
+
+	if(!ddata) {
+		pr_err("%s not found ddata\n", __func__);
+		return -EINVAL;
+	}
+
+	for(i = 0; ddata->running; i++) {
+		dev_info(&ddata->input->dev, "loopping %d ...\n", i);
+		msleep(2000);
+
+		input_report_switch(ddata->input, 109, i & 1);
+		input_sync(ddata->input);
+
+	}
+
+	dev_info(&ddata->input->dev, "exit loopping ...\n");
+
+	return 0;
+}
+
+static int swev_open(struct input_dev *dev)
+{
+	struct s_swev *ddata = input_get_drvdata(dev);
+
+	dev_info(&dev->dev, "%s in\n", __func__);
+
+	if(!ddata) {
+		dev_err(&dev->dev, "%s not found ddata\n", __func__);
+		return -EINVAL;
+	}
+
+	ddata->running = 1;
+	kthread_run(swev_threadfn, dev, "swev_loop");
+	return 0;
+}
+
+static void swev_close(struct input_dev *dev)
+{
+	struct s_swev *ddata = input_get_drvdata(dev);
+
+	dev_info(&dev->dev, "%s in\n", __func__);
+
+	ddata->running = 0;
+}
 
 static int sw_ev_probe(struct platform_device *pdev)
 {
@@ -34,6 +89,7 @@ static int sw_ev_probe(struct platform_device *pdev)
 
 	input_set_capability(input, EV_SW, 109);
 
+	pdata->input = input;
 	platform_set_drvdata(pdev, pdata);
 	input_set_drvdata(input, pdata);
 
@@ -54,7 +110,19 @@ fail1:
 
 static int sw_ev_remove(struct platform_device *pdev)
 {
+	struct s_swev *pdata = platform_get_drvdata(pdev);
+	struct input_dev *input;
+
 	pr_info("%s, in\n", __func__);
+	if(!pdata) {
+		pr_err("not platform_data");
+		return -1;
+	}
+
+	input = pdata->input;
+	input_unregister_device(input);
+	input_free_device(input);
+	kfree(pdata);
 
 	return 0;
 }
