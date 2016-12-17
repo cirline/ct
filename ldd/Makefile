@@ -30,6 +30,7 @@ obj-m += tasklet/
 obj-m += workqueue/
 obj-m += memory/
 obj-m += devmod/
+obj-m += input/
 
 endif
 
