@@ -186,6 +186,43 @@ int load_xmlstocks(xmlNodePtr node, void *data)
 	return 0;
 }
 
+int load_xmlindex(xmlNodePtr node, void *data)
+{
+	struct stk_index *index;
+	char *prop;
+	struct sstkmon *ss = data;
+
+	if(strcmp(node->name, "index") != 0) {
+		return - EINVAL;
+	}
+
+	index = malloc(sizeof(*index));
+	if(!index) {
+		pr_err("%s, malloc fail, %s\n", __func__, strerror(errno));
+		return - ENOMEM;
+	}
+
+	prop = cxml_get_prop_string(node, "code", NULL, index->data.code);
+	if(!prop)
+		goto out;
+	prop = cxml_get_prop_string(node, "exchange", NULL, index->data.exchange);
+	if(!prop)
+		goto out;
+
+	index->enable = cxml_get_prop_bool(node, "enable", 0);
+	index->visible = cxml_get_prop_bool(node, "visible", 0);
+	index->pull_data = NULL;
+
+	CIRCLEQ_INSERT_TAIL(&ss->index_list, index, list);
+	ss->index_count++;
+
+	return 0;
+
+out:
+	free(index);
+	return - ENODATA;
+}
+
 int load_xmlstock(xmlNodePtr node, void *data)
 {
 	struct stk_xmlcfg *p = data;
@@ -234,6 +271,7 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 {
 	struct stk_alert_level *sal;
 	struct stk_stock *p;
+	struct stk_index *si;
 
 	printf("configure:\n");
 	printf(" %12s: %s\n", "interval", smxc->interval);
@@ -255,6 +293,14 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 			p = p->list.cqe_next) {
 		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n", i++, p->visible, p->code, p->exchange,
 				p->cfg.avg_price.f, p->cfg.min_price.f, p->cfg.aim_price.f);
+	}
+
+	pr_info("index count: %d\n", smxc->index_count);
+	pr_info("%4s %8s %8s %8s %8s\n", "n", "enable", "visible", "code", "exhg");
+	for(i = 0, si = smxc->index_list.cqh_first; si != (void *)&smxc->index_list;
+			si = si->list.cqe_next) {
+		pr_info("%4d %8d %8d %8s %8s\n", i++, si->enable, si->visible,
+				si->data.code, si->data.exchange);
 	}
 }
 
@@ -333,6 +379,16 @@ int load_xmlconfig(struct sm_xmlcfg *smxc)
 		parse_xobjects(object, load_xmlstock, smxc);
 		xmlXPathFreeObject(object);
 	}
+
+	smxc->index_count = 0;
+	CIRCLEQ_INIT(&smxc->index_list);
+	object = get_xpath_object(docp, "/root/index");
+	if(object) {
+		parse_xobjects(object, load_xmlindex, smxc);
+		xmlXPathFreeObject(object);
+	}
+
+
 	xmlFreeDoc(docp);
 
 	print_xmlcfg(smxc);

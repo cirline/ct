@@ -1,5 +1,5 @@
 /**
- * sm - stock market
+ * Golden Eye
  */
 #ifndef __STKMON_H__
 #define __STKMON_H__
@@ -78,9 +78,12 @@ struct stk_stkdat_container {
 struct stk_idxdat {
 	char	exchange[STK_EX_SZ];
 	char	code[STK_CODE_SZ];
+	char	name[STK_NAME_SZ];
 	float	index;
-	float	volume;
-	float	amount;
+	float	index_diff;		/* index(today) - index(yesterday) */
+	float	roc;			/* rate of change */
+	long	volume;
+	long	amount;
 };
 struct stk_idxdat_container {
 	struct stk_idxdat	common;
@@ -96,6 +99,11 @@ struct sm_stkui {
 	GtkWidget	*toggle_visible;
 	GtkWidget	*label_avg_price;
 	GtkWidget	*label_name;
+};
+
+struct stk_idxui {
+	GtkWidget	*label_price;
+	GtkWidget	*label_roc;
 };
 
 struct stk_stkcfg {
@@ -124,6 +132,18 @@ struct stk_stock {
 };
 #define sm_stock	stk_stock
 
+struct stk_index {
+	struct stk_idxdat	data;
+	struct stk_idxui	ui;
+	void			*pull_data;
+
+	short			enable;
+	short			visible;
+
+	CIRCLEQ_ENTRY(stk_index)
+				list;
+};
+
 struct stk_alert_level {
 	struct stk_float	lv1;
 	struct stk_float	lv2;
@@ -150,15 +170,25 @@ struct stk_mainui {
 	} monitor;
 };
 
-struct stk_xmlcfg {
+struct golden_eye {
 	char		interval[16];
 	struct stk_alert	alert;
 
 	struct stk_mainui	ui;
 
-	CIRCLEQ_HEAD(, stk_stock)	stock_list;
+
+	int (*pull_index_data)(struct golden_eye *ge);
+
+	CIRCLEQ_HEAD(, stk_stock)	
+				stock_list;
 	int		stocks_count;
+
+	CIRCLEQ_HEAD(, stk_index)
+				index_list;
+	int			index_count;
 };
+#define sstkmon		golden_eye
+#define stk_xmlcfg	sstkmon
 #define sm_xmlcfg	stk_xmlcfg
 
 #endif

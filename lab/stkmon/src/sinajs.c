@@ -140,6 +140,76 @@ void sinajs_print(struct sinajs *sj)
 	printf("time: %s\n\n", sj->time);
 }
 
+static int sinajs_index_attach(struct sstkmon *ss, struct sinajs_index *index)
+{
+	struct stk_index *si;
+
+	for(si = ss->index_list.cqh_first; si != (void *)&ss->index_list;
+			si = si->list.cqe_next) {
+
+		if(strcmp(si->data.exchange, index->common.data.exchange) == 0 &&
+				strcmp(si->data.code, index->common.data.code) == 0)
+			break;
+	}
+
+	if(si == (void *)&ss->index_list)
+		return - ENODATA;
+
+	if(!si->pull_data)
+		si->pull_data = malloc(sizeof(*index));
+	if(!si->pull_data) {
+		pr_err("%s, malloc fail\n", __func__);
+		return - ENOMEM;
+	}
+	memcpy(si->pull_data, index, sizeof(*index));
+
+	return 0;
+}
+
+int sinajs_index_decode(char *pbuf, struct sinajs_index *index)
+{
+	return 0;
+}
+
+int sinajs_build_index_url(char *url, struct golden_eye *ge)
+{
+	return 0;
+}
+
+int sinajs_pull_index_data(struct sstkmon *ss)
+{
+	char url[1024] = "hq.sinajs.cn/list=s_sh000001";
+	char buffer[4096];
+	int rc;
+	char *token, *sptr1;
+
+	if(sinajs_build_index_url(url, ss) < 0) {
+		pr_err("%s, build index url fail\n", __func__);
+		return - EINVAL;
+	}
+
+	rc = http_get(url, buffer);
+	if(rc < 0) {
+		pr_err("http get fail, %s\n", url);
+		return - EINVAL;
+	}
+	buffer[rc] = 0;
+
+	for(token = strtok_r(buffer, "\n", &sptr1); token;
+			token = strtok_r(NULL, "\n", &sptr1)) {
+		struct sinajs_index index;
+
+		if(sinajs_index_decode(token, &index) < 0) {
+			pr_err("%s, index decode fail\n", __func__);
+			return - EINVAL;
+		}
+
+		/* find index and attach data to pull_data */
+		sinajs_index_attach(ss, &index);
+	}
+
+	return 0;
+}
 
 int sinajs_pull_data(struct stk_xmlcfg *sxc)
 {
@@ -179,6 +249,7 @@ int sinajs_pull_data(struct stk_xmlcfg *sxc)
 				//break;
 			}
 
+			/* find stock and attach data to pull_data */
 			for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
 					stock = stock->list.cqe_next) {
 				char local[20];

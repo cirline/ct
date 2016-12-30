@@ -26,18 +26,13 @@ struct sinajs {
 };
 
 struct sinajs_index {
-	char	code	[SJS_CODE_SIZE];
-	char	name	[SJS_NAME_SIZE];
-	float	index;
-	float	range;
-	float	rate;
-	long	volume;
-	long	amount;
+	struct stk_index	common;
 };
 
 extern int sinajs_pull_data(struct stk_xmlcfg *sxc);
 extern void sinajs_print(struct sinajs *sj);
 extern int sinajs_decode(char *buffer, struct sinajs *sj);
 int sinajs_apply_data(struct stk_xmlcfg *sxc);
+int sinajs_pull_index_data(struct golden_eye *ge);
 
 #endif

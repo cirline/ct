@@ -160,6 +160,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 
 	gtk_init(&argc, &argv);
 
+	/* win */
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(win), "stkmon");
 	gtk_window_set_default_size(GTK_WINDOW(win), 0, 0);
@@ -169,24 +170,27 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 	gtk_window_set_icon(GTK_WINDOW(win), create_logo("logo.png"));
 
+	/* ebox and mbox */
 	GtkWidget *ebox = gtk_event_box_new();
 	GtkWidget *mbox = gtk_vbox_new(FALSE, 1);
 	gtk_container_add(GTK_CONTAINER(win), ebox);
 	gtk_container_add(GTK_CONTAINER(ebox), mbox);
 
+	/* menu */
 	GtkWidget *menubar = create_menubar(win);
 	gtk_box_pack_start(GTK_BOX(mbox), menubar, FALSE, FALSE, 0);
 
 	create_popupmenu(ebox);
 
+	/* monitor */
 	GtkWidget *infobox = gtk_hbox_new(FALSE, 1);
 	gtk_box_pack_start(GTK_BOX(mbox), infobox, FALSE, FALSE, 0);
 
-	GtkWidget *infopanel = ui_monitor_create_info_panel(smxc);
+	GtkWidget *infopanel = ui_monitor_create_info_panel(smxc);			// fixed
 	gtk_box_pack_start(GTK_BOX(infobox), infopanel, FALSE, FALSE, 0);
 	smxc->ui.monitor.fixed = infopanel;
 
-	GtkWidget *monitor_dynamic = ui_monitor_create_dynamic_table(smxc);
+	GtkWidget *monitor_dynamic = ui_monitor_create_dynamic_table(smxc);		// dynamic
 	gtk_box_pack_start(GTK_BOX(infobox), monitor_dynamic, FALSE, FALSE, 0);
 	smxc->ui.monitor.dynamic = monitor_dynamic;
 	/* ui end */
@@ -228,7 +232,12 @@ gboolean hdlr_1s(gpointer *p)
 	GdkColor color;
 	static int count = 0;
 	struct stk_stkdat *dat;
-
+#if 0
+	if(event_update_net_data(p) < 0) {
+		pr_err("%s, update net data fail\n");
+		return TRUE;
+	}
+#endif
 	rc = sinajs_pull_data(smxc);
 	if(rc < 0) {
 		pr_err("sinajs_pull_data failed\n");
@@ -300,11 +309,14 @@ gboolean hdlr_1s(gpointer *p)
 int main(int argc, char *argv[])
 {
 	struct sm_xmlcfg smxc;
+	struct sstkmon *ss = &smxc;
 
 	pr_pkg();
 
 	pr_info("load configure.\n");
 	load_xmlconfig(&smxc);
+
+	ss->pull_index_data = sinajs_pull_index_data;
 
 	pr_info("start main ui.\n");
 	main_ui(argc, argv, &smxc);
