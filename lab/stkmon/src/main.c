@@ -38,8 +38,9 @@ GtkWidget *create_menubar(GtkWidget *win)
 	GtkWidget *file_menu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
 
-	GtkWidget *quit_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_QUIT, accel_grp);
-	gtk_widget_add_accelerator(quit_item, "activate", accel_grp, GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	//v2 GtkWidget *quit_item = gtk_image_menu_item_new_from_stock(GTK_STOCK_QUIT, accel_grp);
+	GtkWidget *quit_item = gtk_menu_item_new_with_label("Quit");
+	//v2 gtk_widget_add_accelerator(quit_item, "activate", accel_grp, GDK_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
 	g_signal_connect(G_OBJECT(quit_item), "activate", G_CALLBACK(gtk_main_quit), NULL);
 
 	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
