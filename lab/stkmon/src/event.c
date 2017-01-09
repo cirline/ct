@@ -1,3 +1,5 @@
+#define pr_fmt(fmt)	"event   ] " fmt
+
 #include <errno.h>
 #include <gtk/gtk.h>
 
@@ -13,7 +15,7 @@ int event_monitor(GtkWidget *widget, GdkEvent *event, gpointer pointer)
 int event_update_net_data(gpointer *p)
 {
 	int rc;
-	struct sstkmon *ss;
+	struct golden_eye *ss = (struct golden_eye *)p;
 
 	if(!ss->pull_index_data) {
 		pr_err("%s, no found pull_index_data\n", __func__);

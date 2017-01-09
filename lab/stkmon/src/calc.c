@@ -7,6 +7,8 @@ int calc_pr_info(struct stk_xmlcfg *sxc)
 {
 	struct stk_stock *stock;
 	struct stk_stkdat *dat;
+	struct ge_index *idx;
+	struct ge_idxdat *idxd;
 
 	pr_info("%8s %8s %12s %8s\n", "code", "chg", "chg_min", "name");
 	for(stock = sxc->stock_list.cqh_first; stock != (void *)&sxc->stock_list;
@@ -16,6 +18,14 @@ int calc_pr_info(struct stk_xmlcfg *sxc)
 
 		dat = &(((struct stk_stkdat_container *)stock->pull_data)->common);
 		pr_info("%8s %8.3f %12.3f\n", stock->code, stock->chg_rate, stock->chg_rate_min);
+	}
+	pr_info("\n");
+	pr_info("%16s %8s %12s %8s\n", "code", "roc", "diff", "name");
+	for(idx = sxc->index_list.cqh_first; idx != (void *)&sxc->index_list;
+			idx = idx->list.cqe_next) {
+
+		idxd = &idx->data;
+		pr_info("%16s %8.3f %12.2f\n", idxd->code, idxd->roc, idxd->index_diff);
 	}
 	pr_info("\n");
 

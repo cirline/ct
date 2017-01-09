@@ -190,6 +190,7 @@ int load_xmlindex(xmlNodePtr node, void *data)
 {
 	struct stk_index *index;
 	char *prop;
+	char buffer[16];
 	struct sstkmon *ss = data;
 
 	if(strcmp(node->name, "index") != 0) {
@@ -202,16 +203,17 @@ int load_xmlindex(xmlNodePtr node, void *data)
 		return - ENOMEM;
 	}
 
-	prop = cxml_get_prop_string(node, "code", NULL, index->data.code);
-	if(!prop)
-		goto out;
-	prop = cxml_get_prop_string(node, "exchange", NULL, index->data.exchange);
+	prop = cxml_get_prop_string(node, "exchange", NULL, index->data.code);
 	if(!prop)
 		goto out;
 
+	prop = cxml_get_prop_string(node, "code", NULL, buffer);
+	if(!prop)
+		goto out;
+	strncat(index->data.code, buffer, GE_CODE_SIZE - strlen(index->data.code) - 1);
+
 	index->enable = cxml_get_prop_bool(node, "enable", 0);
 	index->visible = cxml_get_prop_bool(node, "visible", 0);
-	index->pull_data = NULL;
 
 	CIRCLEQ_INSERT_TAIL(&ss->index_list, index, list);
 	ss->index_count++;
@@ -296,11 +298,11 @@ void print_xmlcfg(struct sm_xmlcfg *smxc)
 	}
 
 	pr_info("index count: %d\n", smxc->index_count);
-	pr_info("%4s %8s %8s %8s %8s\n", "n", "enable", "visible", "code", "exhg");
+	pr_info("%4s %8s %8s %8s\n", "n", "enable", "visible", "code");
 	for(i = 0, si = smxc->index_list.cqh_first; si != (void *)&smxc->index_list;
 			si = si->list.cqe_next) {
-		pr_info("%4d %8d %8d %8s %8s\n", i++, si->enable, si->visible,
-				si->data.code, si->data.exchange);
+		pr_info("%4d %8d %8d %8s\n", i++, si->enable, si->visible,
+				si->data.code);
 	}
 }
 

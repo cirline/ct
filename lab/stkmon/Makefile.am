@@ -4,7 +4,7 @@ AM_CPPFLAGS += $(GTK_CFLAGS)
 AM_CPPFLAGS += $(XML_CFLAGS)
 AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/data/"'
 
-AM_CFLAGS = -O0
+AM_CFLAGS = -O0 -rdynamic
 
 bin_PROGRAMS = stkmon_out
 stkmon_out_SOURCES = src/main.c \

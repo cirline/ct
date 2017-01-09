@@ -1,3 +1,6 @@
+
+#define pr_fmt(fmt)	"sinajs  ] " fmt
+
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -5,6 +8,7 @@
 #include <sys/queue.h>
 #include <ccutils/log.h>
 #include <ccutils/net.h>
+#include <ccutils/string.h>
 
 #include "stkmon/stkmon.h"
 #include "stkmon/sinajs.h"
@@ -147,27 +151,75 @@ static int sinajs_index_attach(struct sstkmon *ss, struct sinajs_index *index)
 	for(si = ss->index_list.cqh_first; si != (void *)&ss->index_list;
 			si = si->list.cqe_next) {
 
-		if(strcmp(si->data.exchange, index->common.data.exchange) == 0 &&
-				strcmp(si->data.code, index->common.data.code) == 0)
+		if(strcmp(si->data.code, index->common.data.code) == 0)
 			break;
 	}
 
 	if(si == (void *)&ss->index_list)
 		return - ENODATA;
 
-	if(!si->pull_data)
-		si->pull_data = malloc(sizeof(*index));
-	if(!si->pull_data) {
-		pr_err("%s, malloc fail\n", __func__);
-		return - ENOMEM;
-	}
-	memcpy(si->pull_data, index, sizeof(*index));
+	memcpy(&si->data, &index->common.data, sizeof(si->data));
 
 	return 0;
 }
 
+#undef sinajs_decode_debug
+#define sinajs_decode_debug(format, ...)	pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
 int sinajs_index_decode(char *pbuf, struct sinajs_index *index)
 {
+	char *sptr1, *sptr2;
+	char *token;
+	char *p;
+	int i;
+	int rc;
+	int inb_len;
+	int outb_len;
+	struct ge_idxdat *idxd = &index->common.data;
+
+	if(!pbuf)
+		return - EINVAL;
+	sinajs_decode_debug("buffer = %s\n", pbuf);
+
+	memset(index, 0, sizeof(*index));
+	/* decode variable */
+	token = strtok_r(pbuf, "\"", &sptr1);		/* split variable and value */
+	for(p = token; *p && *p != '='; p++)
+		;
+	*p = 0;						/* variable '=' --> 0 */
+	sinajs_decode_debug("1, token = %s\n", token);
+	rc = sscanf(token, "var hq_str_%s", idxd->code);
+	if(rc <= 0) {
+		pr_err("not found index code (%s)\n", token);
+		return -1;
+	}
+	sinajs_decode_debug("code = %s\n", idxd->code);
+
+	/* decode value */
+	token = strtok_r(NULL, "\"", &sptr1);		/* split end '"' and newline symbol */
+
+	/* prop is split by ',' */
+	/* name */
+	token = strtok_r(token, ",", &sptr2);
+	sinajs_decode_debug("3, token = %s\n", token);
+	inb_len = strlen(token);
+	outb_len = STK_NAME_SZ;
+	convert_charset("UTF-8", "GB18030", idxd->name, outb_len, token, inb_len);
+	/* index */
+	cstr_token(token, NULL, ",", &sptr2, atof, idxd->index);
+	sinajs_decode_debug("4, token = %s\n", token);
+	/* diff */
+	cstr_token(token, NULL, ",", &sptr2, atof, idxd->index_diff);
+	sinajs_decode_debug("5, token = %s\n", token);
+	/* roc */
+	cstr_token(token, NULL, ",", &sptr2, atof, idxd->roc);
+	sinajs_decode_debug("6, token = %s\n", token);
+	/* volume */
+	cstr_token(token, NULL, ",", &sptr2, atol, idxd->volume);
+	sinajs_decode_debug("7, token = %s\n", token);
+	/* amount */
+	cstr_token(token, NULL, ",", &sptr2, atol, idxd->amount);
+	sinajs_decode_debug("8, token = %s\n", token);
+
 	return 0;
 }
 
@@ -188,6 +240,7 @@ int sinajs_pull_index_data(struct sstkmon *ss)
 		return - EINVAL;
 	}
 
+	pr_info("index url: %s\n", url);
 	rc = http_get(url, buffer);
 	if(rc < 0) {
 		pr_err("http get fail, %s\n", url);
@@ -205,7 +258,11 @@ int sinajs_pull_index_data(struct sstkmon *ss)
 		}
 
 		/* find index and attach data to pull_data */
-		sinajs_index_attach(ss, &index);
+		rc = sinajs_index_attach(ss, &index);
+		if(rc < 0) {
+			pr_err("%s, attach fail, %d\n", __func__, rc);
+			return rc;
+		}
 	}
 
 	return 0;

@@ -233,12 +233,10 @@ gboolean hdlr_1s(gpointer *p)
 	GdkColor color;
 	static int count = 0;
 	struct stk_stkdat *dat;
-#if 0
-	if(event_update_net_data(p) < 0) {
-		pr_err("%s, update net data fail\n");
+
+	if(event_update_net_data(p) < 0)
 		return TRUE;
-	}
-#endif
+
 	rc = sinajs_pull_data(smxc);
 	if(rc < 0) {
 		pr_err("sinajs_pull_data failed\n");
@@ -307,8 +305,15 @@ gboolean hdlr_1s(gpointer *p)
 	return TRUE;
 }
 
+void on_window1_destroy(GtkWidget *widget, gpointer data)
+{
+	printf("%s\n", __func__);
+	gtk_main_quit();
+}
+
 int main(int argc, char *argv[])
 {
+#if 1
 	struct sm_xmlcfg smxc;
 	struct sstkmon *ss = &smxc;
 
@@ -321,6 +326,20 @@ int main(int argc, char *argv[])
 
 	pr_info("start main ui.\n");
 	main_ui(argc, argv, &smxc);
+#else
+	GtkBuilder *builder;
+	GtkWidget *widget;
 
+	gtk_init(&argc, &argv);
+	builder = gtk_builder_new();
+	gtk_builder_add_from_file(builder, "layout/main.glade", NULL);
+	widget = GTK_WIDGET(gtk_builder_get_object(builder, "window1"));
+	gtk_builder_connect_signals(builder, NULL);
+
+	g_object_unref(G_OBJECT(builder));
+	gtk_widget_show(widget);
+	gtk_main();
+
+#endif
 	return 0;
 }

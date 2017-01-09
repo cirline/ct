@@ -26,8 +26,10 @@
 #define STK_DATA_SZ	16
 #define STK_TIME_SZ	16
 #define STK_EX_SZ	8
-#define STK_CODE_SZ	8
+#define GE_CODE_SIZE	16
+#define STK_CODE_SZ	GE_CODE_SIZE
 #define STK_NAME_SZ	32
+
 
 #ifdef DATADIR
 #define top_datadir	DATADIR"/"
@@ -75,8 +77,8 @@ struct stk_stkdat_container {
  * a customized stk_idxdat_xxx should contain it first by named 'common'
  * a customized stk_idxdat_xxx can get the common data by macro STK_GET_IDXDAT()
  */
+#define ge_idxdat	stk_idxdat
 struct stk_idxdat {
-	char	exchange[STK_EX_SZ];
 	char	code[STK_CODE_SZ];
 	char	name[STK_NAME_SZ];
 	float	index;
@@ -132,10 +134,10 @@ struct stk_stock {
 };
 #define sm_stock	stk_stock
 
+#define ge_index	stk_index
 struct stk_index {
 	struct stk_idxdat	data;
 	struct stk_idxui	ui;
-	void			*pull_data;
 
 	short			enable;
 	short			visible;
