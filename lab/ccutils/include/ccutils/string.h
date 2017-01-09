@@ -3,6 +3,13 @@
 
 #define CS_GREEN(string)	"\033[32m" string "\033[0m"
 
+#define cstr_token(token, str, delim, saveptr, func, var) \
+	do { \
+		token = strtok_r(str, delim, saveptr); \
+		if(!token) break; \
+		if(func) var = func(token); \
+	} while(0)
+
 enum utf8_char {
 	UTF8_C1,
 	UTF8_C2,
