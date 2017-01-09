@@ -58,6 +58,19 @@ int cxml_get_prop_bool(xmlNodePtr node, const char *name, int default_value)
 	return default_value;
 }
 
+int cxml_get_prop_integer(xmlNodePtr node, const char *name, int default_value)
+{
+	char *prop;
+
+	prop = xmlGetProp(node, name);
+	if(prop) {
+		default_value = atoi(prop);
+		xmlFree(prop);
+	}
+
+	return default_value;
+}
+
 float cxml_get_prop_float(xmlNodePtr node, const char *name, float default_value)
 {
 	char *prop;
