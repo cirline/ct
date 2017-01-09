@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <gtk/gtk.h>
 
 #include "stkmon/stkmon.h"
@@ -81,7 +82,7 @@ GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc)
 		label = gtk_label_new("0");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, tbl_cur_line, tbl_cur_line + 1);
-		si->ui.label_price = label;
+		si->ui.label_index = label;
 
 		align = gtk_alignment_new(1, 0, 0, 0);
 		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 2, 0, 2, 2);
@@ -106,6 +107,7 @@ GtkWidget *ui_monitor_create_dynamic_table(struct stk_xmlcfg *sxc)
 {
 	struct stk_stock *stock;
 	int tbl_cur_line = 0;
+	struct ge_index *idx;
 
 	GtkWidget *table = gtk_table_new(0, 0, FALSE);
 	gtk_table_set_col_spacings(GTK_TABLE(table), 5);
@@ -128,5 +130,42 @@ GtkWidget *ui_monitor_create_dynamic_table(struct stk_xmlcfg *sxc)
 		tbl_cur_line++;
 	}
 
+	for(idx = sxc->index_list.cqh_first; idx != (void *)&sxc->index_list;
+			idx = idx->list.cqe_next) {
+		GtkWidget *align;
+		GtkWidget *label;
+
+		if(!idx->visible)
+			continue;
+
+		align = gtk_alignment_new(1, 0, 0, 0);
+		gtk_alignment_set_padding(GTK_ALIGNMENT(align), 2, 0, 2, 2);
+		label = gtk_label_new("0");
+		gtk_container_add(GTK_CONTAINER(align), label);
+		gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, tbl_cur_line, tbl_cur_line + 1);
+		idx->ui.label_name = label;
+
+		tbl_cur_line++;
+	}
+
 	return table;
+}
+
+void ui_monitor_update(struct golden_eye *ge)
+{
+	struct ge_index *idx;
+	char buffer[16];
+
+	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
+			idx = idx->list.cqe_next) {
+		struct ge_idxdat *idxd = &idx->data;
+
+		snprintf(buffer, 15, "%.2f", idxd->index - idx->base);
+		gtk_label_set_text(GTK_LABEL(idx->ui.label_index), buffer);
+
+		snprintf(buffer, 15, "%.2f", idxd->roc);
+		gtk_label_set_text(GTK_LABEL(idx->ui.label_roc), buffer);
+
+		gtk_label_set_text(GTK_LABEL(idx->ui.label_name), idxd->name);
+	}
 }

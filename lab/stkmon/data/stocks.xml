@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <root>
 	<!-- 上证指数 -->
-	<index enable="true" visible="true" exchange="s_sh" code="000001" />
+	<index enable="true" visible="true" exchange="s_sh" code="000001" base="3100"/>
 
 	<!-- 工商银行 -->
 	<stock enable="true" visible="true" exchange="sh" code="601398"

@@ -247,6 +247,8 @@ gboolean hdlr_1s(gpointer *p)
 	calc_realtime_info(smxc);
 	calc_pr_info(smxc);
 
+	ui_monitor_update(smxc);
+
 	for(stock = smxc->stock_list.cqh_first; stock != (void *)&smxc->stock_list;
 			stock = stock->list.cqe_next) {
 		if(!stock->pull_data)

@@ -8,5 +8,6 @@
 int ui_show_dialog_info(GtkWidget *win, char *msg);
 GtkWidget *ui_monitor_create_info_panel(struct sm_xmlcfg *smxc);
 GtkWidget *ui_monitor_create_dynamic_table(struct stk_xmlcfg *sxc);
+void ui_monitor_update(struct golden_eye *ge);
 
 #endif

@@ -214,6 +214,7 @@ int load_xmlindex(xmlNodePtr node, void *data)
 
 	index->enable = cxml_get_prop_bool(node, "enable", 0);
 	index->visible = cxml_get_prop_bool(node, "visible", 0);
+	index->base = cxml_get_prop_integer(node, "base", 0);
 
 	CIRCLEQ_INSERT_TAIL(&ss->index_list, index, list);
 	ss->index_count++;

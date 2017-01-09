@@ -104,8 +104,9 @@ struct sm_stkui {
 };
 
 struct stk_idxui {
-	GtkWidget	*label_price;
+	GtkWidget	*label_index;
 	GtkWidget	*label_roc;
+	GtkWidget	*label_name;
 };
 
 struct stk_stkcfg {
@@ -141,6 +142,7 @@ struct stk_index {
 
 	short			enable;
 	short			visible;
+	int			base;
 
 	CIRCLEQ_ENTRY(stk_index)
 				list;
