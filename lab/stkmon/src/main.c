@@ -121,19 +121,6 @@ void create_popupmenu(GtkWidget *ebox, struct golden_eye *ge)
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
 
-GdkPixbuf *create_logo(const char *filename)
-{
-	GdkPixbuf *pb;
-	GError *error = NULL;
-
-	pb = gdk_pixbuf_new_from_file(filename, &error);
-	if(!pb) {
-		pr_err("create logo failed: %s\n", error->message);
-		g_error_free(error);
-	}
-	return pb;
-}
-
 /**
  *  _____ win __________________________
  * / ____ ebox _________________________
@@ -162,8 +149,6 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 
 	/* win */
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(win), "stkmon");
-	gtk_window_set_icon(GTK_WINDOW(win), create_logo("logo.png"));
 
 	/* ebox and mbox */
 	GtkWidget *ebox = gtk_event_box_new();
@@ -221,3 +206,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+
