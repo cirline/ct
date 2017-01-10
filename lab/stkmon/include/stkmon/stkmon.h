@@ -7,6 +7,8 @@
 #include <sys/queue.h>
 #include <gtk/gtk.h>
 
+#include "geye/ge.h"
+
 #define COLOR_RISE_1	"#FF5555"
 
 #define COLOR_RISE	"red"
@@ -47,6 +49,7 @@ struct stk_long {
 	long	l;
 };
 
+#define ge_stkdat	stk_stkdat
 struct stk_stkdat {
 	char	exchange[STK_EX_SZ];
 	char	code[STK_CODE_SZ];
@@ -107,6 +110,10 @@ struct stk_idxui {
 	GtkWidget	*label_index;
 	GtkWidget	*label_roc;
 	GtkWidget	*label_name;
+
+	GtkWidget	*index;
+	GtkWidget	*roc;
+	GtkWidget	*name;
 };
 
 struct stk_stkcfg {
@@ -117,6 +124,7 @@ struct stk_stkcfg {
 	struct stk_float	stop_loss;
 };
 
+#define ge_stock	stk_stock
 struct stk_stock {
 	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];
@@ -125,6 +133,7 @@ struct stk_stock {
 	struct stk_stkcfg	cfg;
 
 	struct sm_stkui ui;
+	struct ge_stkui		ui2;
 	void		*pull_data;	/* data pull from web, link to stk_stkdat_container */
 	float	chg_rate;
 	float	chg_rate_min;

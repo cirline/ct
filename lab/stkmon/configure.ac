@@ -2,11 +2,11 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([stkmon], [0.1], [chqiwei89@163.com])
+AC_INIT([golden eye], [0.2], [chqiwei89@163.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 
-PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.10)
+PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.0)
 PKG_CHECK_MODULES(XML, libxml-2.0 >= 2)
 
 # Checks for programs.

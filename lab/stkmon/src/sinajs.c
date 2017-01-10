@@ -164,7 +164,7 @@ static int sinajs_index_attach(struct sstkmon *ss, struct sinajs_index *index)
 }
 
 #undef sinajs_decode_debug
-#define sinajs_decode_debug(format, ...)	pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
+#define sinajs_decode_debug(format, ...)	//pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
 int sinajs_index_decode(char *pbuf, struct sinajs_index *index)
 {
 	char *sptr1, *sptr2;

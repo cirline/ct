@@ -1,3 +1,5 @@
+#define pr_fmt(fmt)	"slist   ] " fmt
+
 #include <gtk/gtk.h>
 
 #include <ccutils/log.h>
@@ -13,6 +15,28 @@ struct {
 } ui;
 
 struct sm_xmlcfg smxc;
+
+void slist_main_window(GtkWidget *widget, gpointer p)
+{
+	GtkBuilder *builder;
+	GtkWidget *win;
+
+	pr_info("%s\n", __func__);
+
+	builder = gtk_builder_new();
+	gtk_builder_add_from_file(builder, "layout/stock_list.glade", NULL);
+	win = GTK_WIDGET(gtk_builder_get_object(builder, "slist_main"));
+	gtk_builder_connect_signals(builder, NULL);
+
+	GtkWidget *label = gtk_label_new("test label");
+	GtkWidget *mbox = GTK_WIDGET(gtk_builder_get_object(builder, "slist_mbox"));
+	gtk_box_pack_start(GTK_BOX(mbox), label, FALSE, FALSE, 0);
+
+	g_object_unref(G_OBJECT(builder));
+	gtk_widget_show_all(win);
+	gtk_main();
+
+}
 
 void configure_save(GtkWidget *widget, gpointer p)
 {

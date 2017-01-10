@@ -16,6 +16,8 @@
 #include "stkmon/stkmon.h"
 #include "stkmon/stkxml.h"
 #include "stkmon/calc.h"
+#include "stkmon/stock_list.h"
+#include "geye/monitor.h"
 #include "config.h"
 
 #define WIN_OPACITY	0.4
@@ -101,7 +103,7 @@ static int main_event(GtkWidget *widget, GdkEvent *event, gpointer pointer)
 	return FALSE;
 }
 
-void create_popupmenu(GtkWidget *ebox)
+void create_popupmenu(GtkWidget *ebox, struct golden_eye *ge)
 {
 	GtkWidget *item;
 
@@ -116,6 +118,11 @@ void create_popupmenu(GtkWidget *ebox)
 	gtk_widget_show(item);
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item);
 	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(configure_main), &gx);
+
+	item = gtk_menu_item_new_with_label("monitor");
+	gtk_widget_show(item);
+	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item);
+	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(monitor_main_window), ge);
 
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
@@ -181,7 +188,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	GtkWidget *menubar = create_menubar(win);
 	gtk_box_pack_start(GTK_BOX(mbox), menubar, FALSE, FALSE, 0);
 
-	create_popupmenu(ebox);
+	create_popupmenu(ebox, smxc);
 
 	/* monitor */
 	GtkWidget *infobox = gtk_hbox_new(FALSE, 1);
@@ -212,7 +219,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_window_get_size(GTK_WINDOW(win), &width, &height);
 	pr_info("%d, %d, %d, %d\n", px, py, width, height);
 	smxc->ui.xpos = px * 2 - width - 50;
-	smxc->ui.ypos = py * 2 - height - 80;
+	smxc->ui.ypos = py * 2 - height - 120;
 	smxc->ui.width = width;
 	smxc->ui.height = height;
 	gtk_window_move(GTK_WINDOW(win), px * 2 - width - 50, py * 2 - height - 80);
@@ -309,17 +316,18 @@ gboolean hdlr_1s(gpointer *p)
 
 void on_window1_destroy(GtkWidget *widget, gpointer data)
 {
-	printf("%s\n", __func__);
+	pr_info("%s\n", __func__);
 	gtk_main_quit();
 }
 
 int main(int argc, char *argv[])
 {
-#if 1
 	struct sm_xmlcfg smxc;
 	struct sstkmon *ss = &smxc;
 
 	pr_pkg();
+	pr_info("GTK v%d.%d.%d\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
+	pr_info("Glib v%d.%d.%d\n", glib_major_version, glib_minor_version, glib_micro_version);
 
 	pr_info("load configure.\n");
 	load_xmlconfig(&smxc);
@@ -328,20 +336,6 @@ int main(int argc, char *argv[])
 
 	pr_info("start main ui.\n");
 	main_ui(argc, argv, &smxc);
-#else
-	GtkBuilder *builder;
-	GtkWidget *widget;
 
-	gtk_init(&argc, &argv);
-	builder = gtk_builder_new();
-	gtk_builder_add_from_file(builder, "layout/main.glade", NULL);
-	widget = GTK_WIDGET(gtk_builder_get_object(builder, "window1"));
-	gtk_builder_connect_signals(builder, NULL);
-
-	g_object_unref(G_OBJECT(builder));
-	gtk_widget_show(widget);
-	gtk_main();
-
-#endif
 	return 0;
 }

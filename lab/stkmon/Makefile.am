@@ -8,6 +8,7 @@ AM_CFLAGS = -O0 -rdynamic
 
 bin_PROGRAMS = stkmon_out
 stkmon_out_SOURCES = src/main.c \
+		     src/monitor.c \
 		     src/event.c \
 		     src/calc.c \
 		     src/ui.c \
