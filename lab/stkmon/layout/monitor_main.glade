@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 -->
+<!-- Generated with glade 3.16.1 -->
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <object class="GtkWindow" id="monitor_mwin">
     <property name="can_focus">False</property>
-    <property name="opacity">0.40000000000000002</property>
+    <property name="opacity">0.29999999999999999</property>
     <property name="title" translatable="yes">Golden eye</property>
     <property name="window_position">center</property>
     <property name="icon">../res/logo.png</property>
     <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
+    <signal name="event" handler="monitor_mwin_event_cb" swapped="no"/>
     <child>
       <object class="GtkEventBox" id="monitor_ebox">
         <property name="visible">True</property>
@@ -181,6 +182,33 @@
                 <property name="can_focus">False</property>
                 <property name="row_spacing">2</property>
                 <property name="column_spacing">5</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

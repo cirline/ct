@@ -7,8 +7,6 @@
 #include <sys/queue.h>
 #include <gtk/gtk.h>
 
-#include "geye/ge.h"
-
 #define COLOR_RISE_1	"#FF5555"
 
 #define COLOR_RISE	"red"
@@ -133,7 +131,11 @@ struct stk_stock {
 	struct stk_stkcfg	cfg;
 
 	struct sm_stkui ui;
-	struct ge_stkui		ui2;
+	struct {
+		GtkWidget	*price;
+		GtkWidget	*roc;
+		GtkWidget	*roc_lastbuy;
+	} ui2;
 	void		*pull_data;	/* data pull from web, link to stk_stkdat_container */
 	float	chg_rate;
 	float	chg_rate_min;

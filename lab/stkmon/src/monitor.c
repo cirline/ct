@@ -6,6 +6,22 @@
 
 #include "stkmon/stkmon.h"
 #include "stkmon/sinajs.h"
+#include "geye/ge.h"
+
+int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
+{
+	struct golden_eye_2 *ge;
+
+	ge = g_object_get_data(G_OBJECT(widget), "mdata");
+	if(!ge) {
+		pr_err("%s cannot get mdata\n", __func__);
+		return FALSE;
+	}
+
+	pr_info("%s, event type %d\n", ge->version, event->type);
+
+	return FALSE;
+}
 
 static GtkBuilder *ge_new_builder_from_file(char *fn)
 {
@@ -156,7 +172,9 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 
 		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
 		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
 		gtk_grid_attach(GTK_GRID(grid), align, 2, grid_cur_row, 1, 1);
+		idx->ui.name = label;
 
 		grid_cur_row++;
 	}
@@ -213,7 +231,7 @@ static monitor_move_window(GtkWidget *win, struct golden_eye *ge)
 	gtk_window_move(GTK_WINDOW(win), ge->ui.xpos, ge->ui.ypos);
 }
 
-void monitor_main_window(int argc, char *argv[], struct golden_eye *ge)
+void monitor_main_window(int argc, char *argv[], struct golden_eye_2 *ge)
 {
 	GtkBuilder *builder;
 	GtkWidget *win;
@@ -226,15 +244,17 @@ void monitor_main_window(int argc, char *argv[], struct golden_eye *ge)
 	win = GTK_WIDGET(gtk_builder_get_object(builder, "monitor_mwin"));
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
-	GtkWidget *infopanel = monitor_infopanel_create(builder, ge);
+	g_object_set_data(G_OBJECT(win), "mdata", ge);
 
-	g_timeout_add(10000, monitor_net_request, ge);
+	GtkWidget *infopanel = monitor_infopanel_create(builder, &ge->old);
+
+	g_timeout_add(10000, monitor_net_request, &ge->old);
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));
 	gtk_widget_show_all(win);
-	monitor_net_request(ge);
-	monitor_move_window(win, ge);
+	monitor_net_request(&ge->old);
+	monitor_move_window(win, &ge->old);
 
 	gtk_main();
 }
