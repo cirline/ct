@@ -7,6 +7,7 @@ struct ge_stkui {
 	GtkWidget	*price;
 	GtkWidget	*roc;
 	GtkWidget	*roc_lastbuy;
+	GtkWidget	*name;
 };
 
 struct ge_idxui {

@@ -11,7 +11,6 @@ stkmon_out_SOURCES = src/main.c \
 		     src/monitor.c \
 		     src/event.c \
 		     src/calc.c \
-		     src/ui.c \
 		     src/parser.c \
 		     src/stock_list.c \
 		     src/sinajs.c

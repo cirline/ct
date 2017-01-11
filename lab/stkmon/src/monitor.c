@@ -13,23 +13,24 @@
 int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
 	struct golden_eye_2 *ge;
+	GtkWidget *dynamic;
+	GtkBuilder *builder;
 
 	ge = g_object_get_data(G_OBJECT(widget), "mdata");
 	if(!ge) {
-		pr_err("%s cannot get mdata\n", __func__);
+		pr_err("%s cannot get widget data\n", __func__);
 		return FALSE;
 	}
 
 	switch(event->type) {
 	case GDK_ENTER_NOTIFY:
-		//gtk_widget_set_visible(sxc->ui.monitor.dynamic, TRUE);
+		gtk_widget_set_visible(ge->ui.monitor_dynamic, TRUE);
 		gtk_widget_set_opacity(widget, 1);
 		break;
 	case GDK_LEAVE_NOTIFY:
-		//gtk_widget_set_visible(sxc->ui.monitor.dynamic, FALSE);
+		gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
 		gtk_widget_set_opacity(widget, MONITOR_OPACITY);
-		//gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos, sxc->ui.ypos);
-		//gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width, sxc->ui.height);
+		gtk_window_resize(GTK_WINDOW(widget), 1, 1);
 		break;
 	case GDK_FOCUS_CHANGE:
 		if(gtk_window_is_active(GTK_WINDOW(widget)))
@@ -96,7 +97,7 @@ static void monitor_ui_update(struct golden_eye *ge)
 		snprintf(buffer, 15, "%.2f", idxd->diff);
 		gtk_label_set_text(GTK_LABEL(idx->ui.diff), buffer);
 
-		//gtk_label_set_text(GTK_LABEL(idx->ui.name), idxd->name);
+		gtk_label_set_text(GTK_LABEL(idx->ui.name), idxd->name);
 	}
 
 	/* update stock ui */
@@ -139,7 +140,7 @@ static void monitor_ui_update(struct golden_eye *ge)
 		gtk_widget_override_color(stock->ui2.price, GTK_STATE_NORMAL, &color);
 		gtk_widget_override_color(stock->ui2.roc, GTK_STATE_NORMAL, &color);
 
-		//gtk_label_set_text(GTK_LABEL(stock->ui.label_name), dat->name);
+		gtk_label_set_text(GTK_LABEL(stock->ui2.name), dat->name);
 	}
 }
 
@@ -162,15 +163,18 @@ static gboolean monitor_net_request(gpointer p)
  *  price     roc     roc_lastbuy
  * ---------------------
  */
-static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_eye *ge)
+static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_eye_2 *ge2)
 {
 	GtkBuilder *builder;
 	GtkWidget *grid;
+	GtkWidget *grid_dynamic;
 	struct ge_index *idx;
 	struct ge_stock *stock;
 	int grid_cur_row = 0;
+	struct golden_eye *ge = &ge2->old;
 
-	grid = GTK_WIDGET(gtk_builder_get_object(mbuilder, "monitor_grid"));
+	grid = GTK_WIDGET(gtk_builder_get_object(mbuilder, "monitor_fixed_info"));
+	grid_dynamic = GTK_WIDGET(gtk_builder_get_object(mbuilder, "monitor_dynamic_info"));
 
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
@@ -182,23 +186,25 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 
 		gtk_grid_insert_row(GTK_GRID(grid), grid_cur_row);
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 0, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 0, grid_cur_row, 1, 1);
 		idx->ui.index = label;
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 1, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 1, grid_cur_row, 1, 1);
 		idx->ui.roc = label;
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 2, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 2, grid_cur_row, 1, 1);
 		idx->ui.diff = label;
+
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
+		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
+		gtk_grid_attach(GTK_GRID(grid_dynamic), label, 0, grid_cur_row, 1, 1);
+		idx->ui.name = label;
 
 		grid_cur_row++;
 	}
@@ -213,35 +219,40 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 
 		gtk_grid_insert_row(GTK_GRID(grid), grid_cur_row);
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 0, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 0, grid_cur_row, 1, 1);
 		stock->ui2.price = label;
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 1, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 1, grid_cur_row, 1, 1);
 		stock->ui2.roc = label;
 
-		builder = ge_new_builder_from_file("layout/label/rightlabel.glade");
-		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
-		gtk_grid_attach(GTK_GRID(grid), align, 2, grid_cur_row, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), label, 2, grid_cur_row, 1, 1);
 		stock->ui2.roc_lastbuy = label;
+
+		builder = ge_new_builder_from_file("layout/label/label_right.glade");
+		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
+		gtk_grid_attach(GTK_GRID(grid_dynamic), label, 0, grid_cur_row, 1, 1);
+		stock->ui2.name = label;
 
 		grid_cur_row++;
 
 	}
 
+	ge2->ui.monitor_dynamic = grid_dynamic;
+
 	return grid;
 }
 
-static monitor_move_window(GtkWidget *win, struct golden_eye *ge)
+static monitor_move_window(GtkWidget *win, struct golden_eye_2 *ge2)
 {
 	int px, py;
 	int width, height;
+	struct golden_eye *ge = &ge2->old;
 
 	//GdkScreen *screen = gdk_screen_get_resolution();
 
@@ -250,8 +261,8 @@ static monitor_move_window(GtkWidget *win, struct golden_eye *ge)
 	pr_info("%d, %d, %d, %d\n", px * 2, py * 2, width, height);
 	ge->ui.xpos = px * 2 - width - 160;
 	ge->ui.ypos = py * 2 - height;
-	ge->ui.width = width;
-	ge->ui.height = height;
+	ge2->ui.width = width;
+	ge2->ui.height = height;
 	gtk_window_move(GTK_WINDOW(win), ge->ui.xpos, ge->ui.ypos);
 }
 
@@ -269,8 +280,9 @@ void monitor_main_window(int argc, char *argv[], struct golden_eye_2 *ge)
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
 	g_object_set_data(G_OBJECT(win), "mdata", ge);
+	g_object_set_data(G_OBJECT(win), "builder", builder);
 
-	GtkWidget *infopanel = monitor_infopanel_create(builder, &ge->old);
+	GtkWidget *infopanel = monitor_infopanel_create(builder, ge);
 
 	g_timeout_add(10000, monitor_net_request, &ge->old);
 	gtk_builder_connect_signals(builder, NULL);
@@ -278,7 +290,8 @@ void monitor_main_window(int argc, char *argv[], struct golden_eye_2 *ge)
 	g_object_unref(G_OBJECT(builder));
 	gtk_widget_show_all(win);
 	monitor_net_request(&ge->old);
-	monitor_move_window(win, &ge->old);
+	monitor_move_window(win, ge);
+	gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
 
 	gtk_main();
 }

@@ -21,8 +21,6 @@
 #include "geye/ge.h"
 #include "config.h"
 
-#define WIN_OPACITY	0.4
-
 static int gx = 99;
 
 void configure_main(GtkWidget *widget, gpointer p);
@@ -129,17 +127,7 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 
 	create_popupmenu(ebox, smxc);
 
-	/* monitor */
-	GtkWidget *infobox = gtk_hbox_new(FALSE, 1);
-	gtk_box_pack_start(GTK_BOX(mbox), infobox, FALSE, FALSE, 0);
-
-	GtkWidget *monitor_dynamic = ui_monitor_create_dynamic_table(smxc);		// dynamic
-	gtk_box_pack_start(GTK_BOX(infobox), monitor_dynamic, FALSE, FALSE, 0);
-	smxc->ui.monitor.dynamic = monitor_dynamic;
-	/* ui end */
-
 	gtk_widget_show_all(win);
-	gtk_widget_set_visible(GTK_WIDGET(monitor_dynamic), FALSE);
 
 	gtk_main();
 
