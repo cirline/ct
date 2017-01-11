@@ -69,40 +69,6 @@ int show_popup(GtkWidget *widget, GdkEvent *event)
 	return FALSE;
 }
 
-static int main_event(GtkWidget *widget, GdkEvent *event, gpointer pointer)
-{
-	gboolean focus;
-	int xpos, ypos;
-	int width, height;
-	struct stk_xmlcfg *sxc = pointer;
-
-	switch(event->type) {
-	case GDK_ENTER_NOTIFY:
-		gtk_widget_set_visible(sxc->ui.monitor.dynamic, TRUE);
-		gtk_window_set_opacity(GTK_WINDOW(widget), 1);
-		//gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos - 100, sxc->ui.ypos);
-		//gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width + 100, sxc->ui.height);
-		break;
-	case GDK_LEAVE_NOTIFY:
-		gtk_widget_set_visible(sxc->ui.monitor.dynamic, FALSE);
-		gtk_window_set_opacity(GTK_WINDOW(widget), WIN_OPACITY);
-		gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos, sxc->ui.ypos);
-		gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width, sxc->ui.height);
-		break;
-	case GDK_FOCUS_CHANGE:
-		if(gtk_window_is_active(GTK_WINDOW(widget)))
-			gtk_window_set_opacity(GTK_WINDOW(widget), WIN_OPACITY);
-		else
-			gtk_window_set_opacity(GTK_WINDOW(widget), 1);
-		break;
-	default:
-		pr_debug("unimpl event type = %d\n", event->type);
-	}
-
-
-	return FALSE;
-}
-
 void create_popupmenu(GtkWidget *ebox, struct golden_eye *ge)
 {
 	GtkWidget *item;
@@ -171,8 +137,6 @@ int main_ui(int argc, char *argv[], struct sm_xmlcfg *smxc)
 	gtk_box_pack_start(GTK_BOX(infobox), monitor_dynamic, FALSE, FALSE, 0);
 	smxc->ui.monitor.dynamic = monitor_dynamic;
 	/* ui end */
-
-	g_signal_connect(win, "event", G_CALLBACK(main_event), smxc);
 
 	gtk_widget_show_all(win);
 	gtk_widget_set_visible(GTK_WIDGET(monitor_dynamic), FALSE);

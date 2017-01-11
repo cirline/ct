@@ -8,6 +8,8 @@
 #include "stkmon/sinajs.h"
 #include "geye/ge.h"
 
+#define MONITOR_OPACITY		0.3
+
 int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
 	struct golden_eye_2 *ge;
@@ -18,7 +20,26 @@ int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 		return FALSE;
 	}
 
-	pr_info("%s, event type %d\n", ge->version, event->type);
+	switch(event->type) {
+	case GDK_ENTER_NOTIFY:
+		//gtk_widget_set_visible(sxc->ui.monitor.dynamic, TRUE);
+		gtk_widget_set_opacity(widget, 1);
+		break;
+	case GDK_LEAVE_NOTIFY:
+		//gtk_widget_set_visible(sxc->ui.monitor.dynamic, FALSE);
+		gtk_widget_set_opacity(widget, MONITOR_OPACITY);
+		//gtk_window_move(GTK_WINDOW(widget), sxc->ui.xpos, sxc->ui.ypos);
+		//gtk_window_resize(GTK_WINDOW(widget), sxc->ui.width, sxc->ui.height);
+		break;
+	case GDK_FOCUS_CHANGE:
+		if(gtk_window_is_active(GTK_WINDOW(widget)))
+			gtk_widget_set_opacity(widget, MONITOR_OPACITY);
+		else
+			gtk_widget_set_opacity(widget, 1);
+		break;
+	default:
+		pr_debug("unimpl event type = %d\n", event->type);
+	}
 
 	return FALSE;
 }
@@ -71,6 +92,9 @@ static void monitor_ui_update(struct golden_eye *ge)
 
 		snprintf(buffer, 15, "%.2f", idxd->roc);
 		gtk_label_set_text(GTK_LABEL(idx->ui.roc), buffer);
+
+		snprintf(buffer, 15, "%.2f", idxd->diff);
+		gtk_label_set_text(GTK_LABEL(idx->ui.diff), buffer);
 
 		//gtk_label_set_text(GTK_LABEL(idx->ui.name), idxd->name);
 	}
@@ -174,7 +198,7 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 		align = GTK_WIDGET(gtk_builder_get_object(builder, "align"));
 		label = GTK_WIDGET(gtk_builder_get_object(builder, "label"));
 		gtk_grid_attach(GTK_GRID(grid), align, 2, grid_cur_row, 1, 1);
-		idx->ui.name = label;
+		idx->ui.diff = label;
 
 		grid_cur_row++;
 	}

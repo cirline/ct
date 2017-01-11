@@ -25,7 +25,7 @@ int calc_pr_info(struct stk_xmlcfg *sxc)
 			idx = idx->list.cqe_next) {
 
 		idxd = &idx->data;
-		pr_info("%16s %8.3f %12.2f\n", idxd->code, idxd->roc, idxd->index_diff);
+		pr_info("%16s %8.3f %12.2f\n", idxd->code, idxd->roc, idxd->diff);
 	}
 	pr_info("\n");
 

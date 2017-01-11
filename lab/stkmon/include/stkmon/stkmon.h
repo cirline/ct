@@ -7,12 +7,12 @@
 #include <sys/queue.h>
 #include <gtk/gtk.h>
 
+#include "geye/ge_head.h"
+
 #define COLOR_RISE_1	"#FF5555"
 
-#define COLOR_RISE	"red"
 #define COLOR_DROP	"gray"
 #define COLOR_EQ	"black"
-#define COLOR_STOPP	"red"
 #define COLOR_STOPL	"green"
 
 #define SM_DEFAULT_DELAY_MS	5
@@ -83,7 +83,7 @@ struct stk_idxdat {
 	char	code[STK_CODE_SZ];
 	char	name[STK_NAME_SZ];
 	float	index;
-	float	index_diff;		/* index(today) - index(yesterday) */
+	float	diff;			/* index(today) - index(yesterday) */
 	float	roc;			/* rate of change */
 	long	volume;
 	long	amount;
@@ -104,16 +104,6 @@ struct sm_stkui {
 	GtkWidget	*label_name;
 };
 
-struct stk_idxui {
-	GtkWidget	*label_index;
-	GtkWidget	*label_roc;
-	GtkWidget	*label_name;
-
-	GtkWidget	*index;
-	GtkWidget	*roc;
-	GtkWidget	*name;
-};
-
 struct stk_stkcfg {
 	struct stk_float	min_price;
 	struct stk_float	aim_price;
@@ -131,11 +121,7 @@ struct stk_stock {
 	struct stk_stkcfg	cfg;
 
 	struct sm_stkui ui;
-	struct {
-		GtkWidget	*price;
-		GtkWidget	*roc;
-		GtkWidget	*roc_lastbuy;
-	} ui2;
+	struct ge_stkui		ui2;
 	void		*pull_data;	/* data pull from web, link to stk_stkdat_container */
 	float	chg_rate;
 	float	chg_rate_min;
@@ -149,7 +135,7 @@ struct stk_stock {
 #define ge_index	stk_index
 struct stk_index {
 	struct stk_idxdat	data;
-	struct stk_idxui	ui;
+	struct ge_idxui		ui;
 
 	short			enable;
 	short			visible;

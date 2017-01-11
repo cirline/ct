@@ -59,7 +59,7 @@ GtkWidget *ui_monitor_create_dynamic_table(struct stk_xmlcfg *sxc)
 		label = gtk_label_new("0");
 		gtk_container_add(GTK_CONTAINER(align), label);
 		gtk_table_attach_defaults(GTK_TABLE(table), align, 0, 1, tbl_cur_line, tbl_cur_line + 1);
-		idx->ui.label_name = label;
+		//idx->ui.label_name = label;
 
 		tbl_cur_line++;
 	}

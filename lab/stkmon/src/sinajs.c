@@ -208,7 +208,7 @@ int sinajs_index_decode(char *pbuf, struct sinajs_index *index)
 	cstr_token(token, NULL, ",", &sptr2, atof, idxd->index);
 	sinajs_decode_debug("4, token = %s\n", token);
 	/* diff */
-	cstr_token(token, NULL, ",", &sptr2, atof, idxd->index_diff);
+	cstr_token(token, NULL, ",", &sptr2, atof, idxd->diff);
 	sinajs_decode_debug("5, token = %s\n", token);
 	/* roc */
 	cstr_token(token, NULL, ",", &sptr2, atof, idxd->roc);
