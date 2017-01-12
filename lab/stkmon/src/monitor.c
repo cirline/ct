@@ -1,6 +1,7 @@
 #define pr_fmt(fmt)	"monitor ] " fmt
 
 #include <errno.h>
+#include <stdlib.h>
 #include <math.h>
 #include <gtk/gtk.h>
 #include <ccutils/log.h>
@@ -76,19 +77,21 @@ static int monitor_netdata_update(struct golden_eye *ge)
 	return 0;
 }
 
-static void monitor_ui_update(struct golden_eye *ge)
+static void monitor_ui_update(struct golden_eye_2 *ge_)
 {
+	struct golden_eye *ge = &ge_->old;
 	struct ge_index *idx;
 	struct ge_stock *stock;
 	struct ge_stkdat *dat;
 	GdkRGBA color;
 	char buffer[16];
+	char *pbuf;
 
 	/* updata index ui */
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
 		struct ge_idxdat *idxd = &idx->data;
-
+#if 0
 		gdk_rgba_parse(&color, idxd->roc > 0 ? COLOR_RISE : COLOR_DROP);
 
 		snprintf(buffer, 15, "%.2f", idxd->index - idx->base);
@@ -104,6 +107,11 @@ static void monitor_ui_update(struct golden_eye *ge)
 		gtk_widget_override_color(idx->ui.diff, GTK_STATE_NORMAL, &color);
 
 		gtk_label_set_text(GTK_LABEL(idx->ui.name), idxd->name);
+#endif
+		if(asprintf(&pbuf, "%.2f,%.2f,%.2f", idxd->roc, idxd->index, idxd->diff) > 0) {
+			gtk_window_set_title(GTK_WINDOW(ge_->ui.win), pbuf);
+			free(pbuf);
+		}
 	}
 
 	/* update stock ui */
@@ -153,12 +161,13 @@ static void monitor_ui_update(struct golden_eye *ge)
 static gboolean monitor_net_request(gpointer p)
 {
 	int rc;
+	struct golden_eye_2 *ge = p;
 
-	rc = monitor_netdata_update(p);
+	rc = monitor_netdata_update(&ge->old);
 	if(rc < 0)
 		return TRUE;
 
-	monitor_ui_update(p);
+	monitor_ui_update(ge);
 	return TRUE;
 
 }
@@ -181,7 +190,7 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 
 	grid = GTK_WIDGET(gtk_builder_get_object(mbuilder, "monitor_fixed_info"));
 	grid_dynamic = GTK_WIDGET(gtk_builder_get_object(mbuilder, "monitor_dynamic_info"));
-
+#if 0
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
 		GtkWidget *align;
@@ -214,6 +223,7 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 
 		grid_cur_row++;
 	}
+#endif
 
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
@@ -285,17 +295,19 @@ void monitor_main_window(int argc, char *argv[], struct golden_eye_2 *ge)
 	win = GTK_WIDGET(gtk_builder_get_object(builder, "monitor_mwin"));
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
+	ge->ui.win = win;
 	g_object_set_data(G_OBJECT(win), "mdata", ge);
 	g_object_set_data(G_OBJECT(win), "builder", builder);
 
 	GtkWidget *infopanel = monitor_infopanel_create(builder, ge);
 
-	g_timeout_add(10000, monitor_net_request, &ge->old);
+	g_timeout_add(10000, monitor_net_request, ge);
 	gtk_builder_connect_signals(builder, NULL);
 
+	g_object_set_data(G_OBJECT(win), "builder", NULL);
 	g_object_unref(G_OBJECT(builder));
 	gtk_widget_show_all(win);
-	monitor_net_request(&ge->old);
+	monitor_net_request(ge);
 	monitor_move_window(win, ge);
 	gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
 

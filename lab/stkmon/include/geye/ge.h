@@ -14,6 +14,8 @@ struct ge_mainui {
 	int		width;
 	int		height;
 	GtkWidget	*monitor_dynamic;
+
+	GtkWidget	*win;
 };
 
 struct golden_eye_2 {
