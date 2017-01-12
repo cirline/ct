@@ -9,15 +9,6 @@
 
 #include "geye/ge_head.h"
 
-#define COLOR_RISE_1	"#FF5555"
-
-#define COLOR_DROP	"gray"
-#define COLOR_EQ	"black"
-#define COLOR_STOPL	"green"
-
-#define SM_DEFAULT_DELAY_MS	5
-#define SM_DEFAULT_INTERVAL	5000
-
 #define SM_CODE_SZ	16
 #define SM_STKEX_SZ	8
 #define SM_PRICE_SZ	8

@@ -4,8 +4,11 @@
 #include <gtk/gtk.h>
 #include "stkmon/stkmon.h"
 
-#define COLOR_RISE	"black"		// red
-#define COLOR_STOPP	"black"		// red
+#define COLOR_RISE	"#000000"		// red
+#define COLOR_STOPP	"#ff0000"		// red
+#define COLOR_EQ	"black"
+#define COLOR_DROP	"#888888"		//"gray"
+#define COLOR_STOPL	"green"
 
 struct ge_mainui {
 	int		width;

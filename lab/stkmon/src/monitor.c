@@ -1,6 +1,7 @@
 #define pr_fmt(fmt)	"monitor ] " fmt
 
 #include <errno.h>
+#include <math.h>
 #include <gtk/gtk.h>
 #include <ccutils/log.h>
 
@@ -8,7 +9,7 @@
 #include "stkmon/sinajs.h"
 #include "geye/ge.h"
 
-#define MONITOR_OPACITY		0.3
+#define MONITOR_OPACITY		0.4
 
 int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
@@ -88,14 +89,19 @@ static void monitor_ui_update(struct golden_eye *ge)
 			idx = idx->list.cqe_next) {
 		struct ge_idxdat *idxd = &idx->data;
 
+		gdk_rgba_parse(&color, idxd->roc > 0 ? COLOR_RISE : COLOR_DROP);
+
 		snprintf(buffer, 15, "%.2f", idxd->index - idx->base);
 		gtk_label_set_text(GTK_LABEL(idx->ui.index), buffer);
+		gtk_widget_override_color(idx->ui.index, GTK_STATE_NORMAL, &color);
 
-		snprintf(buffer, 15, "%.2f", idxd->roc);
+		snprintf(buffer, 15, "%.2f", fabsf(idxd->roc));
 		gtk_label_set_text(GTK_LABEL(idx->ui.roc), buffer);
+		gtk_widget_override_color(idx->ui.roc, GTK_STATE_NORMAL, &color);
 
-		snprintf(buffer, 15, "%.2f", idxd->diff);
+		snprintf(buffer, 15, "%.2f", fabsf(idxd->diff));
 		gtk_label_set_text(GTK_LABEL(idx->ui.diff), buffer);
+		gtk_widget_override_color(idx->ui.diff, GTK_STATE_NORMAL, &color);
 
 		gtk_label_set_text(GTK_LABEL(idx->ui.name), idxd->name);
 	}
@@ -113,14 +119,14 @@ static void monitor_ui_update(struct golden_eye *ge)
 		gtk_label_set_text(GTK_LABEL(stock->ui2.price), buffer);
 
 		/* roc */
-		sprintf(buffer, "%.2f", stock->chg_rate * 100);
+		sprintf(buffer, "%.2f", fabsf(stock->chg_rate * 100));
 		gtk_label_set_text(GTK_LABEL(stock->ui2.roc), buffer);
 
 		/* roc_lastbuy */
 		float stop_profit = stock->cfg.stop_profit.f;
 		float stop_loss = stock->cfg.stop_loss.f;
 		float roc_lastbuy = stock->chg_rate_min;
-		sprintf(buffer, "%.1f", roc_lastbuy * 100);
+		sprintf(buffer, "%.1f", fabsf(roc_lastbuy * 100));
 		gtk_label_set_text(GTK_LABEL(stock->ui2.roc_lastbuy), buffer);
 
 		if(roc_lastbuy >= stop_profit - 1)
