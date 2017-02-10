@@ -60,6 +60,8 @@ lab/filesync
 # automake
 *_demo
 *_out
+*_out.*
+
 .deps
 .dirstamp
 .libs
