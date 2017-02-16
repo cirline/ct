@@ -6,8 +6,9 @@ AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/data/"'
 
 AM_CFLAGS = -O0 -rdynamic
 
-bin_PROGRAMS = stkmon_out
-stkmon_out_SOURCES = src/main.c \
+bin_PROGRAMS = geye_out
+geye_out_SOURCES = \
+		     src/main.c \
 		     src/monitor.c \
 		     src/event.c \
 		     src/calc.c \
@@ -15,7 +16,12 @@ stkmon_out_SOURCES = src/main.c \
 		     src/stock_list.c \
 		     src/sinajs.c
 
-stkmon_out_LDADD = -lccutils -lpthread -ldl -liconv
-stkmon_out_LDADD += $(GTK_LIBS)
-stkmon_out_LDADD += $(XML_LIBS)
+geye_out_LDADD = \
+		 -lccutils -lpthread -ldl -liconv
+
+geye_out_LDADD += \
+		  $(GTK_LIBS)
+
+geye_out_LDADD += \
+		  $(XML_LIBS)
 
