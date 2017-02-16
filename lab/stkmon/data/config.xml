@@ -1,0 +1,10 @@
+<root>
+    <color>
+        <rise>#000000</rise>
+        <drop>#888888</drop>
+        <stop_profit>#ff0000</stop_profit>
+        <stop_loss>#444444</stop_loss>
+    </color>
+
+
+</root>

@@ -10,7 +10,7 @@
 #include "stkmon/sinajs.h"
 #include "geye/ge.h"
 
-#define MONITOR_OPACITY		0.4
+#define MONITOR_OPACITY		0.2
 
 int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
@@ -301,7 +301,7 @@ void monitor_main_window(int argc, char *argv[], struct golden_eye_2 *ge)
 
 	GtkWidget *infopanel = monitor_infopanel_create(builder, ge);
 
-	g_timeout_add(10000, monitor_net_request, ge);
+	g_timeout_add(15500, monitor_net_request, ge);
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_set_data(G_OBJECT(win), "builder", NULL);
