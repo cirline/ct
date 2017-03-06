@@ -10,6 +10,7 @@ static void do_drawing(GtkWidget *widget, cairo_t *cr)
 	static gdouble scale = 1;
 	static gdouble delta = 0.01;
 
+# if 0
 	GtkWidget *win = gtk_widget_get_toplevel(widget);
 
 	gint w, h;
@@ -36,6 +37,31 @@ static void do_drawing(GtkWidget *widget, cairo_t *cr)
 	cairo_set_source_rgb(cr, 0, 0, 1);
 	cairo_move_to(cr, 21, 121);
 	cairo_show_text(cr, "hello line 4");
+	/* gradient text */
+	gint th = 90;
+	cairo_set_font_size(cr, th);
+	cairo_pattern_t *pat = cairo_pattern_create_linear(0, 15, 0, th * 0.8);
+	cairo_pattern_set_extend(pat, CAIRO_EXTEND_REPEAT);
+	cairo_pattern_add_color_stop_rgb(pat, 0, 1, 0.6, 0);
+	cairo_pattern_add_color_stop_rgb(pat, 0.5, 1, 0.3, 0);
+
+	cairo_move_to(cr, 15, 180);
+	cairo_text_path(cr, "zetcode");
+	cairo_set_source(cr, pat);
+	cairo_fill(cr);
+
+#endif
+
+	/* glyphs */
+	cairo_glyph_t glyphs[20 * 35];
+	gint i, x, y;
+	for(i = y = 0; y < 20; y++) {
+		for(x = 0; x < 35; x++) {
+			glyphs[i++] = (cairo_glyph_t) {i, x * 15 + 20, y * 18 + 20};
+		}
+	}
+
+	cairo_show_glyphs(cr, glyphs, 20 * 35);
 }
 
 static gboolean timer_handler(GtkWidget *widget)
