@@ -19,6 +19,7 @@
 #include "stkmon/stock_list.h"
 #include "geye/monitor.h"
 #include "geye/ge.h"
+#include "geye/ui.h"
 #include "config.h"
 
 static int gx = 99;
@@ -140,7 +141,7 @@ void on_window1_destroy(GtkWidget *widget, gpointer data)
 	gtk_main_quit();
 }
 
-int main(int argc, char *argv[])
+int old_main(int argc, char *argv[])
 {
 	struct golden_eye_2 ge;
 	struct golden_eye *ss = &ge.old;
@@ -157,7 +158,8 @@ int main(int argc, char *argv[])
 	ss->pull_index_data = sinajs_pull_index_data;
 
 	pr_info("start main ui.\n");
-	monitor_main_window(argc, argv, &ge);
+	ui_window_start(argc, argv, &ge);
+	//monitor_main_window(argc, argv, &ge);
 
 	return 0;
 }
