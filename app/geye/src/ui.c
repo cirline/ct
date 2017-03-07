@@ -1,4 +1,4 @@
-#define pr_fmt(fmt)	"monitor ] " fmt
+#define pr_fmt(fmt)	"ui      ] " fmt
 
 #include <errno.h>
 #include <stdlib.h>
@@ -10,35 +10,47 @@
 #include "stkmon/sinajs.h"
 #include "geye/ge.h"
 
-#define MONITOR_OPACITY		0.2
+#define MONITOR_OPACITY		0.4
 
-static int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
+static int ui_window_set_active_status(GtkWidget *widget, int active)
 {
 	struct golden_eye_2 *ge;
-	GtkWidget *dynamic;
-	GtkBuilder *builder;
 
 	ge = g_object_get_data(G_OBJECT(widget), "mdata");
 	if(!ge) {
 		pr_err("%s cannot get widget data\n", __func__);
-		return FALSE;
+		return - ENODATA;
 	}
 
-	switch(event->type) {
-	case GDK_ENTER_NOTIFY:
+	if(active) {
 		gtk_widget_set_visible(ge->ui.monitor_dynamic, TRUE);
 		gtk_widget_set_opacity(widget, 1);
-		break;
-	case GDK_LEAVE_NOTIFY:
+		gtk_window_set_decorated(GTK_WINDOW(widget), TRUE);
+	} else {
 		gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
 		gtk_widget_set_opacity(widget, MONITOR_OPACITY);
 		gtk_window_resize(GTK_WINDOW(widget), 1, 1);
+		gtk_window_set_decorated(GTK_WINDOW(widget), FALSE);
+	}
+
+	return 0;
+}
+
+int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
+{
+	switch(event->type) {
+	case GDK_ENTER_NOTIFY:
+		ui_window_set_active_status(widget, 1);
+		break;
+	case GDK_LEAVE_NOTIFY:
+		ui_window_set_active_status(widget, 0);
 		break;
 	case GDK_FOCUS_CHANGE:
-		if(gtk_window_is_active(GTK_WINDOW(widget)))
-			gtk_widget_set_opacity(widget, MONITOR_OPACITY);
-		else
-			gtk_widget_set_opacity(widget, 1);
+		if(gtk_window_is_active(GTK_WINDOW(widget))) {
+			ui_window_set_active_status(widget, 0);
+		} else {
+			ui_window_set_active_status(widget, 1);
+		}
 		break;
 	default:
 		pr_debug("unimpl event type = %d\n", event->type);

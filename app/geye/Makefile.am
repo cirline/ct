@@ -16,7 +16,6 @@ geye_out_SOURCES = \
 		   src/ui.c \
 		   src/main.c \
 		     $(OLD_PATH)/src/main.c \
-		     $(OLD_PATH)/src/monitor.c \
 		     $(OLD_PATH)/src/event.c \
 		     $(OLD_PATH)/src/calc.c \
 		     $(OLD_PATH)/src/parser.c \
