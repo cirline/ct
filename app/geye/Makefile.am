@@ -10,7 +10,6 @@ AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/$(OLD_PATH)/data/"'
 
 AM_CFLAGS = -O0 -rdynamic
 
-
 bin_PROGRAMS = geye_out
 geye_out_SOURCES = \
 		   src/ui.c \

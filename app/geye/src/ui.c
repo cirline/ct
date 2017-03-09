@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <gtk/gtk.h>
+#include <cairo.h>
 #include <ccutils/log.h>
 
 #include "stkmon/stkmon.h"
@@ -89,6 +90,49 @@ static int monitor_netdata_update(struct golden_eye *ge)
 	return 0;
 }
 
+static gboolean ui_icon_cycle_display(struct golden_eye_2 *ge, float index, float roc)
+{
+	cairo_surface_t *surface;
+	cairo_t *cr;
+	cairo_text_extents_t extents;
+	float ystart;
+	char buf[16];
+	const gap = 16;
+
+	int index_dec = (int)(index * 100) % 100;
+
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 64, 64);
+	cr = cairo_create(surface);
+	cairo_set_source_rgb(cr, 0, 0 ,0);
+	cairo_set_font_size(cr, 16);
+
+	snprintf(buf, 15, "%.2f", roc);
+	cairo_text_extents(cr, buf, &extents);
+	ystart = 32 - (gap + extents.height * 3) / 2 + extents.height;
+	cairo_move_to(cr, 32 - extents.width / 2, ystart);
+	cairo_show_text(cr, buf);
+
+	snprintf(buf, 15, "%d", (int)index % 1000);
+	cairo_text_extents(cr, buf, &extents);
+	ystart += extents.height + gap / 2;
+	cairo_move_to(cr, 32 - extents.width / 2, ystart);
+	cairo_show_text(cr, buf);
+
+	snprintf(buf, 15, "%d", index_dec);
+	cairo_text_extents(cr, "34", &extents);
+	ystart += extents.height + gap / 2;
+	cairo_move_to(cr, 32 - extents.width / 2, ystart);
+	cairo_show_text(cr, "34");
+
+	cairo_surface_write_to_png(surface, "icon_tmp.png");
+
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+	//GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file("icon_tmp.png", NULL);
+	gtk_window_set_icon_from_file(GTK_WINDOW(ge->ui.win), "icon_tmp.png", NULL);
+}
+
 static void monitor_ui_update(struct golden_eye_2 *ge_)
 {
 	struct golden_eye *ge = &ge_->old;
@@ -98,6 +142,8 @@ static void monitor_ui_update(struct golden_eye_2 *ge_)
 	GdkRGBA color;
 	char buffer[16];
 	char *pbuf;
+
+	pr_info("%s, in\n", __func__);
 
 	/* updata index ui */
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
@@ -124,6 +170,8 @@ static void monitor_ui_update(struct golden_eye_2 *ge_)
 			gtk_window_set_title(GTK_WINDOW(ge_->ui.win), pbuf);
 			free(pbuf);
 		}
+
+		ui_icon_cycle_display(ge_, idxd->index, idxd->roc);
 	}
 
 	/* update stock ui */
@@ -181,7 +229,6 @@ static gboolean monitor_net_request(gpointer p)
 
 	monitor_ui_update(ge);
 	return TRUE;
-
 }
 
 /*
@@ -327,6 +374,7 @@ void ui_window_start(int argc, char *argv[], struct golden_eye_2 *ge)
 	GtkWidget *infopanel = monitor_infopanel_create(builder, ge);
 
 	g_timeout_add(15500, monitor_net_request, ge);
+
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_set_data(G_OBJECT(win), "builder", NULL);

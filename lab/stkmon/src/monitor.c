@@ -12,41 +12,6 @@
 
 #define MONITOR_OPACITY		0.2
 
-int monitor_mwin_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
-{
-	struct golden_eye_2 *ge;
-	GtkWidget *dynamic;
-	GtkBuilder *builder;
-
-	ge = g_object_get_data(G_OBJECT(widget), "mdata");
-	if(!ge) {
-		pr_err("%s cannot get widget data\n", __func__);
-		return FALSE;
-	}
-
-	switch(event->type) {
-	case GDK_ENTER_NOTIFY:
-		gtk_widget_set_visible(ge->ui.monitor_dynamic, TRUE);
-		gtk_widget_set_opacity(widget, 1);
-		break;
-	case GDK_LEAVE_NOTIFY:
-		gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
-		gtk_widget_set_opacity(widget, MONITOR_OPACITY);
-		gtk_window_resize(GTK_WINDOW(widget), 1, 1);
-		break;
-	case GDK_FOCUS_CHANGE:
-		if(gtk_window_is_active(GTK_WINDOW(widget)))
-			gtk_widget_set_opacity(widget, MONITOR_OPACITY);
-		else
-			gtk_widget_set_opacity(widget, 1);
-		break;
-	default:
-		pr_debug("unimpl event type = %d\n", event->type);
-	}
-
-	return FALSE;
-}
-
 static GtkBuilder *ge_new_builder_from_file(char *fn)
 {
 	GtkBuilder *builder;
