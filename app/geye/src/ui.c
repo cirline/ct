@@ -1,6 +1,9 @@
 #define pr_fmt(fmt)	"ui      ] " fmt
 
+#define _GNU_SOURCE
+
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <gtk/gtk.h>
@@ -10,6 +13,8 @@
 #include "stkmon/stkmon.h"
 #include "stkmon/sinajs.h"
 #include "geye/ge.h"
+#include "geye/event.h"
+#include "geye/calc.h"
 
 #define MONITOR_OPACITY		0.4
 
@@ -97,7 +102,7 @@ static gboolean ui_icon_cycle_display(struct golden_eye_2 *ge, float index, floa
 	cairo_text_extents_t extents;
 	float ystart;
 	char buf[16];
-	const gap = 16;
+	const int gap = 16;
 
 	int index_dec = (int)(index * 100) % 100;
 
@@ -119,17 +124,16 @@ static gboolean ui_icon_cycle_display(struct golden_eye_2 *ge, float index, floa
 	cairo_show_text(cr, buf);
 
 	snprintf(buf, 15, "%d", index_dec);
-	cairo_text_extents(cr, "34", &extents);
+	cairo_text_extents(cr, buf, &extents);
 	ystart += extents.height + gap / 2;
 	cairo_move_to(cr, 32 - extents.width / 2, ystart);
-	cairo_show_text(cr, "34");
+	cairo_show_text(cr, buf);
 
 	cairo_surface_write_to_png(surface, "icon_tmp.png");
 
 	cairo_destroy(cr);
 	cairo_surface_destroy(surface);
 
-	//GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file("icon_tmp.png", NULL);
 	gtk_window_set_icon_from_file(GTK_WINDOW(ge->ui.win), "icon_tmp.png", NULL);
 }
 
@@ -171,7 +175,7 @@ static void monitor_ui_update(struct golden_eye_2 *ge_)
 			free(pbuf);
 		}
 
-		ui_icon_cycle_display(ge_, idxd->index, idxd->roc);
+		//ui_icon_cycle_display(ge_, idxd->index, idxd->roc);
 	}
 
 	/* update stock ui */
@@ -352,17 +356,18 @@ static void ui_visual_setup(GtkWidget *widget)
 		gtk_widget_set_visual(widget, visual);
 }
 
-void ui_window_start(int argc, char *argv[], struct golden_eye_2 *ge)
+void ui_window_start(GtkApplication *app, struct golden_eye_2 *ge)
 {
 	GtkBuilder *builder;
 	GtkWidget *win;
 
 	pr_info("%s\n", __func__);
 
-	gtk_init(&argc, &argv);
 	builder = gtk_builder_new();
 	gtk_builder_add_from_file(builder, "layout/monitor_main.glade", NULL);
 	win = GTK_WIDGET(gtk_builder_get_object(builder, "monitor_mwin"));
+	gtk_application_add_window(app, GTK_WINDOW(win));
+
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 
 	ui_visual_setup(win);
@@ -385,7 +390,5 @@ void ui_window_start(int argc, char *argv[], struct golden_eye_2 *ge)
 	monitor_net_request(ge);
 	monitor_move_window(win, ge);
 	gtk_widget_set_visible(ge->ui.monitor_dynamic, FALSE);
-
-	gtk_main();
 }
 
