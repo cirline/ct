@@ -40,10 +40,6 @@ void slist_main_window(GtkWidget *widget, gpointer p)
 
 void configure_save(GtkWidget *widget, gpointer p)
 {
-	g_printf("%s\n", __func__);
-
-	//smxc.delay_ms = (char *)gtk_entry_get_text(GTK_ENTRY(ui.entry_delay_ms));
-
 	save_xmlconfig(&smxc);
 }
 
@@ -130,7 +126,6 @@ void configure_main(GtkWidget *widget, gpointer p)
 	struct sm_xmlcfg smxc;
 	int curcol;
 
-	g_printf("%s\n", __func__);
 	load_xmlconfig(&smxc);
 
 	GtkWidget *win = gtk_window_new(GTK_WINDOW_TOPLEVEL);

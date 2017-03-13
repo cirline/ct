@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "geye/ge.h"
+#include "geye/market.h"
 
 
 static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
@@ -14,6 +15,8 @@ static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 	extern int old_main(GtkApplication *app, gpointer p);
 
 	old_main(app, ge);
+
+	market_ui_start(app, ge);
 
 	pr_info("%s end\n", __func__);
 }

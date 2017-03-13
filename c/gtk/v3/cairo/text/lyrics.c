@@ -91,6 +91,9 @@ int main(int argc, char *argv[])
 
 	win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+	GdkPixbuf pixbuf = gdk_pixbuf_new_from_file();
+	gtk_window_set_icon();
+
 	darea = gtk_drawing_area_new();
 	gtk_container_add(GTK_CONTAINER(win), darea);
 

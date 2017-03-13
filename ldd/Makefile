@@ -31,6 +31,7 @@ obj-m += workqueue/
 obj-m += memory/
 obj-m += devmod/
 obj-m += input/
+obj-m += tools_tip/
 
 endif
 

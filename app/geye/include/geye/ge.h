@@ -16,6 +16,7 @@ struct ge_mainui {
 	GtkWidget	*monitor_dynamic;
 
 	GtkWidget	*win;
+	GtkWidget	*market;
 };
 
 struct golden_eye_2 {
@@ -24,6 +25,14 @@ struct golden_eye_2 {
 	struct ge_mainui	ui;
 
 	struct golden_eye	old;
+
+	int			stock_count;
+	CIRCLEQ_HEAD(, ge_stock)
+				stock_list;
+
+	int			index_count;
+	CIRCLEQ_HEAD(, ge_index)
+				index_list;
 };
 
 #endif

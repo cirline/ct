@@ -141,25 +141,23 @@ void on_window1_destroy(GtkWidget *widget, gpointer data)
 	gtk_main_quit();
 }
 
-int old_main(int argc, char *argv[])
+int old_main(GtkApplication *app, struct golden_eye_2 *ge)
 {
-	struct golden_eye_2 ge;
-	struct golden_eye *ss = &ge.old;
+	struct golden_eye *ss = &ge->old;
 
 	pr_pkg();
 	pr_info("GTK v%d.%d.%d\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
 	pr_info("Glib v%d.%d.%d\n", glib_major_version, glib_minor_version, glib_micro_version);
 
-	strcpy(ge.version, PACKAGE_STRING);
+	strcpy(ge->version, PACKAGE_STRING);
 
 	pr_info("load configure.\n");
-	load_xmlconfig(&ge.old);
+	load_xmlconfig(ss);
 
 	ss->pull_index_data = sinajs_pull_index_data;
 
 	pr_info("start main ui.\n");
-	ui_window_start(argc, argv, &ge);
-	//monitor_main_window(argc, argv, &ge);
+	ui_window_start(app, ge);
 
 	return 0;
 }

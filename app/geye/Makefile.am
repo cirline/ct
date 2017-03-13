@@ -12,10 +12,10 @@ AM_CFLAGS = -O0 -rdynamic
 
 bin_PROGRAMS = geye_out
 geye_out_SOURCES = \
+		   src/event.c \
 		   src/ui.c \
 		   src/main.c \
 		     $(OLD_PATH)/src/main.c \
-		     $(OLD_PATH)/src/event.c \
 		     $(OLD_PATH)/src/calc.c \
 		     $(OLD_PATH)/src/parser.c \
 		     $(OLD_PATH)/src/stock_list.c \

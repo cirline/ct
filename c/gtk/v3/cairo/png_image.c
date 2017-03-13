@@ -17,6 +17,11 @@ int main(void)
 
 	cairo_surface_write_to_png(sf, "image.png");
 
+	//gtk_window_set_icon();
+	//gdk_pixbuf_new_from_data;
+	cairo_surface_write_to_png_stream;
+	gdk_pixbuf_new_from_stream
+
 	cairo_destroy(cr);
 	cairo_surface_destroy(sf);
 
