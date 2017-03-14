@@ -1,6 +1,12 @@
 #define pr_fmt(fmt)	"market  ] " fmt
 
+#include <errno.h>
 #include <gtk/gtk.h>
+
+#include <ccutils/log.h>
+#include "geye/ge.h"
+#include "geye/calc.h"
+#include "geye/event.h"
 
 static int market_netdata_update(struct golden_eye_2 *ge)
 {
@@ -11,8 +17,8 @@ static int market_netdata_update(struct golden_eye_2 *ge)
 		return - EINVAL;
 	}
 
-	calc_readtime_info(ge);
-	calc_pr_info(ge);
+	//calc_readtime_info(ge);
+	//calc_pr_info(ge);
 
 	return 0;
 }
@@ -25,7 +31,7 @@ static gboolean market_net_request(struct golden_eye_2 *ge)
 	if(rc < 0)
 		return TRUE;
 
-	market_display_update(ge);
+	//market_display_update(ge);
 
 	return TRUE;
 }
@@ -45,7 +51,7 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 	g_object_set_data(G_OBJECT(win), "mdata", ge);
 	g_object_set_data(G_OBJECT(win), "builder", builder);
 
-	g_timeout_add(5500, market_net_request, ge);
+	g_timeout_add(5500, (GSourceFunc)market_net_request, ge);
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_set_data(G_OBJECT(win), "builder", NULL);

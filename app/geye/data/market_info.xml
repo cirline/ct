@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<root>
+	<!-- 上证指数 -->
+	<index enable="true" visible="true" exchange="s_sh" code="000001" base="3100"/>
+
+	<!-- ICBC -->
+	<stock enable="true" visible="true" exchange="sh" code="601398"
+            avg_price="4.34" aim_price="4.4" min_price="4.4" stop_profit="1.15" stop_loss="0.9" />
+
+        <!-- CHN MID CAR -->
+	<stock enable="true" visible="true" exchange="sh" code="601766"
+		avg_price="11.12" aim_price="11.12" min_price="9.91" stop_profit="1.2" stop_loss="0.9" />
+
+	<!-- Shanghai Car Group -->
+	<stock enable="true" visible="true" exchange="sh" code="600104"
+		avg_price="23.17" aim_price="0" min_price="23.17" stop_profit="1.15" stop_loss="0.9" />
+
+	<stock enable="true" visible="false" exchange="sz" code="000651"
+		avg_price="0" aim_price="0" min_price="21.5" stop_profit="1.15" stop_loss="0.9" />
+</root>

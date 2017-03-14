@@ -5,12 +5,8 @@
 
 #include <ccutils/log.h>
 
-#include "stkmon/stkmon.h"
-
-int event_monitor(GtkWidget *widget, GdkEvent *event, gpointer pointer)
-{
-	return 0;
-}
+#include "geye/ge.h"
+#include "geye/calc.h"
 
 int event_update_net_data(struct golden_eye *ss /*gpointer *p*/)
 {
@@ -28,8 +24,23 @@ int event_update_net_data(struct golden_eye *ss /*gpointer *p*/)
 		return rc;
 	}
 
-//	calc_index_realtime_info(ss);
-//	calc_print_info(ss);
+	return 0;
+}
+
+int event_netdata_update(struct golden_eye_2 *ge)
+{
+	if(!ge->pull_index_data) {
+		pr_warn("%s, pull_index_data null\n", __func__);
+	} else {
+		ge->pull_index_data(ge);
+	}
+
+	if(!ge->pull_stock_data)
+		pr_warn("%s, pull_stock_data null\n", __func__);
+	else
+		ge->pull_stock_data(ge);
+
+	calc_print_info(ge);
 
 	return 0;
 }

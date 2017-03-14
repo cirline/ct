@@ -2,12 +2,14 @@
 
 #include <string.h>
 #include <gtk/gtk.h>
+#include <sys/queue.h>
 
 #include <ccutils/log.h>
-
 #include "config.h"
 #include "geye/ge.h"
 #include "geye/market.h"
+#include "geye/sinajs.h"
+#include "geye/parser.h"
 
 
 static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
@@ -21,11 +23,32 @@ static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 	pr_info("%s end\n", __func__);
 }
 
+static int geye_app_data_init(struct golden_eye_2 *ge)
+{
+	int rc;
+
+	ge->pull_stock_data = NULL;
+	ge->pull_index_data = NULL;
+
+	rc = parser_load_xml(ge);
+	if(rc < 0) {
+		pr_err("load xml fail\n");
+		return rc;
+	}
+
+	if(ge->index_count > 0)
+		ge->pull_index_data = sinajs_pull_index_data_v2;
+
+	return 0;
+}
+
 static int geye_app_start(int argc, char *argv[])
 {
 	struct golden_eye_2 ge;
 	GtkApplication *app;
 	int rc;
+
+	geye_app_data_init(&ge);
 
 	app = gtk_application_new("local.chqw.goldeneye", G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(geye_app_activate), &ge);

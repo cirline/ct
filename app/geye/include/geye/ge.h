@@ -10,6 +10,12 @@
 #define COLOR_DROP	"#888888"		//"gray"
 #define COLOR_STOPL	"green"
 
+struct ge_stkdat_container {
+	struct ge_stkdat	common;
+};
+#define GE_GET_STKDAT(pull_data) \
+	(&((struct ge_stkdat_container *)(pull_data))->common)
+
 struct ge_mainui {
 	int		width;
 	int		height;
@@ -25,6 +31,9 @@ struct golden_eye_2 {
 	struct ge_mainui	ui;
 
 	struct golden_eye	old;
+
+	int (*pull_stock_data)(struct golden_eye_2 *ge);
+	int (*pull_index_data)(struct golden_eye_2 *ge);
 
 	int			stock_count;
 	CIRCLEQ_HEAD(, ge_stock)

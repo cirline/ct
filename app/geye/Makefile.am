@@ -6,20 +6,21 @@ AM_CPPFLAGS += -I$(top_srcdir)/$(OLD_PATH)/include
 AM_CPPFLAGS += -I$(top_srcdir)/include
 AM_CPPFLAGS += $(GTK_CFLAGS)
 AM_CPPFLAGS += $(XML_CFLAGS)
-AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/$(OLD_PATH)/data/"'
+AM_CPPFLAGS += -D'DATADIR="$(abs_top_srcdir)/data/"'
 
 AM_CFLAGS = -O0 -rdynamic
 
 bin_PROGRAMS = geye_out
 geye_out_SOURCES = \
+		   src/parser.c \
+		   src/sinajs.c \
+		   src/market.c \
+		   src/calc.c \
 		   src/event.c \
 		   src/ui.c \
 		   src/main.c \
 		     $(OLD_PATH)/src/main.c \
-		     $(OLD_PATH)/src/calc.c \
-		     $(OLD_PATH)/src/parser.c \
-		     $(OLD_PATH)/src/stock_list.c \
-		     $(OLD_PATH)/src/sinajs.c
+		     $(OLD_PATH)/src/stock_list.c
 
 geye_out_LDADD = \
 		 -lccutils -lpthread -ldl -liconv
