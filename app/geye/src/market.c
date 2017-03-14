@@ -17,8 +17,8 @@ static int market_netdata_update(struct golden_eye_2 *ge)
 		return - EINVAL;
 	}
 
-	//calc_readtime_info(ge);
-	//calc_pr_info(ge);
+	calc_realtime_info_v2(ge);
+	calc_print_info(ge);
 
 	return 0;
 }

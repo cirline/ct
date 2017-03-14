@@ -283,6 +283,7 @@ static int parser_load_stock(xmlNodePtr node, void *data)
 	struct golden_eye_2 *ge = data;
 	struct ge_stock *stock;
 	char	*prop;
+	char propbuf[32];
 
 	if(strcmp(node->name, "stock") != 0)
 		return - EINVAL;
@@ -299,20 +300,23 @@ static int parser_load_stock(xmlNodePtr node, void *data)
 	if(!prop)
 		goto out;
 
-	stock->visible = cxml_get_prop_bool(node, "visible", 0);
-	cxml_get_prop_string(node, "avg_price", "0", stock->cfg.avg_price.c);
-	stock->cfg.avg_price.f = atof(stock->cfg.avg_price.c);
-	cxml_get_prop_string(node, "min_price", "0", stock->cfg.min_price.c);
-	stock->cfg.min_price.f = atof(stock->cfg.min_price.c);
-	cxml_get_prop_string(node, "aim_price", "0", stock->cfg.aim_price.c);
-	stock->cfg.aim_price.f = atof(stock->cfg.aim_price.c);
+	stock->cfg.visible = cxml_get_prop_bool(node, "visible", 0);
 
-	cxml_get_prop_string(node, "stop_profit", "0", stock->cfg.stop_profit.c);
-	stock->cfg.stop_profit.f = atof(stock->cfg.stop_profit.c);
-	cxml_get_prop_string(node, "stop_loss", "0", stock->cfg.stop_loss.c);
-	stock->cfg.stop_loss.f = atof(stock->cfg.stop_loss.c);
+	cxml_get_prop_string(node, "avg_price", "0", propbuf);
+	stock->cfg.avg_price = atof(propbuf);
 
-	stock->pull_data = NULL;
+	cxml_get_prop_string(node, "min_price", "0", propbuf);
+	stock->cfg.min_price = atof(propbuf);
+
+	cxml_get_prop_string(node, "aim_price", "0", propbuf);
+	stock->cfg.aim_price = atof(propbuf);
+
+	cxml_get_prop_string(node, "stop_profit", "0", propbuf);
+	stock->cfg.stop_profit = atof(propbuf);
+
+	cxml_get_prop_string(node, "stop_loss", "0", propbuf);
+	stock->cfg.stop_loss = atof(propbuf);
+
 	CIRCLEQ_INSERT_TAIL(&ge->stock_list, stock, list);
 	ge->stock_count++;
 
@@ -376,8 +380,9 @@ static void parser_print_xml(struct golden_eye_2 *ge)
 	pr_info("%4s %8s %8s %8s %8s %8s %8s\n", "n", "visible", "code", "stkex", "p_avg", "p_min", "p_aim");
 	for(gs = ge->stock_list.cqh_first; gs != (void *)&ge->stock_list;
 			gs = gs->list.cqe_next) {
-		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n", i++, gs->visible, gs->code, gs->exchange,
-				gs->cfg.avg_price.f, gs->cfg.min_price.f, gs->cfg.aim_price.f);
+		pr_info("%4d %8d %8s %8s %8.2f %8.2f %8.2f\n",
+				i++, gs->cfg.visible, gs->code, gs->exchange,
+				gs->cfg.avg_price, gs->cfg.min_price, gs->cfg.aim_price);
 	}
 
 	pr_info("%s, index count: %d\n", __func__, ge->index_count);

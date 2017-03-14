@@ -39,6 +39,9 @@ static int geye_app_data_init(struct golden_eye_2 *ge)
 	if(ge->index_count > 0)
 		ge->pull_index_data = sinajs_pull_index_data_v2;
 
+	if(ge->stock_count > 0)
+		ge->pull_stock_data = sinajs_pull_stock_data;
+
 	return 0;
 }
 

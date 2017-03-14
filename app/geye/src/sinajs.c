@@ -11,14 +11,112 @@
 #include <ccutils/string.h>
 
 #include "stkmon/stkmon.h"
-#include "stkmon/sinajs.h"
+#include "geye/sinajs.h"
 #include "geye/ge.h"
 
 /*
  * var hq_str_sh601668="prop1,prop2,...";
  */
-
 #define sinajs_decode_debug(format, ...)//	pr_info("%s, %d, "format, __func__, __LINE__, ##__VA_ARGS__)
+int sinajs_stock_decode(char *buffer, struct sinajs_stock *sjs)
+{
+	struct ge_stkdat *sj;
+	char *sptr1, *sptr2;
+	char *token;
+	char *p;
+	int i;
+	int rc;
+	int inb_len;
+	int outb_len;
+
+	if(!buffer)
+		return -1;
+	sinajs_decode_debug("buffer = %s\n", buffer);
+
+	memset(sjs, 0, sizeof(*sjs));
+	sj = GE_GET_STKDAT(sjs);
+
+	/* decode variable */
+	token = strtok_r(buffer, "\"", &sptr1);		/* split variable and value */
+	for(p = token; *p && *p != '='; p++)
+		;
+	*p = 0;						/* variable '=' --> 0 */
+	sinajs_decode_debug("1, token = %s\n", token);
+	rc = sscanf(token, "var hq_str_%s", sj->code);
+	if(rc <= 0) {
+		pr_err("not found code (%s)\n", token);
+		return -1;
+	}
+	sinajs_decode_debug("sj->code = %s\n", sj->code);
+
+	/* decode value */
+	token = strtok_r(NULL, "\"", &sptr1);		/* split end '"' and newline symbol */
+
+	/* prop is split by ',' */
+	token = strtok_r(token, ",", &sptr2);
+	sinajs_decode_debug("3, token = %s\n", token);
+	inb_len = strlen(token);
+	outb_len = STK_NAME_SZ;
+	convert_charset("UTF-8", "GB18030", sj->name, outb_len, token, inb_len);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("4, token = %s\n", token);
+	sj->open = atof(token);
+	sinajs_decode_debug("sj->open = %f\n", sj->open);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("5, token = %s\n", token);
+	sj->pre_close = atof(token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("6, token = %s\n", token);
+	sj->price = atof(token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("7, token = %s\n", token);
+	sj->high = atof(token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("8, token = %s\n", token);
+	sj->low = atof(token);
+
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("9, token = %s\n", token);
+	sj->bid = atof(token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("10, token = %s\n", token);
+	sj->ask = atof(token);
+
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("11, token = %s\n", token);
+	sj->volume = atol(token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("12, token = %s\n", token);
+	sj->amount = atol(token);
+
+	for(i = 0; i < 5; i++) {
+		token = strtok_r(NULL, ",", &sptr2);
+		sinajs_decode_debug("13, token = %s\n", token);
+		sj->bv[i] = atoi(token);
+		token = strtok_r(NULL, ",", &sptr2);
+		sinajs_decode_debug("14, token = %s\n", token);
+		sj->bp[i] = atof(token);
+	}
+
+	for(i = 0; i < 5; i++) {
+		token = strtok_r(NULL, ",", &sptr2);
+		sinajs_decode_debug("15, token = %s\n", token);
+		sj->av[i] = atoi(token);
+		token = strtok_r(NULL, ",", &sptr2);
+		sinajs_decode_debug("16, token = %s\n", token);
+		sj->ap[i] = atof(token);
+	}
+
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("17, token = %s\n", token);
+	strcpy(sj->date, token);
+	token = strtok_r(NULL, ",", &sptr2);
+	sinajs_decode_debug("18, token = %s\n", token);
+	strcpy(sj->time, token);
+
+	return 0;
+}
+
 int sinajs_decode(char *buffer, struct sinajs *sj)
 {
 	char *sptr1, *sptr2;
@@ -318,6 +416,65 @@ int sinajs_pull_index_data_v2(struct golden_eye_2 *ge)
 			pr_err("%s, attach fail, %d\n", __func__, rc);
 			return rc;
 		}
+	}
+
+	return 0;
+}
+
+int sinajs_pull_stock_data(struct golden_eye_2 *ge)
+{
+	struct ge_stock *stock;
+	char slist[1024] = "hq.sinajs.cn/list=";
+	char buffer[4096];
+	char *sptr1, *token;
+	int rc;
+
+	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
+			stock = stock->list.cqe_next) {
+		if(stock->cfg.visible) {
+			strcat(slist, stock->exchange);
+			strcat(slist, stock->code);
+			strcat(slist, ",");
+		}
+	}
+
+	pr_info("%s, slist url = %s\n", __func__, slist);
+	rc = http_get(slist, buffer);
+	if(rc < 0) {
+		pr_err("%s, http get fail\n", __func__);
+		return -1;
+	}
+	buffer[rc] = 0;
+
+	token = strtok_r(buffer, "\n", &sptr1);
+	for(rc = 0; token; rc++) {
+		struct sinajs_stock sdata;
+
+		rc = sinajs_stock_decode(token, &sdata);
+		do {
+			if(rc < 0) {
+				pr_warn("decode failed\n");
+				return - EINVAL;
+				//break;
+			}
+
+			/* find stock and attach data to pull_data */
+			for(stock = ge->stock_list.cqh_first;
+					stock != (void *)&ge->stock_list;
+					stock = stock->list.cqe_next) {
+				char local[20];
+
+				sprintf(local, "%s%s", stock->exchange, stock->code);
+				if(strcmp(local, sdata.common.code) == 0)
+					break;
+			}
+			if(!stock)
+				break;
+
+			memcpy(&stock->data, &sdata, sizeof(stock->data));
+		} while(0);
+
+		token = strtok_r(NULL, "\n", &sptr1);
 	}
 
 	return 0;

@@ -141,7 +141,7 @@ static void monitor_ui_update(struct golden_eye_2 *ge_)
 {
 	struct golden_eye *ge = &ge_->old;
 	struct ge_index *idx;
-	struct ge_stock *stock;
+	struct stk_stock *stock;
 	struct ge_stkdat *dat;
 	GdkRGBA color;
 	char buffer[16];
@@ -247,7 +247,7 @@ static GtkWidget *monitor_infopanel_create(GtkBuilder *mbuilder, struct golden_e
 	GtkWidget *grid;
 	GtkWidget *grid_dynamic;
 	struct ge_index *idx;
-	struct ge_stock *stock;
+	struct stk_stock *stock;
 	int grid_cur_row = 0;
 	struct golden_eye *ge = &ge2->old;
 

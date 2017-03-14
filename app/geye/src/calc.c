@@ -40,16 +40,15 @@ int calc_print_info(struct golden_eye_2 *ge)
 	struct ge_index *idx;
 	struct ge_idxdat *idxd;
 
-	pr_info("%8s %8s %12s %8s\n", "code", "chg", "chg_min", "name");
+	pr_info("%8s %8s %8s %12s %8s\n", "code", "price", "chg", "chg_min", "name");
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
-		if(!stock->pull_data)
-			continue;
-
-		dat = &(((struct ge_stkdat_container *)stock->pull_data)->common);
-		pr_info("%8s %8.3f %12.3f\n", stock->code, stock->chg_rate, stock->chg_rate_min);
+		dat = &stock->data;
+		pr_info("%8s %8.2f %8.3f %12.3f\n",
+				stock->code, dat->price, stock->roc, stock->mproc);
 	}
 	pr_info("\n");
+
 	pr_info("%16s %8s %8s %12s %8s\n", "index", "code", "roc", "diff", "name");
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
@@ -59,6 +58,21 @@ int calc_print_info(struct golden_eye_2 *ge)
 				idxd->code, idxd->index, idxd->roc, idxd->diff);
 	}
 	pr_info("\n");
+
+	return 0;
+}
+
+int calc_realtime_info_v2(struct golden_eye_2 *ge)
+{
+	struct ge_stock *stock;
+	struct ge_stkdat *dat;
+
+	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
+			stock = stock->list.cqe_next) {
+		dat = &stock->data;
+		stock->roc = (dat->price - dat->pre_close) / dat->pre_close;
+		stock->mproc = (dat->price - stock->cfg.min_price) / stock->cfg.min_price;
+	}
 
 	return 0;
 }

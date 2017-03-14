@@ -51,7 +51,7 @@ struct stk_stkdat {
 	long	volume;
 	long	amount;
 	int	bv[5];		/* bid volume */
-	float	vp[5];		/* bid price */
+	float	bp[5];		/* bid price */
 	int	av[5];		/* ask volume */
 	float	ap[5];		/* ask price */
 	char	date[STK_DATA_SZ];
@@ -103,7 +103,6 @@ struct stk_stkcfg {
 	struct stk_float	stop_loss;
 };
 
-#define ge_stock	stk_stock
 struct stk_stock {
 	int	visible;	/* visable on the monitor panel */
 	char code[SM_CODE_SZ];

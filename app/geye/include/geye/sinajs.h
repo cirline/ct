@@ -2,6 +2,7 @@
 #define __SINAJS_H__
 
 #include "stkmon/stkmon.h"
+#include "geye/ge.h"
 
 #define SJS_CODE_SIZE	16
 #define SJS_NAME_SIZE	20
@@ -25,6 +26,10 @@ struct sinajs {
 	char reserve[16];
 };
 
+struct sinajs_stock {
+	struct ge_stkdat	common;
+};
+
 struct sinajs_index {
 	struct stk_index	common;
 };
@@ -35,5 +40,6 @@ extern int sinajs_decode(char *buffer, struct sinajs *sj);
 int sinajs_apply_data(struct stk_xmlcfg *sxc);
 int sinajs_pull_index_data(struct golden_eye *ge);
 int sinajs_pull_index_data_v2(struct golden_eye_2 *ge);
+int sinajs_pull_stock_data(struct golden_eye_2 *ge);
 
 #endif

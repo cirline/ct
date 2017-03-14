@@ -6,7 +6,6 @@
 #include <ccutils/log.h>
 
 #include "geye/ge.h"
-#include "geye/calc.h"
 
 int event_update_net_data(struct golden_eye *ss /*gpointer *p*/)
 {
@@ -39,8 +38,6 @@ int event_netdata_update(struct golden_eye_2 *ge)
 		pr_warn("%s, pull_stock_data null\n", __func__);
 	else
 		ge->pull_stock_data(ge);
-
-	calc_print_info(ge);
 
 	return 0;
 }
