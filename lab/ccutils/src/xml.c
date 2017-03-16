@@ -45,6 +45,26 @@ int parse_xpath_object(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *)
 	return i;
 }
 
+/**
+ * a xpath object is a node set, for example "/root/book" xobj is:
+ *
+ *  <book name = "book1" />
+ *  <book name = "book2" />
+ *
+ * use this for each the nodeset
+ */
+int cxml_for_each_xobject(xmlXPathObjectPtr object, int (*f)(xmlNodePtr, void *), void *data)
+{
+	int i;
+
+	for(i = 0; i < object->nodesetval->nodeNr; i++) {
+		xmlNodePtr node = object->nodesetval->nodeTab[i];
+		f(node, data);
+	}
+
+	return i;
+}
+
 int cxml_get_prop_bool(xmlNodePtr node, const char *name, int default_value)
 {
 	char *prop;
