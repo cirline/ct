@@ -2,7 +2,7 @@
 #define __CCUTILS_MARCRO_H__
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GUNC_MINOR__ >= 5)
-#define __CU_DEPRECATED_FOR(f)	__attribute(__deprecated__("use '" #f "' instead"))
+#define __CU_DEPRECATED_FOR(f)	__attribute((__deprecated__("use '" #f "' instead")))
 #else
 #define __CU_DEPRECATED_FOR(f)
 #endif

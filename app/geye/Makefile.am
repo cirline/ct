@@ -19,8 +19,7 @@ geye_out_SOURCES = \
 		   src/event.c \
 		   src/ui.c \
 		   src/main.c \
-		     $(OLD_PATH)/src/main.c \
-		     $(OLD_PATH)/src/stock_list.c
+		     $(OLD_PATH)/src/main.c
 
 geye_out_LDADD = \
 		 -lccutils -lpthread -ldl -liconv

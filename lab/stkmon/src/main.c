@@ -24,7 +24,7 @@
 
 static int gx = 99;
 
-void configure_main(GtkWidget *widget, gpointer p);
+//void configure_main(GtkWidget *widget, gpointer p);
 
 GtkWidget *create_menubar(GtkWidget *win)
 {
@@ -45,7 +45,7 @@ GtkWidget *create_menubar(GtkWidget *win)
 	g_signal_connect(G_OBJECT(quit_item), "activate", G_CALLBACK(gtk_main_quit), NULL);
 
 	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
-	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
+	//g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
 
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), item_config);
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), quit_item);
@@ -77,12 +77,12 @@ void create_popupmenu(GtkWidget *ebox, struct golden_eye *ge)
 	GtkWidget *item_config = gtk_menu_item_new_with_label("configure");
 	gtk_widget_show(item_config);
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item_config);
-	g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
+	//g_signal_connect(G_OBJECT(item_config), "activate", G_CALLBACK(configure_main), &gx);
 
 	item = gtk_menu_item_new_with_label("stocks list");
 	gtk_widget_show(item);
 	gtk_menu_shell_append(GTK_MENU_SHELL(popup_menu), item);
-	g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(configure_main), &gx);
+	//g_signal_connect(G_OBJECT(item), "activate", G_CALLBACK(configure_main), &gx);
 
 	g_signal_connect_swapped(G_OBJECT(ebox), "button-press-event", G_CALLBACK(show_popup), popup_menu);
 }
