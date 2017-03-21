@@ -52,7 +52,10 @@ struct ge_mainui {
 	GtkWidget	*monitor_dynamic;
 
 	GtkWidget	*win;
+
+	/* market */
 	GtkWidget	*market;
+	GtkListStore	*market_index_lstore;
 };
 
 struct golden_eye_2 {
