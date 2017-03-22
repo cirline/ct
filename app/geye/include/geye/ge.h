@@ -10,7 +10,12 @@
 #define COLOR_DROP	"#888888"		//"gray"
 #define COLOR_STOPL	"green"
 
+#define MARKET_COLOR_RISE	"red"
+#define MARKET_COLOR_DROP	"blue"
+#define MARKET_COLOR_EQ		"black"
+
 struct ge_stkcfg {
+	int	enable;
 	int	visible;
 
 	float	min_price;
@@ -31,6 +36,7 @@ struct ge_stock {
 
 	char	code[STK_CODE_SZ];
 	char	exchange[STK_EX_SZ];
+	float	diff;
 	float	roc;
 	float	mproc;		/* roc for min price */
 

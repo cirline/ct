@@ -6,6 +6,14 @@
     <columns>
       <!-- column-name code -->
       <column type="gchararray"/>
+      <!-- column-name price -->
+      <column type="gchararray"/>
+      <!-- column-name diff -->
+      <column type="gchararray"/>
+      <!-- column-name diff_color -->
+      <column type="gchararray"/>
+      <!-- column-name roc -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkWindow" id="market_list">
@@ -28,17 +36,68 @@
                 <property name="halign">center</property>
                 <property name="resize_mode">immediate</property>
                 <property name="model">market_index_liststore</property>
-                <property name="enable_grid_lines">horizontal</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection1"/>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                    <property name="title" translatable="yes">column</property>
+                  <object class="GtkTreeViewColumn" id="col_code">
+                    <property name="title" translatable="yes">Code</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cellrenderertext1"/>
+                      <object class="GtkCellRendererText" id="cell_code">
+                        <property name="xpad">5</property>
+                        <property name="ypad">5</property>
+                        <property name="xalign">1</property>
+                      </object>
                       <attributes>
                         <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="col_price">
+                    <property name="title" translatable="yes">Price</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_price">
+                        <property name="xpad">5</property>
+                        <property name="ypad">5</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <attributes>
+                        <attribute name="foreground">3</attribute>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="col_roc">
+                    <property name="title" translatable="yes">Roc</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_roc">
+                        <property name="xpad">5</property>
+                        <property name="ypad">5</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <attributes>
+                        <attribute name="foreground">3</attribute>
+                        <attribute name="text">4</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="col_diff">
+                    <property name="title" translatable="yes">Diff</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_diff">
+                        <property name="xpad">5</property>
+                        <property name="ypad">5</property>
+                        <property name="xalign">1</property>
+                      </object>
+                      <attributes>
+                        <attribute name="foreground">3</attribute>
+                        <attribute name="text">2</attribute>
                       </attributes>
                     </child>
                   </object>

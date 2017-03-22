@@ -4,6 +4,7 @@
 #include "stkmon/stkmon.h"
 #include "geye/ge.h"
 
+/* deprecated */
 int calc_pr_info(struct stk_xmlcfg *sxc)
 {
 	struct stk_stock *stock;
@@ -70,6 +71,7 @@ int calc_realtime_info_v2(struct golden_eye_2 *ge)
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
 		dat = &stock->data;
+		stock->diff = dat->price - dat->pre_close;
 		stock->roc = (dat->price - dat->pre_close) / dat->pre_close;
 		stock->mproc = (dat->price - stock->cfg.min_price) / stock->cfg.min_price;
 	}

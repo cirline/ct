@@ -431,7 +431,7 @@ int sinajs_pull_stock_data(struct golden_eye_2 *ge)
 
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
-		if(stock->cfg.visible) {
+		if(stock->cfg.enable) {
 			strcat(slist, stock->exchange);
 			strcat(slist, stock->code);
 			strcat(slist, ",");

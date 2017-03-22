@@ -1,6 +1,8 @@
 #define pr_fmt(fmt)	"market  ] " fmt
 
 #include <errno.h>
+#include <math.h>
+#include <string.h>
 #include <gtk/gtk.h>
 
 #include <ccutils/log.h>
@@ -23,23 +25,75 @@ static int market_netdata_update(struct golden_eye_2 *ge)
 	return 0;
 }
 
+static char *market_f2color(float n)
+{
+	static char *color[] = {
+		MARKET_COLOR_RISE,
+		MARKET_COLOR_DROP,
+		MARKET_COLOR_EQ,
+	};
+
+	if(n > 0)
+		return color[0];
+	else if(n < 0)
+		return color[1];
+	else
+		return color[2];
+}
+
 static void market_display_update(struct golden_eye_2 *ge)
 {
 	struct ge_index *idx;
 	struct ge_idxdat *idxd;
+	struct ge_stock *stock;
+	struct ge_stkdat *stkd;
+
 	GtkTreeIter iter;
+	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
+	char *color;
+
+	gtk_list_store_clear(ge->ui.market_index_lstore);
 
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
 
 		idxd = &idx->data;
-		pr_info("%16s %8.2f %8.3f %12.2f\n",
-				idxd->code, idxd->index, idxd->roc, idxd->diff);
+		/* pr_info("%16s %8.2f %8.3f %12.2f\n",
+				idxd->code, idxd->index, idxd->roc, idxd->diff); */
+		sprintf(price_str, "%.2f", idxd->index);
+		sprintf(roc_str, "%.2f", idxd->roc);
+		sprintf(diff_str, "%.2f", idxd->diff);
+
+		color = market_f2color(idxd->diff);
 
 		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
-		gtk_list_store_set(ge->ui.market_index_lstore, &iter, 0, idxd->code, -1);
+		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
+				0, idxd->code,
+				1, price_str,
+				2, diff_str,
+				3, color,
+				4, roc_str,
+				-1);
+	}
 
+	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
+			stock = stock->list.cqe_next) {
+		stkd = &stock->data;
 
+		sprintf(price_str, "%.2f", stkd->price);
+		sprintf(roc_str, "%.2f", stock->roc * 100);
+		sprintf(diff_str, "%.2f", fabsf(stock->diff));
+
+		color = market_f2color(stock->diff);
+
+		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
+		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
+				0, stock->code,
+				1, price_str,
+				2, diff_str,
+				3, color,
+				4, roc_str,
+				-1);
 	}
 }
 

@@ -7,6 +7,7 @@ void add_to_list(GtkWidget *list, char *str)
 	GtkListStore *store = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(list)));
 	gtk_list_store_append(store, &iter);
 	gtk_list_store_set(store, &iter, 0, str, -1);
+	gtk_list_store_set_column_types
 }
 
 void on_changed(GtkWidget *widget, gpointer label)
