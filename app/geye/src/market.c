@@ -10,6 +10,40 @@
 #include "geye/calc.h"
 #include "geye/event.h"
 
+static int g_market_timer_running = 0;
+
+static void market_window_set_active(GtkWidget *widget, int active)
+{
+	pr_info("market active %d\n", active);
+	if(active)
+		gtk_window_set_keep_above(GTK_WINDOW(widget), TRUE);
+	else
+		gtk_window_set_keep_below(GTK_WINDOW(widget), TRUE);
+}
+
+int market_list_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
+{
+//	pr_info("%s, event type = %d\n", __func__, event->type);
+	switch(event->type) {
+	case GDK_FOCUS_CHANGE:
+		if(gtk_window_is_active(GTK_WINDOW(widget)))
+			market_window_set_active(widget, 0);
+		else
+			market_window_set_active(widget, 1);
+		break;
+	case GDK_DELETE:
+		g_market_timer_running = 0;
+		break;
+	}
+
+	return FALSE;
+}
+
+void market_list_activate_default_cb(GtkWindow *win, gpointer p)
+{
+	pr_info("%s\n", __func__);
+}
+
 static int market_netdata_update(struct golden_eye_2 *ge)
 {
 	int rc;
@@ -58,8 +92,6 @@ static void market_display_update(struct golden_eye_2 *ge)
 			idx = idx->list.cqe_next) {
 
 		idxd = &idx->data;
-		/* pr_info("%16s %8.2f %8.3f %12.2f\n",
-				idxd->code, idxd->index, idxd->roc, idxd->diff); */
 		sprintf(price_str, "%.2f", idxd->index);
 		sprintf(roc_str, "%.2f", idxd->roc);
 		sprintf(diff_str, "%.2f", idxd->diff);
@@ -105,9 +137,25 @@ static gboolean market_net_request(struct golden_eye_2 *ge)
 	if(rc < 0)
 		return TRUE;
 
+	if(!g_market_timer_running) {
+		pr_info("window deleted, stop timer\n");
+		return FALSE;
+	}
+
 	market_display_update(ge);
 
 	return TRUE;
+}
+
+static void market_ui_visual_setup(GtkWidget *win)
+{
+	gtk_widget_set_app_paintable(win, TRUE);
+	GdkScreen *screen = gdk_screen_get_default();
+	GdkVisual *visual = gdk_screen_get_rgba_visual(screen);
+
+	if(visual && gdk_screen_is_composited(screen)) {
+		gtk_widget_set_visual(win, visual);
+	}
 }
 
 void market_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
@@ -115,13 +163,14 @@ void market_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
 	GtkBuilder *builder = gtk_builder_new_from_file("layout/market_list.glade");
 
 	GtkWidget *win = GTK_WIDGET(gtk_builder_get_object(builder, "market_list"));
-//	GtkTreeView *tree = GTK_TREE_VIEW(gtk_builder_get_object(builder, "market_index_treeview"));
-	ge->ui.market_index_lstore = GTK_LIST_STORE(gtk_builder_get_object(builder, "market_index_liststore"));
+	ge->ui.market_index_lstore =
+		GTK_LIST_STORE(gtk_builder_get_object(builder, "market_index_liststore"));
 
-#if 0
-#endif
+	gtk_window_set_keep_below(GTK_WINDOW(win), TRUE);
 
 	gtk_application_add_window(app, GTK_WINDOW(win));
+
+	market_ui_visual_setup(win);
 
 	gtk_builder_connect_signals(builder, NULL);
 
@@ -142,6 +191,7 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 	//g_object_set_data(G_OBJECT(win), "mdata", ge);
 	//g_object_set_data(G_OBJECT(win), "builder", builder);
 
+	g_market_timer_running = 1;
 	g_timeout_add(5500, (GSourceFunc)market_net_request, ge);
 
 	//g_object_set_data(G_OBJECT(win), "builder", NULL);
