@@ -11,6 +11,7 @@
 #include "geye/sinajs.h"
 #include "geye/parser.h"
 
+extern void monitor_ui_start(GtkApplication *app, struct golden_eye_2 *ge);
 
 static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 {
@@ -19,6 +20,8 @@ static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 	old_main(app, ge);
 
 	market_ui_start(app, ge);
+
+	monitor_ui_start(app, ge);
 
 	pr_info("%s end\n", __func__);
 }

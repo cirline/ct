@@ -62,6 +62,10 @@ struct ge_mainui {
 	/* market */
 	GtkWidget	*market;
 	GtkListStore	*market_index_lstore;
+
+	/* monitor */
+	GtkWidget	*monitor;
+	GtkListStore	*monitor_lstore;
 };
 
 struct golden_eye_2 {
