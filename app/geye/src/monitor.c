@@ -22,19 +22,25 @@ int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 	return FALSE;
 }
 
-static char *monitor_f2color(char *ob, float diff)
+static char *monitor_f2color(char *ob, float roc)
 {
-	float fcolor = diff * 0xff;
+	int m, n;
+	int roc_1000;
 
-	if(diff > 0)
-		//sprintf(ob, "#%02x000000", (int)fcolor);
-		sprintf(ob, "rgb(%d,0,0)", (int)fcolor);
-	else if(diff < 0)
-		//sprintf(ob, "#0000%02x00", (int)fcolor);
-		sprintf(ob, "rgb(0,0,%d)", (int)fcolor);
+	roc_1000 = fabsf(roc * 10);
+	if(roc_1000 > 99)
+		roc = 99;
+
+	m = 9 - roc_1000 / 10;
+	n = 9 - roc_1000 % 10;
+//	pr_info("roc %f, roc_1000 %d, m %d, n %d\n", roc, roc_1000, m, n);
+
+	if(roc > 0)
+		sprintf(ob, "#FF%x%x%x%x", m, n, m, n);
+	else if(roc < 0)
+		sprintf(ob, "#%x%x%x%xFF", m, n, m, n);
 	else
-		//strcpy(ob, "#00000000");
-		sprintf(ob, "rgb(0,0,0)");
+		strcpy(ob, "#000000");
 
 	return ob;
 }
@@ -49,12 +55,11 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 	GtkTreeIter iter;
 	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
 	char color[16];
-	GdkRGBA rgba = {255, 0, 0, 0};
 
 	pr_here();
 
 	gtk_list_store_clear(ge->ui.monitor_lstore);
-#if 0
+
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
 
@@ -63,18 +68,17 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 		sprintf(roc_str, "%.2f", idxd->roc);
 		sprintf(diff_str, "%.2f", idxd->diff);
 
-		//monitor_f2color(color, idxd->diff);
+		monitor_f2color(color, idxd->roc);
 
-		//pr_info("diff %s, color = %s\n", diff_str, color);
-
+		pr_info("roc %s, color = %s\n", roc_str, color);
 		gtk_list_store_append(ge->ui.monitor_lstore, &iter);
 		gtk_list_store_set(ge->ui.monitor_lstore, &iter,
 				0, price_str,
 				1, roc_str,
-				2, rgba,
+				2, color,
 				-1);
 	}
-#endif
+
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
 		stkd = &stock->data;
@@ -83,16 +87,17 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 		sprintf(roc_str, "%.2f", stock->roc * 100);
 		sprintf(diff_str, "%.2f", fabsf(stock->diff));
 
-		//monitor_f2color(color, stock->diff);
+		monitor_f2color(color, stock->roc * 100);
 
-		//pr_info("diff %s, color = %s\n", diff_str, color);
-
+		pr_info("roc %s, color = %s\n", roc_str, color);
 		gtk_list_store_append(ge->ui.monitor_lstore, &iter);
 		gtk_list_store_set(ge->ui.monitor_lstore, &iter,
 				0, price_str,
 				1, roc_str,
+				2, color,
 				-1);
-		//g_object_set
+
+		//g_object_set(cell_roc, "cell-background", color, NULL);
 	}
 }
 
@@ -115,8 +120,6 @@ static void monitor_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
 	GtkWidget *win = GTK_WIDGET(gtk_builder_get_object(builder, "monitor"));
 	ge->ui.monitor_lstore =
 		GTK_LIST_STORE(gtk_builder_get_object(builder, "monitor_liststore"));
-
-	cell_roc = GTK_CELL_RENDERER();
 
 	gtk_window_set_keep_above(GTK_WINDOW(win), TRUE);
 

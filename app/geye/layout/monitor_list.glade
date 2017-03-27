@@ -8,6 +8,8 @@
       <column type="gchararray"/>
       <!-- column-name roc -->
       <column type="gchararray"/>
+      <!-- column-name roc_bg -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkWindow" id="monitor">
@@ -48,8 +50,8 @@
                     <child>
                       <object class="GtkCellRendererText" id="cell_roc"/>
                       <attributes>
+                        <attribute name="background">2</attribute>
                         <attribute name="text">1</attribute>
-                        <attribute name="background-rgba">2</attribute>
                       </attributes>
                     </child>
                   </object>
