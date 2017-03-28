@@ -299,6 +299,9 @@ static int parser_load_stock(xmlNodePtr node, void *data)
 	prop = cxml_get_prop_string(node, "exchange", NULL, stock->exchange);
 	if(!prop)
 		goto out;
+	prop = cxml_get_prop_string(node, "abcode", NULL, stock->abcode);
+	if(!prop)
+		goto out;
 
 	stock->cfg.enable = cxml_get_prop_bool(node, "enable", 0);
 	stock->cfg.visible = cxml_get_prop_bool(node, "visible", 0);

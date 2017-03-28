@@ -31,11 +31,13 @@ struct ge_stkui {
 };
 #endif
 
+#define GE_ABCODE_SZ	8
 struct ge_stock {
 	struct ge_stkdat	data;
 
 	char	code[STK_CODE_SZ];
 	char	exchange[STK_EX_SZ];
+	char	abcode[GE_ABCODE_SZ];
 	float	diff;
 	float	roc;
 	float	mproc;		/* roc for min price */
@@ -66,6 +68,8 @@ struct ge_mainui {
 	/* monitor */
 	GtkWidget	*monitor;
 	GtkListStore	*monitor_lstore;
+	GtkTreeViewColumn	*monitor_cell_roc;
+	GtkTreeViewColumn	*monitor_cell_name;
 };
 
 struct golden_eye_2 {

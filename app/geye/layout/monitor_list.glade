@@ -6,15 +6,21 @@
     <columns>
       <!-- column-name price -->
       <column type="gchararray"/>
+      <!-- column-name tip -->
+      <column type="gchararray"/>
+      <!-- column-name tip_bg -->
+      <column type="gchararray"/>
       <!-- column-name roc -->
       <column type="gchararray"/>
-      <!-- column-name roc_bg -->
+      <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkWindow" id="monitor">
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
+    <property name="icon">../res/logo.png</property>
+    <property name="decorated">False</property>
     <signal name="event" handler="monitor_event_cb" swapped="no"/>
     <child>
       <object class="GtkEventBox" id="monitor_ebox">
@@ -27,31 +33,49 @@
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkTreeView" id="monitor_treeview">
+                <property name="width_request">1</property>
+                <property name="height_request">1</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">monitor_liststore</property>
+                <property name="headers_visible">False</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection2"/>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                    <property name="title" translatable="yes">Price</property>
+                  <object class="GtkTreeViewColumn" id="col_tip">
+                    <property name="title" translatable="yes">tip</property>
                     <child>
-                      <object class="GtkCellRendererText" id="cell_price"/>
+                      <object class="GtkCellRendererText" id="cell_tip">
+                        <property name="size_points">8</property>
+                      </object>
                       <attributes>
-                        <attribute name="text">0</attribute>
+                        <attribute name="background">2</attribute>
+                        <attribute name="text">1</attribute>
                       </attributes>
                     </child>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="treeviewcolumn2">
-                    <property name="title" translatable="yes">Roc</property>
+                  <object class="GtkTreeViewColumn" id="col_roc">
+                    <property name="title" translatable="yes">roc</property>
                     <child>
                       <object class="GtkCellRendererText" id="cell_roc"/>
                       <attributes>
-                        <attribute name="background">2</attribute>
-                        <attribute name="text">1</attribute>
+                        <attribute name="foreground">2</attribute>
+                        <attribute name="text">3</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="col_name">
+                    <property name="title" translatable="yes">name</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_name"/>
+                      <attributes>
+                        <attribute name="foreground">2</attribute>
+                        <attribute name="text">4</attribute>
                       </attributes>
                     </child>
                   </object>

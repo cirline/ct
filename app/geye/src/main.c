@@ -17,7 +17,7 @@ static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 {
 	extern int old_main(GtkApplication *app, gpointer p);
 
-	old_main(app, ge);
+//	old_main(app, ge);
 
 	market_ui_start(app, ge);
 
