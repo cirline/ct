@@ -1,7 +1,4 @@
-OLD_PATH	= ../../lab/stkmon
-
 AM_CPPFLAGS = -I$(top_srcdir)/../../lab/ccutils/include
-AM_CPPFLAGS += -I$(top_srcdir)/$(OLD_PATH)/include
 
 AM_CPPFLAGS += -I$(top_srcdir)/include
 AM_CPPFLAGS += $(GTK_CFLAGS)
