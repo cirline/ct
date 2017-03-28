@@ -119,7 +119,7 @@ static int monitor_f2color(char *ob, float roc)
 	else if(roc < 0)
 		sprintf(ob, "#%x%x%x%xFF", m, n, m, n);
 	else
-		strcpy(ob, "#DDDDDD");
+		strcpy(ob, "#bbb");
 
 	return roc_1000;
 }
@@ -161,8 +161,12 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 				-1);
 	}
 
+	/* stock onboard */
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
+		if(stock->num <= 0)
+			continue;
+
 		stkd = &stock->data;
 
 		sprintf(price_str, "%.2f", stkd->price);
@@ -184,6 +188,43 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 
 		//g_object_set(cell_roc, "cell-background", color, NULL);
 	}
+
+	/* cut-off line */
+	gtk_list_store_append(ge->ui.monitor_lstore, &iter);
+	gtk_list_store_set(ge->ui.monitor_lstore, &iter, 2, "#000", -1);
+#if 0
+	gtk_list_store_set(ge->ui.monitor_lstore, &iter,
+			0, "-", 1, "-", 2, "#000", 3, "-", 4, "-", -1);
+#endif
+
+	/* stock wait and see */
+	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
+			stock = stock->list.cqe_next) {
+		if(stock->num > 0)
+			continue;
+
+		stkd = &stock->data;
+
+		sprintf(price_str, "%.2f", stkd->price);
+		sprintf(tip_str, "%1d", abs((int)(stock->roc * 100)));
+		sprintf(diff_str, "%.2f", fabsf(stock->diff));
+		sprintf(roc_str, "%.2f", fabsf(stock->roc) * 100);
+
+		monitor_f2color(color, stock->roc * 100);
+
+		//pr_info("roc %s, color = %s\n", roc_str, color);
+		gtk_list_store_append(ge->ui.monitor_lstore, &iter);
+		gtk_list_store_set(ge->ui.monitor_lstore, &iter,
+				0, price_str,
+				1, tip_str,
+				2, color,
+				3, roc_str,
+				4, stkd->name,
+				-1);
+
+		//g_object_set(cell_roc, "cell-background", color, NULL);
+	}
+
 
 	monitor_window_refresh_prop(ge->ui.monitor, TRUE);
 }

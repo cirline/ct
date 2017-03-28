@@ -306,6 +306,8 @@ static int parser_load_stock(xmlNodePtr node, void *data)
 	stock->cfg.enable = cxml_get_prop_bool(node, "enable", 0);
 	stock->cfg.visible = cxml_get_prop_bool(node, "visible", 0);
 
+	stock->num = cxml_get_prop_integer(node, "num", 0);
+
 	cxml_get_prop_string(node, "avg_price", "0", propbuf);
 	stock->cfg.avg_price = atof(propbuf);
 

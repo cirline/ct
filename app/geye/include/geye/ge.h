@@ -38,6 +38,7 @@ struct ge_stock {
 	char	code[STK_CODE_SZ];
 	char	exchange[STK_EX_SZ];
 	char	abcode[GE_ABCODE_SZ];
+	int	num;
 	float	diff;
 	float	roc;
 	float	mproc;		/* roc for min price */
