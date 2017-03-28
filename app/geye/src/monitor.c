@@ -11,10 +11,10 @@
 
 static int g_monitor_timer_running = 0;
 
-static void monitor_window_refresh_prop(GtkWidget *widget)
+static void monitor_window_refresh_prop(GtkWidget *widget, gboolean above)
 {
 	gtk_window_resize(GTK_WINDOW(widget), 1, 1);
-	gtk_window_set_keep_above(GTK_WINDOW(widget), TRUE);
+	gtk_window_set_keep_above(GTK_WINDOW(widget), above);
 }
 
 static int monitor_set_active_status(GtkWidget *widget, int active)
@@ -37,15 +37,45 @@ static int monitor_set_active_status(GtkWidget *widget, int active)
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_roc), FALSE);
 		gtk_tree_view_column_set_visible(
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_name), FALSE);
-		monitor_window_refresh_prop(widget);
+		monitor_window_refresh_prop(widget, TRUE);
 	}
 
 	return 0;
 }
 
+static int monitor_show_market(GtkWidget *widget, int active)
+{
+	struct golden_eye_2 *ge;
+
+	ge = g_object_get_data(G_OBJECT(widget), "ge");
+	if(!ge) {
+		pr_err("%s, can't get widget data\n", __func__);
+		return - ENODATA;
+	}
+
+	if(active)
+		gtk_window_set_keep_above(GTK_WINDOW(ge->ui.market), TRUE);
+	else
+		gtk_window_set_keep_below(GTK_WINDOW(ge->ui.market), TRUE);
+}
+
+static int monitor_event_to_string(int type)
+{
+	switch(type) {
+	case GDK_DELETE:
+		pr_info("event ~ GDK_DELETE\n");
+		break;
+	case GDK_ENTER_NOTIFY:
+		pr_info("event ~ GDK_ENTER_NOTIFY\n");
+		break;
+	default:
+		pr_info("event ~ %d\n", type);
+	}
+}
+
 int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
-	//pr_info("%s, event type = %d\n", __func__, event->type);
+	//monitor_event_to_string(event->type);
 	switch(event->type) {
 	case GDK_DELETE:
 		g_monitor_timer_running = 0;
@@ -55,13 +85,17 @@ int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 		break;
 	case GDK_LEAVE_NOTIFY:
 		monitor_set_active_status(widget, 0);
+		monitor_show_market(widget, 0);
 		break;
 	case GDK_FOCUS_CHANGE:
 		if(gtk_window_is_active(GTK_WINDOW(widget))) {
 			monitor_set_active_status(widget, 0);
+			monitor_show_market(widget, 0);
 		} else {
 			monitor_set_active_status(widget, 1);
+			monitor_show_market(widget, 1);
 		}
+		break;
 	}
 
 	return FALSE;
@@ -116,7 +150,7 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 		sprintf(diff_str, "%.2f", idxd->diff);
 		sprintf(roc_str, "%.2f", fabsf(idxd->roc));
 
-		pr_info("roc %s, color = %s\n", roc_str, color);
+		//pr_info("roc %s, color = %s\n", roc_str, color);
 		gtk_list_store_append(ge->ui.monitor_lstore, &iter);
 		gtk_list_store_set(ge->ui.monitor_lstore, &iter,
 				0, price_str,
@@ -138,7 +172,7 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 
 		monitor_f2color(color, stock->roc * 100);
 
-		pr_info("roc %s, color = %s\n", roc_str, color);
+		//pr_info("roc %s, color = %s\n", roc_str, color);
 		gtk_list_store_append(ge->ui.monitor_lstore, &iter);
 		gtk_list_store_set(ge->ui.monitor_lstore, &iter,
 				0, price_str,
@@ -151,7 +185,7 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 		//g_object_set(cell_roc, "cell-background", color, NULL);
 	}
 
-	monitor_window_refresh_prop(ge->ui.monitor);
+	monitor_window_refresh_prop(ge->ui.monitor, TRUE);
 }
 
 static gboolean monitor_net_request(struct golden_eye_2 *ge)
@@ -209,7 +243,7 @@ void monitor_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 
 	g_monitor_timer_running = 1;
 
-	g_timeout_add(10000, (GSourceFunc)monitor_net_request, ge);
+	g_timeout_add(30000, (GSourceFunc)monitor_net_request, ge);
 
 	monitor_net_request(ge);
 }

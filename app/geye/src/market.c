@@ -163,6 +163,8 @@ void market_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
 	GtkBuilder *builder = gtk_builder_new_from_file("layout/market_list.glade");
 
 	GtkWidget *win = GTK_WIDGET(gtk_builder_get_object(builder, "market_list"));
+
+	ge->ui.market = win;
 	ge->ui.market_index_lstore =
 		GTK_LIST_STORE(gtk_builder_get_object(builder, "market_index_liststore"));
 
@@ -192,7 +194,7 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 	//g_object_set_data(G_OBJECT(win), "builder", builder);
 
 	g_market_timer_running = 1;
-	g_timeout_add(5500, (GSourceFunc)market_net_request, ge);
+	g_timeout_add(20000, (GSourceFunc)market_net_request, ge);
 
 	//g_object_set_data(G_OBJECT(win), "builder", NULL);
 
