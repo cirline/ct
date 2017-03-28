@@ -14,7 +14,6 @@ static int g_monitor_timer_running = 0;
 static void monitor_window_refresh_prop(GtkWidget *widget, gboolean above)
 {
 	gtk_window_resize(GTK_WINDOW(widget), 1, 1);
-	gtk_window_set_keep_above(GTK_WINDOW(widget), above);
 }
 
 static int monitor_set_active_status(GtkWidget *widget, int active)
@@ -26,6 +25,8 @@ static int monitor_set_active_status(GtkWidget *widget, int active)
 		pr_err("%s, can't get widget data\n", __func__);
 		return - ENODATA;
 	}
+
+	GtkWidget *win = ge->ui.monitor;
 
 	if(active) {
 		gtk_tree_view_column_set_visible(
@@ -39,7 +40,6 @@ static int monitor_set_active_status(GtkWidget *widget, int active)
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_name), FALSE);
 		monitor_window_refresh_prop(widget, TRUE);
 	}
-
 	return 0;
 }
 
@@ -68,6 +68,24 @@ static int monitor_event_to_string(int type)
 	case GDK_ENTER_NOTIFY:
 		pr_info("event ~ GDK_ENTER_NOTIFY\n");
 		break;
+	case GDK_LEAVE_NOTIFY:
+		pr_info("event ~ GDK_LEAVE_NOTIFY\n");
+		break;
+	case GDK_FOCUS_CHANGE:
+		pr_info("event ~ GDK_FOCUS_CHANGE\n");
+		break;
+	case GDK_MOTION_NOTIFY:
+//		pr_info("event ~ GDK_MOTION_NOTIFY\n");
+		break;
+	case GDK_BUTTON_PRESS:
+		pr_info("event ~ GDK_BUTTON_PRESS\n");
+		break;
+	case GDK_BUTTON_RELEASE:
+		pr_info("event ~ GDK_BUTTON_RELEASE\n");
+		break;
+	case GDK_WINDOW_STATE:
+		pr_info("event ~ GDK_WINDOW_STATE\n");
+		break;
 	default:
 		pr_info("event ~ %d\n", type);
 	}
@@ -85,19 +103,25 @@ int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 		break;
 	case GDK_LEAVE_NOTIFY:
 		monitor_set_active_status(widget, 0);
-		monitor_show_market(widget, 0);
 		break;
 	case GDK_FOCUS_CHANGE:
 		if(gtk_window_is_active(GTK_WINDOW(widget))) {
 			monitor_set_active_status(widget, 0);
-			monitor_show_market(widget, 0);
 		} else {
 			monitor_set_active_status(widget, 1);
-			monitor_show_market(widget, 1);
 		}
 		break;
-	}
 
+	case GDK_KEY_PRESS:
+		if(event->key.keyval == GDK_KEY_Tab)
+			monitor_show_market(widget, 1);
+		break;
+	case GDK_KEY_RELEASE:
+		if(event->key.keyval == GDK_KEY_Tab)
+			monitor_show_market(widget, 0);
+		break;
+
+	}
 	return FALSE;
 }
 
@@ -192,10 +216,6 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 	/* cut-off line */
 	gtk_list_store_append(ge->ui.monitor_lstore, &iter);
 	gtk_list_store_set(ge->ui.monitor_lstore, &iter, 2, "#000", -1);
-#if 0
-	gtk_list_store_set(ge->ui.monitor_lstore, &iter,
-			0, "-", 1, "-", 2, "#000", 3, "-", 4, "-", -1);
-#endif
 
 	/* stock wait and see */
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
@@ -225,8 +245,7 @@ static void monitor_display_update(struct golden_eye_2 *ge)
 		//g_object_set(cell_roc, "cell-background", color, NULL);
 	}
 
-
-	monitor_window_refresh_prop(ge->ui.monitor, TRUE);
+	gtk_window_resize(GTK_WINDOW(ge->ui.monitor), 1, 1);
 }
 
 static gboolean monitor_net_request(struct golden_eye_2 *ge)

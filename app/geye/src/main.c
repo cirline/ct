@@ -1,4 +1,4 @@
-#define pr_fmt(fmt)	"main    ] " fmt
+#define pr_fmt(fmt)	"ge main ] " fmt
 
 #include <string.h>
 #include <gtk/gtk.h>
@@ -12,15 +12,11 @@
 #include "geye/parser.h"
 
 extern void monitor_ui_start(GtkApplication *app, struct golden_eye_2 *ge);
+extern void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge);
 
 static void geye_app_activate(GtkApplication *app, struct golden_eye_2 *ge)
 {
-	extern int old_main(GtkApplication *app, gpointer p);
-
-//	old_main(app, ge);
-
 	market_ui_start(app, ge);
-
 	monitor_ui_start(app, ge);
 
 	pr_info("%s end\n", __func__);
@@ -48,6 +44,13 @@ static int geye_app_data_init(struct golden_eye_2 *ge)
 	return 0;
 }
 
+static gboolean geye_uniform_refresh(struct golden_eye_2 *ge)
+{
+	pr_here();
+
+	return TRUE;
+}
+
 static int geye_app_start(int argc, char *argv[])
 {
 	struct golden_eye_2 ge;
@@ -58,8 +61,14 @@ static int geye_app_start(int argc, char *argv[])
 
 	app = gtk_application_new("local.chqw.goldeneye", G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(geye_app_activate), &ge);
+
+	g_timeout_add(5000, (GSourceFunc)geye_uniform_refresh, &ge);
+	geye_uniform_refresh(&ge);
+
 	rc = g_application_run(G_APPLICATION(app), argc, argv);
+
 	g_object_unref(app);
+
 
 	return rc;
 }

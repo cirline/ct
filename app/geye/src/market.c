@@ -189,14 +189,8 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 
 	market_ui_build(app, ge);
 
-	//ge->ui.market = win;
-	//g_object_set_data(G_OBJECT(win), "mdata", ge);
-	//g_object_set_data(G_OBJECT(win), "builder", builder);
-
 	g_market_timer_running = 1;
 	g_timeout_add(20000, (GSourceFunc)market_net_request, ge);
-
-	//g_object_set_data(G_OBJECT(win), "builder", NULL);
 
 	market_net_request(ge);
 }
