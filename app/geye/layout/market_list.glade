@@ -27,7 +27,6 @@
     <property name="title" translatable="yes">GOLDEN EYE Market</property>
     <property name="window_position">center</property>
     <property name="icon">../res/logo.png</property>
-    <property name="decorated">False</property>
     <signal name="event" handler="market_list_event_cb" swapped="no"/>
     <child>
       <object class="GtkEventBox" id="market_ebox">
@@ -43,7 +42,7 @@
               <object class="GtkTreeView" id="market_index_treeview">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="halign">center</property>
+                <property name="halign">baseline</property>
                 <property name="valign">center</property>
                 <property name="resize_mode">immediate</property>
                 <property name="model">market_index_liststore</property>
@@ -58,6 +57,7 @@
                         <property name="xpad">5</property>
                         <property name="ypad">5</property>
                         <property name="xalign">1</property>
+                        <property name="background">#000</property>
                       </object>
                       <attributes>
                         <attribute name="text">0</attribute>
@@ -66,8 +66,8 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
-                    <property name="title" translatable="yes">col_name</property>
+                  <object class="GtkTreeViewColumn" id="col_name">
+                    <property name="title" translatable="yes">Name</property>
                     <child>
                       <object class="GtkCellRendererText" id="cell_name"/>
                       <attributes>

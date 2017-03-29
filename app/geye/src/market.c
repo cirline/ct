@@ -188,8 +188,6 @@ void market_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
 
 	gtk_application_add_window(app, GTK_WINDOW(win));
 
-	market_ui_visual_setup(win);
-
 	gtk_builder_connect_signals(builder, NULL);
 
 	g_object_unref(G_OBJECT(builder));

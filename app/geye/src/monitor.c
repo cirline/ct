@@ -20,11 +20,6 @@ enum {
 
 static int g_monitor_timer_running = 0;
 
-static void monitor_window_refresh_prop(GtkWidget *widget, gboolean above)
-{
-	gtk_window_resize(GTK_WINDOW(widget), 1, 1);
-}
-
 static int monitor_set_active_status(GtkWidget *widget, int active)
 {
 	struct golden_eye_2 *ge;
@@ -38,16 +33,21 @@ static int monitor_set_active_status(GtkWidget *widget, int active)
 	GtkWidget *win = ge->ui.monitor;
 
 	if(active) {
+		gtk_window_set_decorated(GTK_WINDOW(widget), TRUE);
+
 		gtk_tree_view_column_set_visible(
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_roc), TRUE);
 		gtk_tree_view_column_set_visible(
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_name), TRUE);
 	} else {
+		gtk_window_set_decorated(GTK_WINDOW(widget), FALSE);
+
 		gtk_tree_view_column_set_visible(
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_roc), FALSE);
 		gtk_tree_view_column_set_visible(
 				GTK_TREE_VIEW_COLUMN(ge->ui.monitor_cell_name), FALSE);
-		monitor_window_refresh_prop(widget, TRUE);
+
+		gtk_window_resize(GTK_WINDOW(widget), 1, 1);
 	}
 	return 0;
 }
@@ -66,10 +66,8 @@ static int monitor_show_market(GtkWidget *widget, int active)
 
 	if(active)
 		gtk_widget_show_all(ge->ui.market);
-		//gtk_window_set_keep_above(GTK_WINDOW(ge->ui.market), TRUE);
 	else
 		gtk_widget_hide(ge->ui.market);
-		//gtk_window_set_keep_below(GTK_WINDOW(ge->ui.market), TRUE);
 }
 
 static int monitor_event_to_string(int type)
@@ -130,25 +128,20 @@ int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 		monitor_set_active_status(widget, 1);
 		break;
 	case GDK_LEAVE_NOTIFY:
-		monitor_set_active_status(widget, 0);
+		/* if window is active, we can hide the cols at `focus-change`
+		 * but, if window not active, we should hide the cols now */
+		if(!gtk_window_is_active(GTK_WINDOW(widget)))
+			monitor_set_active_status(widget, 0);
 		break;
 	case GDK_FOCUS_CHANGE:
 		if(gtk_window_is_active(GTK_WINDOW(widget))) {
 			monitor_set_active_status(widget, 0);
-		} else {
-			//monitor_set_active_status(widget, 1);
 		}
 		break;
-
 	case GDK_KEY_PRESS:
 		if(event->key.keyval == GDK_KEY_Tab)
 			monitor_show_market(widget, 1);
 		break;
-	case GDK_KEY_RELEASE:
-		if(event->key.keyval == GDK_KEY_Tab)
-			monitor_show_market(widget, 0);
-		break;
-
 	}
 	return FALSE;
 }

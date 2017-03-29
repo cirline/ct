@@ -22,7 +22,6 @@
     <property name="can_focus">False</property>
     <property name="window_position">center</property>
     <property name="icon">../res/logo.png</property>
-    <property name="decorated">False</property>
     <signal name="event" handler="monitor_event_cb" swapped="no"/>
     <child>
       <object class="GtkEventBox" id="monitor_ebox">
