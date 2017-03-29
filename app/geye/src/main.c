@@ -46,7 +46,7 @@ static int geye_app_data_init(struct golden_eye_2 *ge)
 
 static gboolean geye_uniform_refresh(struct golden_eye_2 *ge)
 {
-	pr_here();
+//	pr_here();
 
 	return TRUE;
 }
@@ -56,6 +56,8 @@ static int geye_app_start(int argc, char *argv[])
 	struct golden_eye_2 ge;
 	GtkApplication *app;
 	int rc;
+
+	strcpy(ge.version, PACKAGE_STRING);
 
 	geye_app_data_init(&ge);
 
@@ -79,6 +81,9 @@ int main(int argc, char *argv[])
 		if(strcmp(argv[1], "-v") == 0)
 			pr_pkg();
 	} else {
+		pr_info("GTK v%d.%d.%d\n", gtk_major_version, gtk_minor_version, gtk_micro_version);
+		pr_info("Glib v%d.%d.%d\n", glib_major_version, glib_minor_version, glib_micro_version);
+
 		geye_app_start(argc, argv);
 	}
 

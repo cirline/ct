@@ -9,6 +9,15 @@
 #include <ccutils/log.h>
 #include "geye/ge.h"
 
+enum {
+	NC_PRICE	= 0,
+	NC_TIP,
+	NC_TIP_BG,
+	NC_ROC,
+	NC_NAME,
+	NC_TIP_FG,
+};
+
 static int g_monitor_timer_running = 0;
 
 static void monitor_window_refresh_prop(GtkWidget *widget, gboolean above)
@@ -53,10 +62,14 @@ static int monitor_show_market(GtkWidget *widget, int active)
 		return - ENODATA;
 	}
 
+	pr_here();
+
 	if(active)
-		gtk_window_set_keep_above(GTK_WINDOW(ge->ui.market), TRUE);
+		gtk_widget_show_all(ge->ui.market);
+		//gtk_window_set_keep_above(GTK_WINDOW(ge->ui.market), TRUE);
 	else
-		gtk_window_set_keep_below(GTK_WINDOW(ge->ui.market), TRUE);
+		gtk_widget_hide(ge->ui.market);
+		//gtk_window_set_keep_below(GTK_WINDOW(ge->ui.market), TRUE);
 }
 
 static int monitor_event_to_string(int type)
@@ -91,14 +104,29 @@ static int monitor_event_to_string(int type)
 	}
 }
 
+static void monitor_delete(GtkWidget *widget)
+{
+	struct golden_eye_2 *ge;
+
+	ge = g_object_get_data(G_OBJECT(widget), "ge");
+	if(!ge) {
+		pr_err("%s, can't get widget data\n", __func__);
+		return;
+	}
+
+	gtk_widget_destroy(ge->ui.market);
+}
+
 int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 {
 	//monitor_event_to_string(event->type);
 	switch(event->type) {
 	case GDK_DELETE:
 		g_monitor_timer_running = 0;
+		monitor_delete(widget);
 		break;
 	case GDK_ENTER_NOTIFY:
+		//pr_info("state = %x\n", event->crossing.state);
 		monitor_set_active_status(widget, 1);
 		break;
 	case GDK_LEAVE_NOTIFY:
@@ -108,7 +136,7 @@ int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 		if(gtk_window_is_active(GTK_WINDOW(widget))) {
 			monitor_set_active_status(widget, 0);
 		} else {
-			monitor_set_active_status(widget, 1);
+			//monitor_set_active_status(widget, 1);
 		}
 		break;
 

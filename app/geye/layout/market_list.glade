@@ -14,6 +14,12 @@
       <column type="gchararray"/>
       <!-- column-name roc -->
       <column type="gchararray"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name mproc -->
+      <column type="gchararray"/>
+      <!-- column-name mproc_fg -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkWindow" id="market_list">
@@ -55,6 +61,18 @@
                       </object>
                       <attributes>
                         <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="treeviewcolumn1">
+                    <property name="title" translatable="yes">col_name</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_name"/>
+                      <attributes>
+                        <attribute name="foreground">3</attribute>
+                        <attribute name="text">5</attribute>
                       </attributes>
                     </child>
                   </object>
@@ -103,6 +121,18 @@
                       <attributes>
                         <attribute name="foreground">3</attribute>
                         <attribute name="text">2</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="col_mproc">
+                    <property name="title" translatable="yes">Mproc</property>
+                    <child>
+                      <object class="GtkCellRendererText" id="cell_mproc"/>
+                      <attributes>
+                        <attribute name="foreground">7</attribute>
+                        <attribute name="text">6</attribute>
                       </attributes>
                     </child>
                   </object>

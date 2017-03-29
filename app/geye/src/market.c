@@ -10,15 +10,28 @@
 #include "geye/calc.h"
 #include "geye/event.h"
 
+enum {
+	NC_CODE		= 0,
+	NC_PRICE,
+	NC_DIFF,
+	NC_DIFF_FG,
+	NC_ROC,
+	NC_NAME,
+	NC_MPROC,
+	NC_MPROC_FG,
+	NC_END,
+};
+
 static int g_market_timer_running = 0;
 
 static void market_window_set_active(GtkWidget *widget, int active)
 {
-	pr_info("market active %d\n", active);
 	if(active)
 		gtk_window_set_keep_above(GTK_WINDOW(widget), TRUE);
+#if 0
 	else
 		gtk_window_set_keep_below(GTK_WINDOW(widget), TRUE);
+#endif
 }
 
 int market_list_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
@@ -26,8 +39,10 @@ int market_list_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
 //	pr_info("%s, event type = %d\n", __func__, event->type);
 	switch(event->type) {
 	case GDK_FOCUS_CHANGE:
-		if(gtk_window_is_active(GTK_WINDOW(widget)))
+		if(gtk_window_is_active(GTK_WINDOW(widget))) {
+			gtk_widget_hide(widget);
 			market_window_set_active(widget, 0);
+		}
 		else
 			market_window_set_active(widget, 1);
 		break;
@@ -100,11 +115,11 @@ static void market_display_update(struct golden_eye_2 *ge)
 
 		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
 		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
-				0, idxd->code,
 				1, price_str,
 				2, diff_str,
 				3, color,
 				4, roc_str,
+				NC_NAME, idxd->name,
 				-1);
 	}
 
@@ -125,6 +140,7 @@ static void market_display_update(struct golden_eye_2 *ge)
 				2, diff_str,
 				3, color,
 				4, roc_str,
+				NC_NAME, stkd->name,
 				-1);
 	}
 }
