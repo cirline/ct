@@ -9,6 +9,7 @@ AM_CFLAGS = -O0 -rdynamic
 
 bin_PROGRAMS = geye_out
 geye_out_SOURCES = \
+		   src/common.c \
 		   src/monitor.c \
 		   src/parser.c \
 		   src/sinajs.c \

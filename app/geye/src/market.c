@@ -9,6 +9,7 @@
 #include "geye/ge.h"
 #include "geye/calc.h"
 #include "geye/event.h"
+#include "geye/common.h"
 
 enum {
 	NC_CODE		= 0,
@@ -28,10 +29,6 @@ static void market_window_set_active(GtkWidget *widget, int active)
 {
 	if(active)
 		gtk_window_set_keep_above(GTK_WINDOW(widget), TRUE);
-#if 0
-	else
-		gtk_window_set_keep_below(GTK_WINDOW(widget), TRUE);
-#endif
 }
 
 int market_list_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)
@@ -74,22 +71,6 @@ static int market_netdata_update(struct golden_eye_2 *ge)
 	return 0;
 }
 
-static char *market_f2color(float n)
-{
-	static char *color[] = {
-		MARKET_COLOR_RISE,
-		MARKET_COLOR_DROP,
-		MARKET_COLOR_EQ,
-	};
-
-	if(n > 0)
-		return color[0];
-	else if(n < 0)
-		return color[1];
-	else
-		return color[2];
-}
-
 static void market_display_update(struct golden_eye_2 *ge)
 {
 	struct ge_index *idx;
@@ -99,7 +80,7 @@ static void market_display_update(struct golden_eye_2 *ge)
 
 	GtkTreeIter iter;
 	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
-	char *color;
+	char color[16];
 
 	gtk_list_store_clear(ge->ui.market_index_lstore);
 
@@ -108,10 +89,10 @@ static void market_display_update(struct golden_eye_2 *ge)
 
 		idxd = &idx->data;
 		sprintf(price_str, "%.2f", idxd->index);
-		sprintf(roc_str, "%.2f", idxd->roc);
-		sprintf(diff_str, "%.2f", idxd->diff);
+		sprintf(roc_str, "%.2f", fabsf(idxd->roc));
+		sprintf(diff_str, "%.2f", fabsf(idxd->diff));
 
-		color = market_f2color(idxd->diff);
+		geye_float2color(color, idxd->roc, "#bbb");
 
 		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
 		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
@@ -128,10 +109,10 @@ static void market_display_update(struct golden_eye_2 *ge)
 		stkd = &stock->data;
 
 		sprintf(price_str, "%.2f", stkd->price);
-		sprintf(roc_str, "%.2f", stock->roc * 100);
+		sprintf(roc_str, "%.2f", fabsf(stock->roc * 100));
 		sprintf(diff_str, "%.2f", fabsf(stock->diff));
 
-		color = market_f2color(stock->diff);
+		geye_float2color(color, stock->roc, "#bbb");
 
 		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
 		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
