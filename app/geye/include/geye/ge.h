@@ -2,17 +2,8 @@
 #define __GOLDEN_EYE_GE_H__
 
 #include <gtk/gtk.h>
+#include "geye/ui.h"
 #include "stkmon/stkmon.h"
-
-#define COLOR_RISE	"#00808F"		// red
-#define COLOR_STOPP	"#00808F"		// red
-#define COLOR_EQ	"black"
-#define COLOR_DROP	"#888888"		//"gray"
-#define COLOR_STOPL	"green"
-
-#define MARKET_COLOR_RISE	"red"
-#define MARKET_COLOR_DROP	"blue"
-#define MARKET_COLOR_EQ		"black"
 
 struct ge_stkcfg {
 	int	enable;
@@ -55,28 +46,9 @@ struct ge_stkdat_container {
 #define GE_GET_STKDAT(pull_data) \
 	(&((struct ge_stkdat_container *)(pull_data))->common)
 
-struct ge_mainui {
-	int		width;
-	int		height;
-	GtkWidget	*monitor_dynamic;
-
-	GtkWidget	*win;
-
-	/* market */
-	GtkWidget	*market;
-	GtkListStore	*market_index_lstore;
-
-	/* monitor */
-	GtkWidget	*monitor;
-	GtkListStore	*monitor_lstore;
-	GtkTreeViewColumn	*monitor_cell_roc;
-	GtkTreeViewColumn	*monitor_cell_name;
-};
-
 struct golden_eye_2 {
 	char		version[32];
-
-	struct ge_mainui	ui;
+	struct ge_ui_main	ui;
 
 	struct golden_eye	old;
 

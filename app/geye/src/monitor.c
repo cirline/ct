@@ -65,9 +65,9 @@ static int monitor_show_market(GtkWidget *widget, int active)
 	pr_here();
 
 	if(active)
-		gtk_widget_show_all(ge->ui.market);
+		gtk_widget_show_all(ge->ui.market.win);
 	else
-		gtk_widget_hide(ge->ui.market);
+		gtk_widget_hide(ge->ui.market.win);
 }
 
 static int monitor_event_to_string(int type)
@@ -112,7 +112,7 @@ static void monitor_delete(GtkWidget *widget)
 		return;
 	}
 
-	gtk_widget_destroy(ge->ui.market);
+	gtk_widget_destroy(ge->ui.market.win);
 }
 
 int monitor_event_cb(GtkWidget *widget, GdkEvent *event, gpointer p)

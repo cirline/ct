@@ -11,6 +11,8 @@
 #include "geye/event.h"
 #include "geye/common.h"
 
+static GtkStyleContext *gcontext;
+
 enum {
 	NC_CODE		= 0,
 	NC_PRICE,
@@ -71,18 +73,29 @@ static int market_netdata_update(struct golden_eye_2 *ge)
 	return 0;
 }
 
-static void market_display_update(struct golden_eye_2 *ge)
+static void market_widget_clearset_color(GtkWidget *widget, 
+		GtkStyleProvider *provider, char *color)
+{
+	const char *clsa[] = { "index_raise", "index_drop", };
+	int i;
+	GtkStyleContext *context;
+
+	context = gtk_widget_get_style_context(widget);
+	for(i = 0; i < ARRAY_SIZE(clsa); i++) {
+		if(gtk_style_context_has_class(context, clsa[i]))
+			gtk_style_context_remove_class(context, clsa[i]);
+	}
+
+	geye_widget_add_class(widget, provider, color);
+}
+
+static void market_display_update_index(struct golden_eye_2 *ge)
 {
 	struct ge_index *idx;
 	struct ge_idxdat *idxd;
-	struct ge_stock *stock;
-	struct ge_stkdat *stkd;
-
-	GtkTreeIter iter;
 	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
-	char color[16];
-
-	gtk_list_store_clear(ge->ui.market_index_lstore);
+	char color[32];
+	static int i = 0;
 
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
@@ -94,15 +107,41 @@ static void market_display_update(struct golden_eye_2 *ge)
 
 		geye_float2color(color, idxd->roc, "#bbb");
 
-		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
-		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
-				1, price_str,
-				2, diff_str,
-				3, color,
-				4, roc_str,
-				NC_NAME, idxd->name,
-				-1);
+		//if(idxd->roc >= 0)
+		if(1 & i++)
+			strcpy(color, "index_raise");
+		else
+			strcpy(color, "index_drop");
+
+		pr_info("%s, color = %s\n", __func__, color);
+
+		market_widget_clearset_color(ge->ui.market.sh.price,
+				ge->ui.market.provider, color);
+		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.price), price_str);
+
+		market_widget_clearset_color(ge->ui.market.sh.roc,
+				ge->ui.market.provider, "index_drop");
+		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.roc), roc_str);
+
+		market_widget_clearset_color(ge->ui.market.sh.diff,
+				ge->ui.market.provider, "index_raise");
+		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.diff), diff_str);
 	}
+
+}
+
+static void market_display_update(struct golden_eye_2 *ge)
+{
+	struct ge_stock *stock;
+	struct ge_stkdat *stkd;
+
+	GtkTreeIter iter;
+	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
+	char color[16];
+
+	market_display_update_index(ge);
+
+	gtk_list_store_clear(GTK_LIST_STORE(ge->ui.market.lstore));
 
 	for(stock = ge->stock_list.cqh_first; stock != (void *)&ge->stock_list;
 			stock = stock->list.cqe_next) {
@@ -114,8 +153,8 @@ static void market_display_update(struct golden_eye_2 *ge)
 
 		geye_float2color(color, stock->roc, "#bbb");
 
-		gtk_list_store_append(ge->ui.market_index_lstore, &iter);
-		gtk_list_store_set(ge->ui.market_index_lstore, &iter,
+		gtk_list_store_append(GTK_LIST_STORE(ge->ui.market.lstore), &iter);
+		gtk_list_store_set(GTK_LIST_STORE(ge->ui.market.lstore), &iter,
 				0, stock->code,
 				1, price_str,
 				2, diff_str,
@@ -161,13 +200,28 @@ void market_ui_build(GtkApplication *app, struct golden_eye_2 *ge)
 
 	GtkWidget *win = GTK_WIDGET(gtk_builder_get_object(builder, "market_list"));
 
-	ge->ui.market = win;
-	ge->ui.market_index_lstore =
-		GTK_LIST_STORE(gtk_builder_get_object(builder, "market_index_liststore"));
+	/* load css */
+	GtkStyleContext *context = gtk_widget_get_style_context(win);
+	GtkStyleProvider *provider = (GtkStyleProvider *)gtk_css_provider_new();
+	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), "res/styles.css", NULL);
+	gtk_style_context_add_provider(context, provider,
+			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
+	ge->ui.market.win = win;
+	ge->ui.market.context = context;
+	ge->ui.market.provider = provider;
+
+	ge->ui.market.lstore =
+		GTK_WIDGET(gtk_builder_get_object(builder, "market_index_liststore"));
+	ge->ui.market.sh.price =
+		GTK_WIDGET(gtk_builder_get_object(builder, "market_index_sh_price"));
+	ge->ui.market.sh.roc =
+		GTK_WIDGET(gtk_builder_get_object(builder, "market_index_sh_roc"));
+	ge->ui.market.sh.diff =
+		GTK_WIDGET(gtk_builder_get_object(builder, "market_index_sh_diff"));
 	gtk_window_set_keep_below(GTK_WINDOW(win), TRUE);
-
 	gtk_application_add_window(app, GTK_WINDOW(win));
+
 
 	gtk_builder_connect_signals(builder, NULL);
 
