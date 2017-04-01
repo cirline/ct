@@ -96,6 +96,7 @@ static void market_display_update_index(struct golden_eye_2 *ge)
 	char color[32];
 	char str[128];
 	const char *tpl = "<span foreground='%s'>%.2f</span>";
+	const char *tpl_p = "<span foreground='%s'>%.2f%</span>";
 
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
@@ -107,10 +108,10 @@ static void market_display_update_index(struct golden_eye_2 *ge)
 		sprintf(str, tpl, color, idxd->index);
 		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.price), str);
 
-		sprintf(str, tpl, color, fabsf(idxd->roc));
+		sprintf(str, tpl_p, color, idxd->roc);
 		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.roc), str);
 
-		sprintf(str, tpl, color, fabsf(idxd->diff));
+		sprintf(str, tpl, color, idxd->diff);
 		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.diff), str);
 	}
 }
