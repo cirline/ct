@@ -93,41 +93,26 @@ static void market_display_update_index(struct golden_eye_2 *ge)
 {
 	struct ge_index *idx;
 	struct ge_idxdat *idxd;
-	char price_str[16], roc_str[16], diff_str[16], mproc_str[16];
 	char color[32];
-	static int i = 0;
+	char str[128];
+	const char *tpl = "<span foreground='%s'>%.2f</span>";
 
 	for(idx = ge->index_list.cqh_first; idx != (void *)&ge->index_list;
 			idx = idx->list.cqe_next) {
 
 		idxd = &idx->data;
-		sprintf(price_str, "%.2f", idxd->index);
-		sprintf(roc_str, "%.2f", fabsf(idxd->roc));
-		sprintf(diff_str, "%.2f", fabsf(idxd->diff));
 
-		geye_float2color(color, idxd->roc, "#bbb");
+		geye_roc_to_colorname(color, idxd->roc, "#bbb");
 
-		//if(idxd->roc >= 0)
-		if(1 & i++)
-			strcpy(color, "index_raise");
-		else
-			strcpy(color, "index_drop");
+		sprintf(str, tpl, color, idxd->index);
+		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.price), str);
 
-		pr_info("%s, color = %s\n", __func__, color);
+		sprintf(str, tpl, color, fabsf(idxd->roc));
+		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.roc), str);
 
-		market_widget_clearset_color(ge->ui.market.sh.price,
-				ge->ui.market.provider, color);
-		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.price), price_str);
-
-		market_widget_clearset_color(ge->ui.market.sh.roc,
-				ge->ui.market.provider, "index_drop");
-		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.roc), roc_str);
-
-		market_widget_clearset_color(ge->ui.market.sh.diff,
-				ge->ui.market.provider, "index_raise");
-		gtk_label_set_text(GTK_LABEL(ge->ui.market.sh.diff), diff_str);
+		sprintf(str, tpl, color, fabsf(idxd->diff));
+		gtk_label_set_markup(GTK_LABEL(ge->ui.market.sh.diff), str);
 	}
-
 }
 
 static void market_display_update(struct golden_eye_2 *ge)
@@ -151,7 +136,7 @@ static void market_display_update(struct golden_eye_2 *ge)
 		sprintf(roc_str, "%.2f", fabsf(stock->roc * 100));
 		sprintf(diff_str, "%.2f", fabsf(stock->diff));
 
-		geye_float2color(color, stock->roc, "#bbb");
+		geye_roc_to_colorname(color, stock->roc, "#bbb");
 
 		gtk_list_store_append(GTK_LIST_STORE(ge->ui.market.lstore), &iter);
 		gtk_list_store_set(GTK_LIST_STORE(ge->ui.market.lstore), &iter,
@@ -239,7 +224,7 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 	market_ui_build(app, ge);
 
 	g_market_timer_running = 1;
-	g_timeout_add(20000, (GSourceFunc)market_net_request, ge);
+	g_timeout_add(1000, (GSourceFunc)market_net_request, ge);
 
 	market_net_request(ge);
 }

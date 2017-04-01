@@ -5,14 +5,14 @@
 #include <gtk/gtk.h>
 
 /**
- * geye_float2color - covert a float value to color
+ * geye_roc_to_color - covert a roc% to color
  * @outbuf: color output buffer
  * @roc_100: the roc * 100
  * @defval: the default value when roc = 0
  *
  * function return the abs(roc * 1000)
  */
-int geye_float2color(char *outbuf, float roc_100, char *defval)
+int geye_roc_to_colorname(char *outbuf, float roc_100, char *defval)
 {
 	int m, n;
 	int roc_1000;	/* it's roc * 1000 */
@@ -32,26 +32,6 @@ int geye_float2color(char *outbuf, float roc_100, char *defval)
 		strcpy(outbuf, defval);
 
 	return roc_1000;
-}
-
-void geye_label_set_text(GtkWidget *label, char *str, char *fg, GtkStyleContext *context)
-{
-#if 0
-	GtkStyleContext *context = gtk_widget_get_style_context(label);
-	GtkStyleProvider *provider = (GtkStyleProvider *)gtk_css_provider_new();
-	gtk_css_provider_load_from_path(GTK_CSS_PROVIDER(provider), "res/styles.css", NULL);
-	gtk_style_context_add_provider(context, provider,
-			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-#endif
-
-//	gtk_style_context_save(context);
-
-	gtk_style_context_add_class(context, "index_raise");
-
-	gtk_label_set_text(GTK_LABEL(label), str);
-
-//	gtk_style_context_remove_class(context, "index_drop");
-//	gtk_style_context_restore(context);
 }
 
 void geye_widget_add_class(GtkWidget *widget, GtkStyleProvider *provider, char *class)
