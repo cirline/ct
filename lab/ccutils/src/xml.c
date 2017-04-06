@@ -3,7 +3,10 @@
 
 #include "ccutils/log.h"
 
-xmlXPathObjectPtr get_xpath_object(xmlDocPtr doc, unsigned char *path)
+/**
+ * a xpath object is a node set, more see about # cxml_for_each_xobject
+ */
+xmlXPathObjectPtr cxml_get_xpath_object(xmlDocPtr doc, unsigned char *path)
 {
 	xmlChar *xpath;
 	xmlXPathObjectPtr object;
@@ -31,6 +34,13 @@ xmlXPathObjectPtr get_xpath_object(xmlDocPtr doc, unsigned char *path)
 	return object;
 }
 
+/* deprecated */
+xmlXPathObjectPtr get_xpath_object(xmlDocPtr doc, unsigned char *path)
+{
+	return cxml_get_xpath_object(doc, path);
+}
+
+/* deprecated */
 int parse_xpath_object(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *), void *data)
 {
 	int i;
@@ -42,6 +52,20 @@ int parse_xpath_object(xmlXPathObjectPtr object, int (*func)(xmlNodePtr, void *)
 		func(node, data);
 	}
 
+	return i;
+}
+
+/**
+ * for each the xml node by list
+ */
+int cxml_for_each_node(xmlNodePtr node, int (*f)(xmlNodePtr, void *), void *p)
+{
+	int i;
+
+	for(i = 0; node; node = node->next) {
+		if(f && !f(node, p))
+			i++;
+	}
 	return i;
 }
 
@@ -63,6 +87,30 @@ int cxml_for_each_xobject(xmlXPathObjectPtr object, int (*f)(xmlNodePtr, void *)
 	}
 
 	return i;
+}
+
+/**
+ * if a xpath only has an object, this function can for each
+ * the object children directly. eg:
+ *
+ * xpath is /root
+ *
+ * the xpath children has:
+ *
+ * /root/integer
+ * /root/bool
+ * ...
+ *
+ */
+int cxml_for_each_xobject_children(xmlXPathObjectPtr object, int (*f)(xmlNodePtr, void *),
+		void *p)
+{
+	if(object->nodesetval->nodeNr > 1)
+		pr_warn("the xpath is more than one node,"
+				"use 'cxml_for_each_xobject' and 'cxml_for_each_node' "
+				"for each the nodeset\n");
+
+	return cxml_for_each_node(object->nodesetval->nodeTab[0], f, p);
 }
 
 int cxml_get_prop_bool(xmlNodePtr node, const char *name, int default_value)
@@ -121,14 +169,8 @@ char *cxml_get_prop_string(xmlNodePtr node, const char *name, char *default_valu
 	return dest;
 }
 
+/* deprecated */
 int cxml_foreach_node(xmlNodePtr node, int (*f)(xmlNodePtr, void *), void *p)
 {
-	int i;
-
-	for(i = 0; node; node = node->next) {
-		if(f && !f(node, p))
-			i++;
-	}
-	return i;
+	return cxml_for_each_node(node, f, p);
 }
-

@@ -225,7 +225,7 @@ void market_ui_start(GtkApplication *app, struct golden_eye_2 *ge)
 	market_ui_build(app, ge);
 
 	g_market_timer_running = 1;
-	g_timeout_add(1000, (GSourceFunc)market_net_request, ge);
+	g_timeout_add(20000, (GSourceFunc)market_net_request, ge);
 
 	market_net_request(ge);
 }
